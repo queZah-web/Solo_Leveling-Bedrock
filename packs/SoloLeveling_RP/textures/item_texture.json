@@ -1,0 +1,7 @@
+{
+  "resource_pack_name": "solo_leveling",
+  "texture_name": "atlas.items",
+  "texture_data": {
+    "sl_system_gem": { "textures": "textures/items/sl/system_gem" }
+  }
+}

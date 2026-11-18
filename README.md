@@ -1,2 +1,75 @@
-# Solo_Leveling-Bedrock
-Minecraft Bedrock Solo Leveling Add-on Project
+# Solo Leveling — Minecraft Bedrock Add-on
+
+مود **Solo Leveling** لماين كرافت بيدروك **1.26.60 وما فوق**، مصمم للسيرفرات.
+لا يحتاج تفعيل "Beta APIs" أو أي إعدادات تجريبية.
+
+## المراحل
+
+| المرحلة | المحتوى | الحالة |
+|---|---|---|
+| 1 | النظام: مستويات، XP، إحصائيات، HP/MP/Fatigue، نافذة النظام المخصصة، جوهرة النظام، `/system` | ✅ |
+| 2 | System Inventory + Shadow Vault | ⏳ |
+| 3 | جيش الظلال (ARISE) وإدارة الجيش | ⏳ |
+| 4 | المهارات + المهام اليومية + منطقة العقوبة | ⏳ |
+| 5 | البوابات والدانجن والزعماء | ⏳ |
+| 6 | الوحوش والأسلحة والمتجر | ⏳ |
+| 7 | تحسين الموديلات والتكستشرات | ⏳ |
+
+## المرحلة 1 — المحتوى
+
+- **جوهرة النظام (System Gem)**: تُعطى لكل لاعب تلقائيًا. تقدر تحرّكها داخل الانفنتوري، لكن ما تقدر ترميها أو تحطها في صندوق، وما تضيع لما تموت. إذا انحذفت، ترجع لك تلقائيًا.
+- **`/system`**: يفتح نافذة النظام. يشتغل لكل اللاعبين بدون تفعيل الغش.
+- **نافذة النظام المخصصة** فيها 5 تبويبات (STATUS / INVENTORY / SHADOWS / QUESTS / SETTINGS):
+  - ملف الصياد، والرتبة (من E-Rank إلى National Level)، وأشرطة HP / MP / Fatigue / XP
+  - **توزيع النقاط** بزر `+` على كل إحصائية، أو بزر DISTRIBUTE لتوزيع عدة نقاط مرة وحدة
+- **الإحصائيات**:
+  - **STR**: +2% ضرر قريب لكل نقطة
+  - **AGI**: مستويات سرعة
+  - **VIT**: HP أعلى، وتقليل الضرر اللي ياخذه اللاعب
+  - **INT**: MP أعلى وتجديد أسرع للـ MP
+  - **PER**: فرصة ضربة حرجة، وضرر أعلى للرماية
+- **المستويات**: XP من قتل الوحوش، و5 نقاط لكل مستوى، واستعادة كاملة عند الصعود.
+- **Fatigue**: يزيد في القتال، ويقل وقت الراحة (أسرع وأنت جالس/Sneak). فوق 80 يجيك Weakness.
+- **HUD** فوق الهوت بار (تقدر تطفيه من الإعدادات).
+- **Custom UI: OFF** في الإعدادات: يحوّل النوافذ للشكل العادي، احتياطًا لو الواجهة ما ضبطت على جهاز معين.
+
+### أوامر الأدمن (للـ OP فقط)
+```
+/sl:setlevel <level> [player]
+/sl:addxp <amount> [player]
+/sl:resetstats [player]
+/sl:resetplayer [player]
+```
+
+## التثبيت على سيرفر استضافة (BDS)
+
+1. نزّل `dist/SoloLeveling.mcaddon` وفك ضغطه (هو ملف zip). بيطلع لك مجلدان: `SoloLeveling_BP` و `SoloLeveling_RP`.
+2. ارفع:
+   - `SoloLeveling_BP` إلى `behavior_packs/`
+   - `SoloLeveling_RP` إلى `resource_packs/`
+3. داخل مجلد العالم `worlds/<اسم العالم>/` سوّ أو عدّل الملفين التاليين:
+
+`world_behavior_packs.json`
+```json
+[ { "pack_id": "c63f3ea1-b815-4c86-8d08-fa4f1f13d4e2", "version": [0, 1, 0] } ]
+```
+`world_resource_packs.json`
+```json
+[ { "pack_id": "74a1ff86-af96-45c3-8ccf-94d3550211ba", "version": [0, 1, 0] } ]
+```
+4. في `server.properties` خلّ:
+```
+texturepack-required=true
+```
+5. أعد تشغيل السيرفر.
+
+> بعض الاستضافات فيها زر لرفع ملفات `.mcaddon` أو `.mcpack` مباشرة، وتقدر تستخدمه بدل الخطوات اليدوية.
+
+## للمطوّرين
+
+```
+python3 tools/build.py     # يولّد التكستشرات والواجهة ويبني dist/
+```
+- `tools/gen_textures.py`: كل تكستشرات الواجهة والجوهرة
+- `tools/gen_ui.py`: ملفات JSON UI (الواجهة المخصصة)
+- `packs/SoloLeveling_BP/scripts/`: منطق اللعبة (Script API `@minecraft/server` 2.10.0)
