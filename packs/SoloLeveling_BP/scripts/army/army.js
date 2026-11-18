@@ -9,7 +9,7 @@ import { addDamageHook, addXp, flash, xpFor } from "../stats.js";
 import { ARCHERS, gearInfo, setGear, GEAR_SLOTS, shadowBow, updateCombatMode } from "./gear.js";
 import { deleteShadowSave, placeShadow, placing, saveShadow, shadowTag } from "./persist.js";
 import {
-  creeperCharges, creeperPower,
+  creeperCharges, creeperPower, healValue,
   activeLimit, ARISE_ATTEMPTS, ARISE_MP, armyCapacity, CORPSE_SECONDS, entityIdOf, FEED_MP, GRADES,
   gradeForLevel, MOB_TO_TYPE, reviveSeconds, SHADOW_MAX_LEVEL, SHADOW_TYPES, shadowAtkMult, shadowDefMult,
   shadowXpToNext, TRAIN_MP,
@@ -628,23 +628,11 @@ world.beforeEvents.playerLeave.subscribe(({ player }) => {
   });
 });
 
-const nutritionCache = new Map();
-function nutritionOf(id) {
-  if (!nutritionCache.has(id)) {
-    let n = 4;
-    try {
-      n = new ItemStack(id, 1).getComponent("minecraft:food")?.nutrition ?? 4;
-    } catch {}
-    nutritionCache.set(id, n);
-  }
-  return nutritionCache.get(id);
-}
-
 /** Shadows eat from their food pouch when hurt. */
 function autoEat(player, sid, e, h) {
   const s = findRecord(player, sid);
   if (!s?.food || s.food.count <= 0) return;
-  const heal = nutritionOf(s.food.id) * 2 + 2;
+  const heal = healValue(s.type, s.food.id) || 4;
   if (h.currentValue > h.effectiveMax - heal && h.currentValue > h.effectiveMax * 0.6) return;
   h.setCurrentValue(Math.min(h.effectiveMax, h.currentValue + heal));
   if (s.food.id === "minecraft:golden_apple") e.addEffect("absorption", 2400, { amplifier: 0 });
@@ -676,6 +664,8 @@ system.runInterval(() => {
         const h = e.getComponent("minecraft:health");
         if (h && h.currentValue < h.effectiveMax) h.setCurrentValue(Math.min(h.effectiveMax, h.currentValue + h.effectiveMax * 0.02));
         if (h) autoEat(player, sid, e, h);
+        // Shadow aura: also shows where a shadow is in the dark.
+        e.dimension.spawnParticle("minecraft:soul_particle", { x: e.location.x, y: e.location.y + 0.4, z: e.location.z });
       } catch {}
     }
   }

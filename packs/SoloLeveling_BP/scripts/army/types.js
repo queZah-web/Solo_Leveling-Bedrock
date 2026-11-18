@@ -100,6 +100,39 @@ export const creeperPower = (s) => Math.min(4.5, 1.3 + (s.level - 1) * 0.03 + s.
 
 export const FOOD_MAX = 64;
 
+// ---------------------------------------------------------------- diets
+const MEATS = {
+  "minecraft:beef": 6, "minecraft:cooked_beef": 18, "minecraft:porkchop": 6, "minecraft:cooked_porkchop": 18,
+  "minecraft:chicken": 4, "minecraft:cooked_chicken": 14, "minecraft:mutton": 4, "minecraft:cooked_mutton": 14,
+  "minecraft:rabbit": 6, "minecraft:cooked_rabbit": 12, "minecraft:rotten_flesh": 6,
+};
+const HUMAN_FOOD = {
+  ...MEATS, "minecraft:bread": 12, "minecraft:baked_potato": 12, "minecraft:cooked_cod": 12, "minecraft:cooked_salmon": 14,
+  "minecraft:apple": 8, "minecraft:golden_carrot": 16, "minecraft:golden_apple": 20, "minecraft:enchanted_golden_apple": 40,
+};
+/**
+ * What each shadow eats: item id -> HP healed per item. `hint` is shown
+ * when the player offers something else.
+ */
+export const DIETS = {
+  zombie: { hint: "Rotten Flesh", items: { "minecraft:rotten_flesh": 8 } },
+  husk: { hint: "Rotten Flesh", items: { "minecraft:rotten_flesh": 8 } },
+  drowned: { hint: "Rotten Flesh", items: { "minecraft:rotten_flesh": 8 } },
+  skeleton: { hint: "a Bone", items: { "minecraft:bone": 8 } },
+  stray: { hint: "a Bone", items: { "minecraft:bone": 8 } },
+  wither_skeleton: { hint: "a Bone", items: { "minecraft:bone": 10 } },
+  spider: { hint: "a Spider Eye", items: { "minecraft:spider_eye": 8, "minecraft:rotten_flesh": 4 } },
+  wolf: { hint: "Meat", items: MEATS },
+  creeper: { hint: "Gunpowder", items: { "minecraft:gunpowder": 10 } },
+  enderman: { hint: "Chorus Fruit or an Ender Pearl", items: { "minecraft:chorus_fruit": 10, "minecraft:ender_pearl": 20 } },
+  vindicator: { hint: "food (bread, meat...)", items: HUMAN_FOOD },
+  iron_golem: { hint: "an Iron Ingot", items: { "minecraft:iron_ingot": 25, "minecraft:iron_block": 100 } },
+  ravager: { hint: "Meat or Hay", items: { ...MEATS, "minecraft:wheat": 6, "minecraft:hay_block": 40 } },
+  warden: { hint: "Sculk or Echo Shards", items: { "minecraft:sculk": 20, "minecraft:echo_shard": 80, ...MEATS } },
+};
+/** HP an item heals this shadow type, or 0 if it's not part of its diet. */
+export const healValue = (type, id) => DIETS[type]?.items[id] ?? 0;
+
 export const ARISE_MP = 10;
 export const ARISE_ATTEMPTS = 3;
 export const CORPSE_SECONDS = 20;

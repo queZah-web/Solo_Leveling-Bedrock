@@ -35,10 +35,9 @@ SHADOWS = {
 }
 
 
-# The vanilla zombie definition doesn't render on custom entities in recent
-# versions, so the shadow zombie is built from the husk (same model) with the
-# zombie texture (bundled in our pack).  type -> (definition to copy, texture)
-CLIENT_BASE = {"zombie": ("husk", "textures/sl/entity/shadow_zombie")}
+# type -> (vanilla definition to copy, texture override). Empty: every shadow
+# uses its own vanilla model, material and texture.
+CLIENT_BASE = {}
 
 
 def load(path):
@@ -183,7 +182,10 @@ def main(vanilla_dir):
                 "geometry": "Geometry.default",
                 "materials": [{"*": "Material.default"}],
                 "textures": ["Texture.default"],
-                "overlay_color": {"r": "0.04", "g": "0.0", "b": "0.12", "a": "0.8"},
+                # Dark purple shadow tint, drawn at full brightness so dark mobs
+                # (zombie, creeper...) stay visible at night and in caves.
+                "overlay_color": {"r": "0.12", "g": "0.03", "b": "0.32", "a": "0.6"},
+                "ignore_lighting": True,
                 "is_hurt_color": {"r": "0.5", "g": "0.2", "b": "1.0", "a": "0.5"},
             }
         },

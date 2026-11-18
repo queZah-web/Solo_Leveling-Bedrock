@@ -7,7 +7,7 @@ import {
 } from "../army/army.js";
 import { canWearGear, gearInfo, GEAR_SLOTS, isPlain, setGear, updateCombatMode } from "../army/gear.js";
 import {
-  creeperCharges, FEED_MP, FOOD_MAX, GRADES, portraitOf, SHADOW_MAX_LEVEL, SHADOW_TYPES, shadowAtkMult, shadowDefMult, shadowXpToNext, TRAIN_MP,
+  creeperCharges, DIETS, FEED_MP, FOOD_MAX, GRADES, healValue, portraitOf, SHADOW_MAX_LEVEL, SHADOW_TYPES, shadowAtkMult, shadowDefMult, shadowXpToNext, TRAIN_MP,
 } from "../army/types.js";
 import { markDirty } from "../data.js";
 import { iconOf, prettyId } from "../vault/items.js";
@@ -55,6 +55,7 @@ export async function shadowScreen(player) {
       `§7ATK §cx${shadowAtkMult(s).toFixed(2)} §7DEF §a${Math.round((1 - shadowDefMult(s)) * 100)}%%`,
       `§7${status} §8| §9${g.cost} MP`,
       `§5${def.skill}§7: ${def.skillDesc}`,
+      `§7Eats: §f${DIETS[s.type].hint}`,
       s.type === "creeper" ? `§7Blasts: §c${creeperCharges(s)} §8(more with level & rank)` : "",
       !wears ? "§8Gear: none §7(food & totem OK)" : !e ? "§8Summon it to change gear." : "",
     ].join("\n"),
@@ -68,11 +69,14 @@ export async function shadowScreen(player) {
     } else report(await summon(player, s), `§5${s.name} §fhas been summoned`);
     return again();
   });
-  const food = selItem?.hasComponent("minecraft:food") ? selItem.getComponent("minecraft:food") : undefined;
+  const diet = DIETS[s.type];
+  const food = selItem ? healValue(s.type, selItem.typeId) : 0;
+  const notFood = () => toast(`§cThis is not a food. Put ${diet.hint}.`);
   form.slot(17, food && e ? "§aFEED" : `FEED §9${FEED_MP}`, BLANK, () => {
+    if (selItem && !food && selItem.hasComponent("minecraft:food")) return notFood(), again();
     if (food && e && h) {
       if (h.currentValue >= h.effectiveMax) return toast(`§7${s.name} is already at full health`), again();
-      h.setCurrentValue(Math.min(h.effectiveMax, h.currentValue + food.nutrition * 2 + 2));
+      h.setCurrentValue(Math.min(h.effectiveMax, h.currentValue + food));
       if (selItem.amount > 1) bag.getSlot(st.bagSel).amount = selItem.amount - 1;
       else bag.setItem(st.bagSel, undefined);
       player.playSound("random.eat");
@@ -172,20 +176,36 @@ export async function shadowScreen(player) {
       count -= n;
     }
   };
-  form.slot(76, `N|${s.food ? s.food.count : ""}`, s.food ? iconOf(s.food.id) : BLANK, () => {
+  form.slot(76, `N|${s.food ? s.food.count : ""}`, s.food ? iconOf(s.food.id) : BLANK, async () => {
     const item = st.bagSel >= 0 ? bag.getItem(st.bagSel) : undefined;
     if (item) {
-      if (!item.hasComponent("minecraft:food")) return toast("§cThat is not food"), again();
-      if (!isPlain(item)) return toast("§cRenamed / special food can't go in the pouch"), again();
+      if (!healValue(s.type, item.typeId)) return notFood(), again();
+      if (!isPlain(item)) return toast("§cRenamed / special items can't go in the pouch"), again();
       if (s.food && s.food.id !== item.typeId) {
         giveBack(s.food.id, s.food.count);
         delete s.food;
       }
       const have = s.food?.count ?? 0;
-      const take = Math.min(FOOD_MAX - have, item.amount);
-      if (take <= 0) return toast(`§7The food pouch is full (${FOOD_MAX})`), again();
+      const room = Math.min(FOOD_MAX - have, item.amount);
+      if (room <= 0) return toast(`§7The food pouch is full (${FOOD_MAX})`), again();
+      // How many? (1 .. what fits)
+      let take = room;
+      if (room > 1) {
+        const res = await showForm(
+          player,
+          new ModalFormData()
+            .title(`Feed ${s.name}`)
+            .slider(`${prettyId(item.typeId)} §7(pouch: ${have}/${FOOD_MAX})`, 1, room, { defaultValue: room, valueStep: 1 })
+            .submitButton("Give"),
+        );
+        if (!res || res.canceled || !res.formValues) return again();
+        take = Math.max(1, Math.min(room, Number(res.formValues[0]) || room));
+      }
+      const now = bag.getItem(st.bagSel);
+      if (!now || now.typeId !== item.typeId) return again();
+      take = Math.min(take, now.amount);
       s.food = { id: item.typeId, count: have + take };
-      if (item.amount > take) bag.getSlot(st.bagSel).amount = item.amount - take;
+      if (now.amount > take) bag.getSlot(st.bagSel).amount = now.amount - take;
       else bag.setItem(st.bagSel, undefined);
       st.bagSel = -1;
       toast(`§a${s.name} received ${take} ${prettyId(item.typeId)}`);
@@ -194,7 +214,7 @@ export async function shadowScreen(player) {
       delete s.food;
       toast("§7Took the food back");
     } else {
-      return toast("§7Select food from your inventory (up to 64)"), again();
+      return toast(`§7Select ${diet.hint} from your inventory (up to ${FOOD_MAX})`), again();
     }
     markDirty(player);
     return again();
@@ -241,6 +261,8 @@ export async function shadowScreen(player) {
   if (selItem) {
     const hint = food
       ? "§aFEED§7 now, or put it in the §aFOOD§7 slot"
+      : selItem.hasComponent("minecraft:food")
+        ? `§cNot its food. §7Eats: §f${diet.hint}`
       : selItem.typeId === "minecraft:totem_of_undying"
         ? "§7Tap §eTOTEM§7 (or OFFHAND)"
         : GEAR_SLOTS.some((gs) => gs.accepts(selItem.typeId)) ? "§7Tap a gear slot to equip" : "";

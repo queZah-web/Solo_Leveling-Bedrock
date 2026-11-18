@@ -12,11 +12,12 @@
         "Texture.default"
       ],
       "overlay_color": {
-        "r": "0.04",
-        "g": "0.0",
-        "b": "0.12",
-        "a": "0.8"
+        "r": "0.12",
+        "g": "0.03",
+        "b": "0.32",
+        "a": "0.6"
       },
+      "ignore_lighting": true,
       "is_hurt_color": {
         "r": "0.5",
         "g": "0.2",

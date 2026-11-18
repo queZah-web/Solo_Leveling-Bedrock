@@ -52,6 +52,7 @@
   - كل نوع له مهارة خاصة: سم، تجميد، Wither، إطلاق للهواء، وغيرها.
 - **ظلال بأسماء**: أول استخراج من Wither Skeleton يطلع لك **Igris**، ومن Iron Golem يطلع **Iron**، ومن Ravager يطلع **Tank**، ومن Warden يطلع **Beru**.
 - **الرتب**: Normal ← Elite ← Knight ← Elite Knight ← Commander ← Marshal ← Grand Marshal. الظل يترقّى كل 20 مستوى.
+- **شكل الظلال**: طبقة بنفسجية داكنة تنرسم بإضاءتها الخاصة (تبان بالليل وداخل الكهوف)، وحولها هالة أرواح خفيفة.
 - **الظلال تقاتل معك**: تتبعك، وتحميك، وتهاجم الوحوش، وتلحقك لو ابتعدت أو انتقلت لبُعد ثاني. لما تقتل وحش، الظل ياخذ XP وأنت تاخذ 50%.
 - **لما يموت الظل** يرجع لظلك ويتجدد بعد 30 ثانية أو أكثر حسب رتبته.
 - **الأزرار**: SUMMON / DISMISS / FEED (يعالج أو يحيي الظل فورًا) / TRAIN (XP للظل) / RENAME / RELEASE / SUMMON ALL / CALL / DISMISS ALL.
@@ -76,7 +77,20 @@
   - الظل ينحفظ **مع تجهيزاته** كـ structure لما تصرفه (`slshadow:*`)، والتجهيزات ما تطيح لما يموت.
   - **Shield** في OFFHAND: فرصة 50% يصد الضربة أو السهم (الضرر ينزل 80%).
   - **TOTEM**: في OFFHAND أو في خانة TOTEM (تشتغل لكل الأنواع). لما يقرب الظل يموت، ينكسر التوتم وترجع صحته كاملة.
-  - **FOOD**: خانة تاخذ لين 64 أكل، والظل ياكل منها بنفسه لما تنزل صحته.
+  - **FOOD**: خانة تاخذ لين 64، وتختار الكمية (1 إلى 64). الظل ياكل منها بنفسه لما تنزل صحته. **كل نوع له أكله**:
+
+| الظل | الأكل |
+|---|---|
+| Zombie / Husk / Drowned | Rotten Flesh |
+| Skeleton / Stray / Wither Skeleton | Bone |
+| Spider | Spider Eye (أو Rotten Flesh) |
+| Wolf | أي لحم |
+| Creeper | Gunpowder |
+| Enderman | Chorus Fruit / Ender Pearl |
+| Vindicator | أكل البشر (خبز، لحم مطبوخ، تفاح ذهبي...) |
+| Iron Golem | Iron Ingot / Iron Block |
+| Ravager | لحم / Wheat / Hay Block |
+| Warden | Sculk / Echo Shard / لحم |
   - **Shadow Creeper**: ينفجر على الوحوش بس، ولا يكسر بلوكات ولا يأذي اللاعبين.
     - عدد الانفجارات = 1 + مستوى/10 + الرتبة (أقصى شي 10). آخر انفجار يموت فيه ويتجدد.
     - قوة الانفجار تزيد مع المستوى.
@@ -107,11 +121,11 @@
 
 `world_behavior_packs.json`
 ```json
-[ { "pack_id": "c63f3ea1-b815-4c86-8d08-fa4f1f13d4e2", "version": [0, 3, 4] } ]
+[ { "pack_id": "c63f3ea1-b815-4c86-8d08-fa4f1f13d4e2", "version": [0, 3, 5] } ]
 ```
 `world_resource_packs.json`
 ```json
-[ { "pack_id": "74a1ff86-af96-45c3-8ccf-94d3550211ba", "version": [0, 3, 4] } ]
+[ { "pack_id": "74a1ff86-af96-45c3-8ccf-94d3550211ba", "version": [0, 3, 5] } ]
 ```
 4. في `server.properties` خلّ:
 ```
