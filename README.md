@@ -11,7 +11,7 @@
 | 2 | System Inventory + Shadow Vault | ✅ |
 | 3 | جيش الظلال (ARISE) وإدارة الجيش | ✅ |
 | 4 | المهارات + المهام اليومية + منطقة العقوبة | ✅ |
-| 5 | البوابات والدانجن والزعماء | ⏳ |
+| 5 | البوابات والدانجن والزعماء | ✅ |
 | 6 | الوحوش والأسلحة والمتجر | ⏳ |
 | 7 | تحسين الموديلات والتكستشرات | ⏳ |
 
@@ -144,6 +144,29 @@
 - لو صمدت ترجع لمكانك وتاخذ لقب **The One Who Overcame Adversity**.
 - الأدمن يقدر يطفيها: `/sl:penalty false`
 
+## المرحلة 5 — البوابات والدانجن
+
+- **البوابات** تطلع قريب من اللاعبين كل فترة، ورتبتها (E إلى S) حسب مستوى الصياد. البوابة الحمراء نادرة (5%).
+- **اضغط على البوابة** وتطلع نافذتها: الرتبة، والمستوى المقترح، والزعيم، والوقت الباقي، و **ENTER GATE**.
+- **الدانجن**: غرف متصلة بممرات، وكل غرفة فيها موجة وحوش، وبابها مقفول لين تخلصها. وفي آخر غرفة الزعيم.
+
+| الرتبة | المستوى | الغرف | الزعيم |
+|---|---|---|---|
+| E | 1 | 2 | Goblin Chieftain |
+| D | 10 | 3 | Hobgoblin Warlord |
+| C | 20 | 3 | Ice Elf Captain |
+| B | 35 | 4 | Tank, the Ice Bear |
+| A | 50 | 4 | Igris the Bloodred |
+| S | 70 | 5 | Beru, the Ant King |
+
+- **اللعب الجماعي**: كل اللي يدخلون نفس البوابة يكونون في نفس الدانجن، والوحوش تزيد مع عدد اللاعبين.
+- **الجائزة**: XP وأغراض حسب الرتبة، والبوابة الحمراء ×1.5. و ARISE يشتغل على الزعيم.
+- **البوابة الحمراء**: ما فيه خروج لين يموت الزعيم.
+- **الخروج**: من بوابة EXIT في غرفة البداية، أو من تبويب QUESTS ← LEAVE DUNGEON.
+- **Dungeon Break**: البوابة اللي ما أحد يخلصها خلال 60 دقيقة تنفجر وتطلع منها الوحوش.
+- **QUESTS ← NEARBY GATES**: قائمة البوابات القريبة مع المسافة والاتجاه.
+- الدانجن **ما ينكسر**، وينمسح لما يطلع آخر لاعب منه.
+
 ### أوامر الأدمن (للـ OP فقط)
 ```
 /sl:setlevel <level> [player]
@@ -151,6 +174,8 @@
 /sl:resetstats [player]
 /sl:resetplayer [player]
 /sl:penalty <true|false>
+/sl:spawngate <E|D|C|B|A|S> [red]   - يفتح بوابة قدامك
+/sl:gates <true|false>               - البوابات الطبيعية
 /sl:testpenalty [player]   - ينقلك لمنطقة العقوبة الحين (للتجربة)
 /sl:endpenalty [player]    - ينهي العقوبة ويرجعك
 ```
@@ -172,11 +197,11 @@
 
 `world_behavior_packs.json`
 ```json
-[ { "pack_id": "c63f3ea1-b815-4c86-8d08-fa4f1f13d4e2", "version": [0, 4, 5] } ]
+[ { "pack_id": "c63f3ea1-b815-4c86-8d08-fa4f1f13d4e2", "version": [0, 5, 0] } ]
 ```
 `world_resource_packs.json`
 ```json
-[ { "pack_id": "74a1ff86-af96-45c3-8ccf-94d3550211ba", "version": [0, 4, 5] } ]
+[ { "pack_id": "74a1ff86-af96-45c3-8ccf-94d3550211ba", "version": [0, 5, 0] } ]
 ```
 4. في `server.properties` خلّ:
 ```
@@ -195,5 +220,6 @@ python3 tools/build.py     # يولّد التكستشرات والواجهة و
 - `tools/gen_ui.py`: ملفات JSON UI (الواجهة المخصصة)
 - `tools/gen_shadows.py` / `tools/gen_shadow_art.py`: كيانات الظلال وصورها
 - `tools/gen_custom_models.py`: موديلات وتكستشرات خاصة بالزومبي والكريبر
+- `tools/gen_gate.py`: كيان البوابة (موديل وتكستشر الدوامة)
 - `tools/gen_icons.py`: خريطة أيقونات الأغراض (من Mojang/bedrock-samples و @minecraft/vanilla-data)
 - `packs/SoloLeveling_BP/scripts/`: منطق اللعبة (Script API `@minecraft/server` 2.10.0)

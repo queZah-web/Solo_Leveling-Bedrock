@@ -8,6 +8,8 @@ import { getData, markDirty, resetData } from "./data.js";
 import { addXp, applyStatEffects, setLevel } from "./stats.js";
 import { arise } from "./army/army.js";
 import { setPenaltyEnabled } from "./quests/daily.js";
+import { createGate, setNaturalGates } from "./gates/gates.js";
+import { RANK_INDEX } from "./gates/ranks.js";
 import { endPenalty, startPenalty } from "./quests/penalty.js";
 import { openSystem } from "./ui/screens.js";
 import { castSlot, quickMenu } from "./ui/skills_screen.js";
@@ -81,6 +83,42 @@ system.beforeEvents.startup.subscribe(({ customCommandRegistry: reg }) => {
     (origin, enabled) => {
       system.run(() => setPenaltyEnabled(!!enabled));
       return ok(`Penalty Zone ${enabled ? "enabled" : "disabled"}.`);
+    },
+  );
+
+  reg.registerEnum("sl:gaterank", ["E", "D", "C", "B", "A", "S"]);
+  reg.registerCommand(
+    {
+      name: "sl:spawngate",
+      description: "[Admin] Open a gate in front of you",
+      permissionLevel: CommandPermissionLevel.GameDirectors,
+      cheatsRequired: false,
+      mandatoryParameters: [{ name: "sl:gaterank", type: CustomCommandParamType.Enum }],
+      optionalParameters: [{ name: "red", type: CustomCommandParamType.Boolean }],
+    },
+    (origin, rank, red) => {
+      const p = origin.sourceEntity ?? origin.initiator;
+      if (!(p instanceof Player)) return fail("Run this as a player.");
+      system.run(() => {
+        const dir = p.getViewDirection();
+        const loc = { x: p.location.x + dir.x * 4, y: p.location.y, z: p.location.z + dir.z * 4 };
+        createGate(p.dimension, loc, RANK_INDEX[rank] ?? 0, !!red);
+      });
+      return ok(`Opening a ${rank}-Rank ${red ? "Red " : ""}Gate.`);
+    },
+  );
+
+  reg.registerCommand(
+    {
+      name: "sl:gates",
+      description: "[Admin] Turn natural gate spawning on or off",
+      permissionLevel: CommandPermissionLevel.GameDirectors,
+      cheatsRequired: false,
+      mandatoryParameters: [{ name: "enabled", type: CustomCommandParamType.Boolean }],
+    },
+    (origin, enabled) => {
+      system.run(() => setNaturalGates(!!enabled));
+      return ok(`Natural gates ${enabled ? "enabled" : "disabled"}.`);
     },
   );
 

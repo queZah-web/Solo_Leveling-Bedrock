@@ -11,6 +11,7 @@ import { barTex, BLANK, showForm, SystemForm, TEX } from "./form.js";
 import { frame } from "./frame.js";
 import { armyScreen } from "./army_screen.js";
 import { questsScreen } from "./quests_screen.js";
+import { gateScreen, gatesScreen, registerGateUi } from "./gate_screen.js";
 import { skillsScreen } from "./skills_screen.js";
 import { shadowScreen } from "./shadow_screen.js";
 import { endVault, vaultScreen } from "./vault_screen.js";
@@ -120,6 +121,8 @@ const SCREENS = {
   shadows: armyScreen,
   shadow: shadowScreen,
   skills: skillsScreen,
+  gate: gateScreen,
+  gates: gatesScreen,
   quests: questsScreen,
   settings: settingsScreen,
 };
@@ -150,3 +153,5 @@ export async function openSystem(player, start = "profile") {
     open.delete(player.id);
   }
 }
+
+registerGateUi(openSystem);

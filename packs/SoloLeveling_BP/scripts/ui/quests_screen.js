@@ -1,6 +1,7 @@
 // QUESTS tab: the Daily Quest "Preparation to Become Powerful".
 import { getData } from "../data.js";
 import { claimDaily, DAILY_REWARD_POINTS, DAILY_TASKS, dailyOf, isComplete, penaltyEnabled } from "../quests/daily.js";
+import { instanceOf, leaveDungeon } from "../gates/dungeon.js";
 import { BLANK, SystemForm } from "./form.js";
 import { frame } from "./frame.js";
 
@@ -34,6 +35,16 @@ export async function questsScreen(player) {
     if (err) player.onScreenDisplay.setActionBar(`§c${err}`);
     return "quests";
   });
+  form.button("§9NEARBY GATES", BLANK, () => "gates");
+  const inst = instanceOf(player);
+  if (inst) {
+    const canLeave = !inst.red || inst.state === "cleared";
+    form.button(canLeave ? "§cLEAVE DUNGEON" : "§8Red Gate: no way out", BLANK, () => {
+      if (!canLeave) return player.onScreenDisplay.setActionBar("§cDefeat the boss first."), "quests";
+      leaveDungeon(player, "§b[System] §7You left the dungeon.");
+      return undefined;
+    });
+  }
   form.button("§bBack to Status", BLANK, () => "profile");
   return form.show(player);
 }

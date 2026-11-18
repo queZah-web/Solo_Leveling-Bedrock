@@ -1,0 +1,56 @@
+{
+  "format_version": "1.12.0",
+  "minecraft:geometry": [
+    {
+      "description": {
+        "identifier": "geometry.sl.gate",
+        "texture_width": 128,
+        "texture_height": 64,
+        "visible_bounds_width": 4,
+        "visible_bounds_height": 4,
+        "visible_bounds_offset": [
+          0,
+          1.5,
+          0
+        ]
+      },
+      "bones": [
+        {
+          "name": "root",
+          "pivot": [
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "name": "swirl",
+          "parent": "root",
+          "pivot": [
+            0,
+            26,
+            0
+          ],
+          "cubes": [
+            {
+              "origin": [
+                -20,
+                6,
+                -0.5
+              ],
+              "size": [
+                40,
+                40,
+                1
+              ],
+              "uv": [
+                0,
+                0
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
