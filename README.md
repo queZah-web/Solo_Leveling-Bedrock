@@ -63,6 +63,7 @@
   - **STAY HERE**: الظل يحرس مكانه ويقتل اللي يقرب منه (مفيد للفارمات).
   - **FOLLOW ME**: يرجع يتبعك.
   - من **الجوهرة ← SHADOWS**: زر **STAY HERE (ALL)** / **FOLLOW ME (ALL)** للجيش كله، أو من Shadow Profile لظل واحد.
+- **Beru** (ظل الـ Warden): موديل خاص فيه جسم أسود بعروق بنفسجية متوهجة، وتاج من 8 مجسات، و6 مجسات هالة من الظهر، ومخالب، ودائرة رونية تدور تحته. ويقدر يلبس دروع ويمسك أسلحة.
 - **ظلال بأسماء**: أول استخراج من Wither Skeleton يطلع لك **Igris**، ومن Iron Golem يطلع **Iron**، ومن Ravager يطلع **Tank**، ومن Warden يطلع **Beru**.
 - **الرتب**: Normal ← Elite ← Knight ← Elite Knight ← Commander ← Marshal ← Grand Marshal. الظل يترقّى كل 20 مستوى.
 - **شكل الظلال**: طبقة بنفسجية داكنة تنرسم بإضاءتها الخاصة (تبان بالليل وداخل الكهوف)، وحولها هالة أرواح خفيفة.
@@ -299,11 +300,11 @@ Healing Elixir, Mana Potion, Fatigue Recovery Potion, Elixir of Life, Random Box
 
 `world_behavior_packs.json`
 ```json
-[ { "pack_id": "c63f3ea1-b815-4c86-8d08-fa4f1f13d4e2", "version": [0, 7, 1] } ]
+[ { "pack_id": "c63f3ea1-b815-4c86-8d08-fa4f1f13d4e2", "version": [0, 7, 2] } ]
 ```
 `world_resource_packs.json`
 ```json
-[ { "pack_id": "74a1ff86-af96-45c3-8ccf-94d3550211ba", "version": [0, 7, 1] } ]
+[ { "pack_id": "74a1ff86-af96-45c3-8ccf-94d3550211ba", "version": [0, 7, 2] } ]
 ```
 4. في `server.properties` خلّ:
 ```
@@ -323,6 +324,7 @@ python3 tools/build.py     # يولّد التكستشرات والواجهة و
 - `tools/gen_shadows.py` / `tools/gen_shadow_art.py`: كيانات الظلال وصورها
 - `tools/gen_custom_models.py`: موديلات وتكستشرات خاصة بالزومبي والكريبر
 - `tools/gen_gate.py`: كيان البوابة (موديل وتكستشر الدوامة)
+- `tools/gen_beru.py`: موديل Beru (ظل الـ Warden)
 - `tools/gen_art.py`: الرسم المفصل (أسلحة 32×32، وجلود وحوش 64×64 مع أجزاء 3D)
 - `tools/gen_icons.py`: خريطة أيقونات الأغراض (من Mojang/bedrock-samples و @minecraft/vanilla-data)
 - `packs/SoloLeveling_BP/scripts/`: منطق اللعبة (Script API `@minecraft/server` 2.10.0)

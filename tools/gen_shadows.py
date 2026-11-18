@@ -45,7 +45,7 @@ SHADOW_SCALE = {"goblin": 0.75, "orc": 1.2}
 CLIENT_BASE = {}
 # Shadows with fully custom models (tools/gen_custom_models.py): their vanilla
 # definitions don't render on custom entities in recent versions.
-CUSTOM_MODELS = {"zombie", "creeper", "husk", "drowned", "vindicator", "iron_golem", "goblin", "orc", "ice_elf"}
+CUSTOM_MODELS = {"zombie", "creeper", "husk", "drowned", "vindicator", "iron_golem", "goblin", "orc", "ice_elf", "warden"}
 
 
 def load(path):
