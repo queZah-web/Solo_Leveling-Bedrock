@@ -5,9 +5,9 @@ import { ModalFormData } from "@minecraft/server-ui";
 import {
   dismiss, entityOf, feed, findRecord, regenLeft, release, rename, saveActive, summon, train,
 } from "../army/army.js";
-import { canWearGear, gearInfo, GEAR_SLOTS, setGear, updateCombatMode } from "../army/gear.js";
+import { canWearGear, gearInfo, GEAR_SLOTS, isPlain, setGear, updateCombatMode } from "../army/gear.js";
 import {
-  FEED_MP, GRADES, portraitOf, SHADOW_MAX_LEVEL, SHADOW_TYPES, shadowAtkMult, shadowDefMult, shadowXpToNext, TRAIN_MP,
+  creeperCharges, FEED_MP, FOOD_MAX, GRADES, portraitOf, SHADOW_MAX_LEVEL, SHADOW_TYPES, shadowAtkMult, shadowDefMult, shadowXpToNext, TRAIN_MP,
 } from "../army/types.js";
 import { markDirty } from "../data.js";
 import { iconOf, prettyId } from "../vault/items.js";
@@ -55,7 +55,8 @@ export async function shadowScreen(player) {
       `§7ATK §cx${shadowAtkMult(s).toFixed(2)} §7DEF §a${Math.round((1 - shadowDefMult(s)) * 100)}%%`,
       `§7${status} §8| §9${g.cost} MP`,
       `§5${def.skill}§7: ${def.skillDesc}`,
-      !wears ? "§8This shadow can't wear gear." : !e ? "§8Summon it to change gear." : "",
+      s.type === "creeper" ? `§7Blasts: §c${creeperCharges(s)} §8(more with level & rank)` : "",
+      !wears ? "§8Gear: none §7(food & totem OK)" : !e ? "§8Summon it to change gear." : "",
     ].join("\n"),
   );
 
@@ -96,7 +97,11 @@ export async function shadowScreen(player) {
       st.confirm = true;
       return again();
     }
-    release(player, s.id);
+    const err = release(player, s.id);
+    if (err) {
+      st.confirm = false;
+      return toast(`§c${err}`), again();
+    }
     toast(`§8${s.name} has been released`);
     st.selected = undefined;
     st.confirm = false;
@@ -157,6 +162,66 @@ export async function shadowScreen(player) {
     }, `${gs.label}: ${curName}`);
   });
 
+  // Food pouch (all shadow types): up to 64 of one food, eaten when hurt.
+  const giveBack = (id, count) => {
+    const max = new ItemStack(id, 1).maxAmount;
+    while (count > 0) {
+      const n = Math.min(max, count);
+      const left = bag.addItem(new ItemStack(id, n));
+      if (left) player.dimension.spawnItem(left, player.location);
+      count -= n;
+    }
+  };
+  form.slot(76, `N|${s.food ? s.food.count : ""}`, s.food ? iconOf(s.food.id) : BLANK, () => {
+    const item = st.bagSel >= 0 ? bag.getItem(st.bagSel) : undefined;
+    if (item) {
+      if (!item.hasComponent("minecraft:food")) return toast("§cThat is not food"), again();
+      if (!isPlain(item)) return toast("§cRenamed / special food can't go in the pouch"), again();
+      if (s.food && s.food.id !== item.typeId) {
+        giveBack(s.food.id, s.food.count);
+        delete s.food;
+      }
+      const have = s.food?.count ?? 0;
+      const take = Math.min(FOOD_MAX - have, item.amount);
+      if (take <= 0) return toast(`§7The food pouch is full (${FOOD_MAX})`), again();
+      s.food = { id: item.typeId, count: have + take };
+      if (item.amount > take) bag.getSlot(st.bagSel).amount = item.amount - take;
+      else bag.setItem(st.bagSel, undefined);
+      st.bagSel = -1;
+      toast(`§a${s.name} received ${take} ${prettyId(item.typeId)}`);
+    } else if (s.food) {
+      giveBack(s.food.id, s.food.count);
+      delete s.food;
+      toast("§7Took the food back");
+    } else {
+      return toast("§7Select food from your inventory (up to 64)"), again();
+    }
+    markDirty(player);
+    return again();
+  }, `FOOD: ${s.food ? `${prettyId(s.food.id)} x${s.food.count}` : "empty"}`);
+
+  // Totem pouch (all shadow types): saves the shadow once from death.
+  form.slot(77, "N|", (s.totem ?? 0) > 0 ? iconOf("minecraft:totem_of_undying") : BLANK, () => {
+    const item = st.bagSel >= 0 ? bag.getItem(st.bagSel) : undefined;
+    if (item) {
+      if (item.typeId !== "minecraft:totem_of_undying") return toast("§cOnly a Totem of Undying goes here"), again();
+      if ((s.totem ?? 0) > 0) return toast("§7This shadow already carries a totem"), again();
+      if (item.amount > 1) bag.getSlot(st.bagSel).amount = item.amount - 1;
+      else bag.setItem(st.bagSel, undefined);
+      s.totem = 1;
+      st.bagSel = -1;
+      toast(`§e${s.name} now carries a Totem of Undying`);
+    } else if ((s.totem ?? 0) > 0) {
+      giveBack("minecraft:totem_of_undying", 1);
+      s.totem = 0;
+      toast("§7Took the totem back");
+    } else {
+      return toast("§7Select a Totem of Undying from your inventory"), again();
+    }
+    markDirty(player);
+    return again();
+  }, `TOTEM: ${(s.totem ?? 0) > 0 ? "Totem of Undying" : "empty"}`);
+
   // Your inventory
   BAG_ORDER.forEach((slot, i) => {
     const item = bag.getItem(slot);
@@ -174,7 +239,11 @@ export async function shadowScreen(player) {
   });
 
   if (selItem) {
-    const hint = food ? "§aFEED§7 to heal the shadow" : GEAR_SLOTS.some((gs) => gs.accepts(selItem.typeId)) ? "§7Tap a gear slot to equip" : "";
+    const hint = food
+      ? "§aFEED§7 now, or put it in the §aFOOD§7 slot"
+      : selItem.typeId === "minecraft:totem_of_undying"
+        ? "§7Tap §eTOTEM§7 (or OFFHAND)"
+        : GEAR_SLOTS.some((gs) => gs.accepts(selItem.typeId)) ? "§7Tap a gear slot to equip" : "";
     form.display(39, `§b${selItem.nameTag ?? prettyId(selItem.typeId)} §7x${selItem.amount}\n${hint}`);
   } else {
     form.display(39, "§7Select an item, then tap a gear slot.\n§8Tap a gear slot alone to unequip.");

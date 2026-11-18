@@ -48,7 +48,7 @@
 - **ARISE**: اقتل وحش، وخلال 20 ثانية **اضغط Sneak واستخدم جوهرة النظام** جنب الجثة، أو اكتب `/arise`، أو اضغط زر ARISE في القائمة.
   - كل محاولة تكلف 10 MP، وعندك 3 محاولات لكل جثة.
   - نسبة النجاح تعتمد على رتبة الوحش، و INT، والمستوى.
-- **13 نوع ظل**: Zombie, Husk, Drowned, Skeleton, Stray, Spider, Wolf, Wither Skeleton, Enderman, Vindicator, Iron Golem, Ravager, Warden.
+- **14 نوع ظل**: Zombie, Husk, Drowned, Skeleton, Stray, Spider, Wolf, Creeper, Wither Skeleton, Enderman, Vindicator, Iron Golem, Ravager, Warden.
   - كل نوع له مهارة خاصة: سم، تجميد، Wither، إطلاق للهواء، وغيرها.
 - **ظلال بأسماء**: أول استخراج من Wither Skeleton يطلع لك **Igris**، ومن Iron Golem يطلع **Iron**، ومن Ravager يطلع **Tank**، ومن Warden يطلع **Beru**.
 - **الرتب**: Normal ← Elite ← Knight ← Elite Knight ← Commander ← Marshal ← Grand Marshal. الظل يترقّى كل 20 مستوى.
@@ -74,6 +74,13 @@
   - التجهيز متاح للأنواع البشرية: Zombie, Husk, Drowned, Skeleton, Stray, Wither Skeleton, Vindicator.
   - **FEED** بأكل من الانفنتوري يعالج الظل، وبدون أكل يستخدم MP.
   - الظل ينحفظ **مع تجهيزاته** كـ structure لما تصرفه (`slshadow:*`)، والتجهيزات ما تطيح لما يموت.
+  - **Shield** في OFFHAND: فرصة 50% يصد الضربة أو السهم (الضرر ينزل 80%).
+  - **TOTEM**: في OFFHAND أو في خانة TOTEM (تشتغل لكل الأنواع). لما يقرب الظل يموت، ينكسر التوتم وترجع صحته كاملة.
+  - **FOOD**: خانة تاخذ لين 64 أكل، والظل ياكل منها بنفسه لما تنزل صحته.
+  - **Shadow Creeper**: ينفجر على الوحوش بس، ولا يكسر بلوكات ولا يأذي اللاعبين.
+    - عدد الانفجارات = 1 + مستوى/10 + الرتبة (أقصى شي 10). آخر انفجار يموت فيه ويتجدد.
+    - قوة الانفجار تزيد مع المستوى.
+  - RELEASE يرجع لك التجهيزات والأكل والتوتم.
 - لو السيرفر أعاد التشغيل، الظلال ترجع لجيشك تلقائيًا وتقدر تستدعيها من جديد.
 
 ### أوامر الأدمن (للـ OP فقط)
@@ -100,11 +107,11 @@
 
 `world_behavior_packs.json`
 ```json
-[ { "pack_id": "c63f3ea1-b815-4c86-8d08-fa4f1f13d4e2", "version": [0, 3, 3] } ]
+[ { "pack_id": "c63f3ea1-b815-4c86-8d08-fa4f1f13d4e2", "version": [0, 3, 4] } ]
 ```
 `world_resource_packs.json`
 ```json
-[ { "pack_id": "74a1ff86-af96-45c3-8ccf-94d3550211ba", "version": [0, 3, 3] } ]
+[ { "pack_id": "74a1ff86-af96-45c3-8ccf-94d3550211ba", "version": [0, 3, 4] } ]
 ```
 4. في `server.properties` خلّ:
 ```

@@ -31,11 +31,14 @@ SHADOWS = {
     "wolf": (20, 4, 0.35, (0.6, 0.85), False),
     "ravager": (100, 12, 0.3, (1.95, 2.2), False),
     "warden": (300, 30, 0.3, (0.9, 2.9), False),
+    "creeper": (20, 1, 0.25, (0.6, 1.7), False),
 }
 
 
-# Models that don't render on custom entities in recent versions -> same-shape model.
-GEO_OVERRIDE = {"zombie": "geometry.zombie.husk.v1.8"}
+# The vanilla zombie definition doesn't render on custom entities in recent
+# versions, so the shadow zombie is built from the husk (same model) with the
+# zombie texture (bundled in our pack).  type -> (definition to copy, texture)
+CLIENT_BASE = {"zombie": ("husk", "textures/sl/entity/shadow_zombie")}
 
 
 def load(path):
@@ -142,15 +145,16 @@ def behavior(sid, hp, dmg, speed, size, ranged):
 
 
 def client(sid, vanilla_dir):
-    src = load(os.path.join(vanilla_dir, f"{sid}.entity.json"))
+    base, tex = CLIENT_BASE.get(sid, (sid, None))
+    src = load(os.path.join(vanilla_dir, f"{base}.entity.json"))
     fmt = src.get("format_version", "1.10.0")
     d = src["minecraft:client_entity"]["description"]
     mats = d.get("materials", {})
     out = {
         "identifier": f"sl:shadow_{sid}",
         "materials": {"default": mats.get("default") or next(iter(mats.values()), "entity_alphatest")},
-        "textures": {"default": d["textures"]["default"]},
-        "geometry": {"default": GEO_OVERRIDE.get(sid, d["geometry"]["default"])},
+        "textures": {"default": tex or d["textures"]["default"]},
+        "geometry": {"default": d["geometry"]["default"]},
         "render_controllers": ["controller.render.sl_shadow"],
     }
     for k in ("min_engine_version", "scripts", "animations", "animation_controllers", "enable_attachables",

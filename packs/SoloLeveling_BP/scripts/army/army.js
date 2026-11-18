@@ -3,12 +3,13 @@
 // The army list is saved in the player's data. Summoned shadows are real
 // entities linked to their owner only in memory: after a restart, leftover
 // shadow entities are removed and the shadows simply return to the army.
-import { EntityDamageCause, Player, system, world } from "@minecraft/server";
+import { EntityDamageCause, ItemStack, Player, system, world } from "@minecraft/server";
 import { getData, markDirty } from "../data.js";
 import { addDamageHook, addXp, flash, xpFor } from "../stats.js";
-import { ARCHERS, setGear, GEAR_SLOTS, shadowBow, updateCombatMode } from "./gear.js";
+import { ARCHERS, gearInfo, setGear, GEAR_SLOTS, shadowBow, updateCombatMode } from "./gear.js";
 import { deleteShadowSave, placeShadow, placing, saveShadow, shadowTag } from "./persist.js";
 import {
+  creeperCharges, creeperPower,
   activeLimit, ARISE_ATTEMPTS, ARISE_MP, armyCapacity, CORPSE_SECONDS, entityIdOf, FEED_MP, GRADES,
   gradeForLevel, MOB_TO_TYPE, reviveSeconds, SHADOW_MAX_LEVEL, SHADOW_TYPES, shadowAtkMult, shadowDefMult,
   shadowXpToNext, TRAIN_MP,
@@ -22,6 +23,10 @@ const DIMENSIONS = ["minecraft:overworld", "minecraft:nether", "minecraft:the_en
 const active = new Map();
 /** entity.id -> { playerId, sid } */
 const meta = new Map();
+/** Shadow creeper entity.id -> explosions left before it falls. */
+const charges = new Map();
+/** Shadow creeper entity.id -> tick of its last fuse (cooldown). */
+const fuses = new Map();
 
 const activeOf = (player) => {
   let m = active.get(player.id);
@@ -68,6 +73,7 @@ function register(player, s, e) {
   system.runTimeout(tame, 2); // again once the entity is fully initialised
   activeOf(player).set(s.id, e);
   meta.set(e.id, { playerId: player.id, sid: s.id });
+  if (s.type === "creeper") charges.set(e.id, creeperCharges(s));
   try {
     e.dimension.spawnParticle("minecraft:soul_particle", { ...e.location, y: e.location.y + 1 });
     e.dimension.spawnParticle("minecraft:large_explosion", e.location);
@@ -184,7 +190,38 @@ export function callAll(player) {
   return n;
 }
 
+/** Gear (excluding System constructs) a shadow is wearing per its record. */
+export const wornGear = (s) => Object.values(s.gear ?? {}).filter((v) => !v.startsWith("construct:"));
+
+function giveItem(player, item) {
+  const left = player.getComponent("minecraft:inventory").container.addItem(item);
+  if (left) player.dimension.spawnItem(left, player.location);
+}
+
+/**
+ * Releases a shadow forever. Its gear, food and totem go back to the owner.
+ * A shadow wearing gear must be summoned first (its gear lives on the entity).
+ * @returns {string|undefined} error
+ */
 export function release(player, sid) {
+  const rec0 = findRecord(player, sid);
+  const e0 = entityOf(player, sid);
+  if (rec0 && !e0 && wornGear(rec0).length) return "Summon it first to take its gear back.";
+  if (rec0 && e0) {
+    for (const gs of GEAR_SLOTS) {
+      const g = gearInfo(e0, rec0, gs);
+      if (g && !g.construct) giveItem(player, g.item ?? new ItemStack(g.id, 1));
+    }
+  }
+  if (rec0?.food) {
+    let n = rec0.food.count;
+    const max = new ItemStack(rec0.food.id, 1).maxAmount;
+    while (n > 0) {
+      giveItem(player, new ItemStack(rec0.food.id, Math.min(max, n)));
+      n -= max;
+    }
+  }
+  if ((rec0?.totem ?? 0) > 0) giveItem(player, new ItemStack("minecraft:totem_of_undying", 1));
   const e = activeOf(player).get(sid);
   activeOf(player).delete(sid);
   if (e?.isValid) {
@@ -421,19 +458,42 @@ world.afterEvents.entityDie.subscribe(({ deadEntity, damageSource }) => {
 
 // Damage: shadows scale with level/grade, never hurt their owner, and the
 // owner can't hurt them.
+const SHIELD_BLOCK = 0.5; // chance to block melee/projectiles with a shield
+const TOTEM_ID = "minecraft:totem_of_undying";
+
+/** Where the shadow keeps a totem: "offhand", "mainhand", "pouch" or undefined. */
+function totemSlot(e, s) {
+  if (gearInfo(e, s, GEAR_SLOTS[5])?.id === TOTEM_ID) return "offhand";
+  if (gearInfo(e, s, GEAR_SLOTS[4])?.id === TOTEM_ID) return "mainhand";
+  return (s.totem ?? 0) > 0 ? "pouch" : undefined;
+}
+
+// Damage: shadows scale with level/grade, never hurt their owner or each
+// other, block with shields and are saved by totems.
 addDamageHook((ev) => {
   const attacker = ev.damageSource.damagingEntity;
   const victim = ev.hurtEntity;
   const a = attacker && meta.get(attacker.id);
   const v = meta.get(victim.id);
   if (a) {
-    if (victim.id === a.playerId) {
+    if (victim.id === a.playerId || v) {
       ev.cancel = true;
       return;
     }
     const owner = playerById(a.playerId);
     const s = owner && findRecord(owner, a.sid);
     if (s) {
+      // Creeper blasts only hurt monsters (no griefing players, pets or villagers).
+      if (s.type === "creeper" && ev.damageSource.cause === EntityDamageCause.entityExplosion) {
+        let monster = false;
+        try {
+          monster = victim.matches({ families: ["monster"] });
+        } catch {}
+        if (!monster) {
+          ev.cancel = true;
+          return;
+        }
+      }
       let mult = shadowAtkMult(s);
       if (s.type === "wolf") mult *= 1.25;
       if (s.type === "vindicator") {
@@ -450,9 +510,47 @@ addDamageHook((ev) => {
     }
     const owner = playerById(v.playerId);
     const s = owner && findRecord(owner, v.sid);
-    if (s) ev.damage *= shadowDefMult(s);
+    if (!s) return;
+    ev.damage *= shadowDefMult(s);
+    // Shield
+    const cause = ev.damageSource.cause;
+    if ((cause === EntityDamageCause.entityAttack || cause === EntityDamageCause.projectile) &&
+      gearInfo(victim, s, GEAR_SLOTS[5])?.id === "minecraft:shield" && Math.random() < SHIELD_BLOCK) {
+      ev.damage *= 0.2;
+      system.run(() => {
+        try {
+          victim.dimension.playSound("item.shield.block", victim.location);
+        } catch {}
+      });
+    }
+    // Totem of Undying
+    const h = victim.getComponent("minecraft:health");
+    const where = h && ev.damage >= h.currentValue ? totemSlot(victim, s) : undefined;
+    if (where) {
+      ev.cancel = true;
+      system.run(() => useTotem(owner, s, victim, where));
+    }
   }
 });
+
+function useTotem(owner, s, e, where) {
+  if (!e.isValid) return;
+  if (where === "pouch") s.totem = Math.max(0, (s.totem ?? 1) - 1);
+  else setGear(e, s, GEAR_SLOTS[where === "offhand" ? 5 : 4], undefined);
+  markDirty(owner);
+  const h = e.getComponent("minecraft:health");
+  h?.setCurrentValue(h.effectiveMax);
+  try {
+    e.addEffect("regeneration", 900, { amplifier: 1 });
+    e.addEffect("absorption", 100, { amplifier: 1 });
+    e.addEffect("fire_resistance", 800, { amplifier: 0 });
+    e.dimension.spawnParticle("minecraft:totem_particle", { ...e.location, y: e.location.y + 1 });
+    e.dimension.playSound("random.totem", e.location);
+  } catch {}
+  owner.sendMessage(`§5[Shadow] §e${s.name} §7was saved by a §eTotem of Undying§7!`);
+  if (where !== "pouch") saveShadow(owner, s, e);
+}
+
 
 /** On-hit skill effects. */
 const SKILL_EFFECTS = {
@@ -476,6 +574,7 @@ world.afterEvents.entityHurt.subscribe(({ damageSource, hurtEntity }) => {
   const owner = playerById(m.playerId);
   const s = owner && findRecord(owner, m.sid);
   if (!s) return;
+  if (s.type === "creeper" && damageSource.cause === EntityDamageCause.entityAttack) creeperFuse(owner, s, attacker);
   try {
     for (const [id, dur, amp] of SKILL_EFFECTS[s.type] ?? []) hurtEntity.addEffect(id, dur, { amplifier: amp });
     if (s.type === "iron_golem") hurtEntity.applyKnockback({ x: 0, z: 0 }, 0.7);
@@ -487,6 +586,33 @@ world.afterEvents.entityHurt.subscribe(({ damageSource, hurtEntity }) => {
     }
   } catch {}
 });
+
+/** Shadow creeper: hiss, then explode. The last charge makes it fall. */
+function creeperFuse(owner, s, e) {
+  const now = system.currentTick;
+  if (now - (fuses.get(e.id) ?? -999) < 60) return; // 3s between blasts
+  fuses.set(e.id, now);
+  try {
+    e.dimension.playSound("random.fuse", e.location);
+    e.addEffect("slowness", 30, { amplifier: 3, showParticles: false });
+  } catch {}
+  system.runTimeout(() => {
+    if (!e.isValid) return;
+    const left = (charges.get(e.id) ?? 1) - 1;
+    charges.set(e.id, left);
+    try {
+      e.dimension.createExplosion(e.location, creeperPower(s), { breaksBlocks: false, causesFire: false, source: e });
+    } catch {}
+    if (left <= 0) {
+      // Out of blasts: the creeper falls and regenerates like any shadow.
+      try {
+        e.kill();
+      } catch {}
+    } else {
+      flash(owner, `§5${s.name} §7- §f${left} §7blast${left > 1 ? "s" : ""} left`);
+    }
+  }, 30);
+}
 
 world.beforeEvents.playerLeave.subscribe(({ player }) => {
   const id = player.id;
@@ -501,6 +627,38 @@ world.beforeEvents.playerLeave.subscribe(({ player }) => {
     }
   });
 });
+
+const nutritionCache = new Map();
+function nutritionOf(id) {
+  if (!nutritionCache.has(id)) {
+    let n = 4;
+    try {
+      n = new ItemStack(id, 1).getComponent("minecraft:food")?.nutrition ?? 4;
+    } catch {}
+    nutritionCache.set(id, n);
+  }
+  return nutritionCache.get(id);
+}
+
+/** Shadows eat from their food pouch when hurt. */
+function autoEat(player, sid, e, h) {
+  const s = findRecord(player, sid);
+  if (!s?.food || s.food.count <= 0) return;
+  const heal = nutritionOf(s.food.id) * 2 + 2;
+  if (h.currentValue > h.effectiveMax - heal && h.currentValue > h.effectiveMax * 0.6) return;
+  h.setCurrentValue(Math.min(h.effectiveMax, h.currentValue + heal));
+  if (s.food.id === "minecraft:golden_apple") e.addEffect("absorption", 2400, { amplifier: 0 });
+  if (s.food.id === "minecraft:enchanted_golden_apple") {
+    e.addEffect("absorption", 2400, { amplifier: 3 });
+    e.addEffect("regeneration", 400, { amplifier: 1 });
+  }
+  s.food.count--;
+  if (s.food.count <= 0) delete s.food;
+  markDirty(player);
+  try {
+    e.dimension.playSound("random.eat", e.location);
+  } catch {}
+}
 
 // Follow the owner across distance and dimensions; slow regeneration.
 system.runInterval(() => {
@@ -517,6 +675,7 @@ system.runInterval(() => {
         if (far) e.teleport(nearOwner(player), { dimension: player.dimension });
         const h = e.getComponent("minecraft:health");
         if (h && h.currentValue < h.effectiveMax) h.setCurrentValue(Math.min(h.effectiveMax, h.currentValue + h.effectiveMax * 0.02));
+        if (h) autoEat(player, sid, e, h);
       } catch {}
     }
   }

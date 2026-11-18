@@ -24,6 +24,7 @@ export const SHADOW_TYPES = {
   stray: { mob: "minecraft:stray", label: "Shadow Frost Archer", grade: 1, skill: "FROST ARROW", skillDesc: "Ranged attacker. Arrows freeze." },
   spider: { mob: "minecraft:spider", label: "Shadow Spider", grade: 0, skill: "VENOM BITE", skillDesc: "Hits poison the target." },
   wolf: { mob: "minecraft:wolf", label: "Shadow Wolf", grade: 0, skill: "FERAL BITE", skillDesc: "Fast. Hits deal bonus damage." },
+  creeper: { mob: "minecraft:creeper", label: "Shadow Creeper", grade: 0, skill: "SHADOW BLAST", skillDesc: "Explodes on enemies. More blasts with level & rank." },
   wither_skeleton: {
     mob: "minecraft:wither_skeleton", label: "Shadow Knight", grade: 2, skill: "WITHER BLADE", skillDesc: "Hits wither the target.",
     named: { name: "Igris", grade: 4 },
@@ -90,6 +91,14 @@ export const armyCapacity = (level) => {
 };
 /** Summoned at once: rank base + 1 per 10 INT above 10 (max 30). */
 export const activeLimit = (level, int) => Math.min(30, limitsFor(level).active + Math.floor(Math.max(0, int - 10) / 10));
+
+// ---------------------------------------------------------------- creeper
+/** Explosions before the shadow creeper falls (1 at Lv1 Normal). */
+export const creeperCharges = (s) => Math.min(10, 1 + Math.floor((s.level - 1) / 10) + s.grade);
+/** Explosion radius (weak at first, strong when leveled). */
+export const creeperPower = (s) => Math.min(4.5, 1.3 + (s.level - 1) * 0.03 + s.grade * 0.3);
+
+export const FOOD_MAX = 64;
 
 export const ARISE_MP = 10;
 export const ARISE_ATTEMPTS = 3;

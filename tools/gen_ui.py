@@ -534,16 +534,16 @@ def army_content():
 # sl:shadow| indices:
 #   7 back   9 title   16 summon/dismiss 17 feed 18 train 30 rename 31 release
 #   19 portrait  28 hp bar 29 xp bar  33..38 gear (head chest legs feet weapon offhand)
-#   39 selected item label   40..75 your inventory (9 x 4)
+#   39 selected item label   40..75 your inventory (9 x 4)   76 food pouch  77 totem
 GEAR_LABELS = ["HELMET", "CHEST", "LEGS", "BOOTS", "WEAPON", "OFFHAND"]
 
 
 def gear_label_row(names):
     """Labels under a row of gear cells (kept outside the cells' panels)."""
-    return {"type": "stack_panel", "orientation": "horizontal", "size": [58, 9], "controls": [
-        {"l0": {"type": "panel", "size": [28, 9], "controls": [{"t": label(names[0], GREY, font_scale_factor=0.5)}]}},
-        {"g": gap(2, 9)},
-        {"l1": {"type": "panel", "size": [28, 9], "controls": [{"t": label(names[1], GREY, font_scale_factor=0.5)}]}},
+    return {"type": "stack_panel", "orientation": "horizontal", "size": [58, 8], "controls": [
+        {"l0": {"type": "panel", "size": [28, 8], "controls": [{"t": label(names[0], GREY, font_scale_factor=0.5)}]}},
+        {"g": gap(2, 8)},
+        {"l1": {"type": "panel", "size": [28, 8], "controls": [{"t": label(names[1], GREY, font_scale_factor=0.5)}]}},
     ]}
 
 
@@ -571,12 +571,15 @@ def shadow_content():
     # Gear cells are direct children of a row stack_panel, exactly like the
     # inventory grid (deeper nesting broke the button -> index mapping).
     gear_rows = []
-    for r in range(3):
-        i0, i1 = 33 + r * 2, 34 + r * 2
+    pairs = [(33, 34), (35, 36), (37, 38), (76, 77)]
+    labels = GEAR_LABELS + ["FOOD", "TOTEM"]
+    for r in range(4):
+        i0, i1 = pairs[r]
         gear_rows.append({f"gr{r}": {"type": "stack_panel", "orientation": "horizontal", "size": [58, 24],
                                       "controls": [{f"gc{i0}": grid_cell(i0, 24)}, {"g": gap(2, 24)}, {f"gc{i1}": grid_cell(i1, 24)}]}})
-        gear_rows.append({f"gl{r}": gear_label_row(GEAR_LABELS[r * 2: r * 2 + 2])})
+        gear_rows.append({f"gl{r}": gear_label_row(labels[r * 2: r * 2 + 2])})
     mid = inner_panel([66, "100%"], [{"t": section_title("GEAR", PURPLE)}, *gear_rows], pad=3)
+    mid["controls"][1]["content"]["controls"][0]["t"]["size"] = ["100%", 10]
     bag_rows = []
     for r in range(4):
         cells = [{f"b{40 + r * 9 + c}": grid_cell(40 + r * 9 + c)} for c in range(9)]
