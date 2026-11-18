@@ -182,7 +182,7 @@ export function startPenalty(player) {
   }, 30);
 }
 
-function endPenalty(player, survived) {
+export function endPenalty(player, survived) {
   const d = getData(player);
   const ret = d.penalty?.ret;
   d.penalty = null;

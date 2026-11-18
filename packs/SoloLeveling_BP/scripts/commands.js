@@ -7,7 +7,7 @@ import { BASE_STAT, maxMp, STATS } from "./config.js";
 import { getData, markDirty, resetData } from "./data.js";
 import { addXp, applyStatEffects, setLevel } from "./stats.js";
 import { arise } from "./army/army.js";
-import { setPenaltyEnabled } from "./quests/daily.js";
+import { endPenalty, setPenaltyEnabled, startPenalty } from "./quests/daily.js";
 import { openSystem } from "./ui/screens.js";
 import { castSlot, quickMenu } from "./ui/skills_screen.js";
 
@@ -84,6 +84,41 @@ system.beforeEvents.startup.subscribe(({ customCommandRegistry: reg }) => {
   );
 
   const target = { name: "target", type: CustomCommandParamType.PlayerSelector };
+
+  reg.registerCommand(
+    {
+      name: "sl:testpenalty",
+      description: "[Admin] Send a hunter to the Penalty Zone now (for testing)",
+      permissionLevel: CommandPermissionLevel.GameDirectors,
+      cheatsRequired: false,
+      optionalParameters: [target],
+    },
+    (origin, targets) => {
+      const list = targetsOf(origin, targets);
+      system.run(() =>
+        list.forEach((p) => {
+          if (getData(p).penalty) p.sendMessage("§c[System] §7Already in the Penalty Zone.");
+          else startPenalty(p);
+        }),
+      );
+      return ok(`Sent ${list.length} player(s) to the Penalty Zone.`);
+    },
+  );
+
+  reg.registerCommand(
+    {
+      name: "sl:endpenalty",
+      description: "[Admin] End a hunter's Penalty Zone now (counts as survived)",
+      permissionLevel: CommandPermissionLevel.GameDirectors,
+      cheatsRequired: false,
+      optionalParameters: [target],
+    },
+    (origin, targets) => {
+      const list = targetsOf(origin, targets);
+      system.run(() => list.forEach((p) => getData(p).penalty && endPenalty(p, true)));
+      return ok(`Ended the Penalty Zone for ${list.length} player(s).`);
+    },
+  );
 
   reg.registerCommand(
     {
