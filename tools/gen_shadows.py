@@ -34,6 +34,10 @@ SHADOWS = {
 }
 
 
+# Models that don't render on custom entities in recent versions -> same-shape model.
+GEO_OVERRIDE = {"zombie": "geometry.zombie.husk.v1.8"}
+
+
 def load(path):
     text = open(path, encoding="utf-8-sig").read()
     return json.loads(re.sub(r"^\s*//.*$", "", text, flags=re.M))
@@ -146,7 +150,7 @@ def client(sid, vanilla_dir):
         "identifier": f"sl:shadow_{sid}",
         "materials": {"default": mats.get("default") or next(iter(mats.values()), "entity_alphatest")},
         "textures": {"default": d["textures"]["default"]},
-        "geometry": {"default": d["geometry"]["default"]},
+        "geometry": {"default": GEO_OVERRIDE.get(sid, d["geometry"]["default"])},
         "render_controllers": ["controller.render.sl_shadow"],
     }
     for k in ("min_engine_version", "scripts", "animations", "animation_controllers", "enable_attachables",

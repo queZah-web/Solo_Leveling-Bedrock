@@ -538,10 +538,12 @@ def army_content():
 GEAR_LABELS = ["HELMET", "CHEST", "LEGS", "BOOTS", "WEAPON", "OFFHAND"]
 
 
-def gear_cell(idx, name):
-    return {"type": "stack_panel", "orientation": "vertical", "size": [28, 33], "controls": [
-        {"cell": {"type": "panel", "size": [28, 24], "controls": [{"c": grid_cell(idx, 24)}]}},
-        {"lbl": {"type": "panel", "size": [28, 9], "controls": [{"t": label(name, GREY, font_scale_factor=0.5)}]}},
+def gear_label_row(names):
+    """Labels under a row of gear cells (kept outside the cells' panels)."""
+    return {"type": "stack_panel", "orientation": "horizontal", "size": [58, 9], "controls": [
+        {"l0": {"type": "panel", "size": [28, 9], "controls": [{"t": label(names[0], GREY, font_scale_factor=0.5)}]}},
+        {"g": gap(2, 9)},
+        {"l1": {"type": "panel", "size": [28, 9], "controls": [{"t": label(names[1], GREY, font_scale_factor=0.5)}]}},
     ]}
 
 
@@ -566,11 +568,14 @@ def shadow_content():
         row("b2", [{"a7": small_btn(7, ["30%", 15])}, {"g": gap(2, 15)}, {"a30": small_btn(30, ["34%", 15])},
                    {"g2": gap(2, 15)}, {"a31": small_btn(31, ["fill", 15], red=True)}], 15),
     ], pad=3)
+    # Gear cells are direct children of a row stack_panel, exactly like the
+    # inventory grid (deeper nesting broke the button -> index mapping).
     gear_rows = []
     for r in range(3):
-        cells = [{f"gc{33 + r * 2 + c}": gear_cell(33 + r * 2 + c, GEAR_LABELS[r * 2 + c])} for c in range(2)]
-        gear_rows.append({f"gr{r}": {"type": "stack_panel", "orientation": "horizontal", "size": [58, 33],
-                                      "controls": [cells[0], {"g": gap(2, 33)}, cells[1]]}})
+        i0, i1 = 33 + r * 2, 34 + r * 2
+        gear_rows.append({f"gr{r}": {"type": "stack_panel", "orientation": "horizontal", "size": [58, 24],
+                                      "controls": [{f"gc{i0}": grid_cell(i0, 24)}, {"g": gap(2, 24)}, {f"gc{i1}": grid_cell(i1, 24)}]}})
+        gear_rows.append({f"gl{r}": gear_label_row(GEAR_LABELS[r * 2: r * 2 + 2])})
     mid = inner_panel([66, "100%"], [{"t": section_title("GEAR", PURPLE)}, *gear_rows], pad=3)
     bag_rows = []
     for r in range(4):
