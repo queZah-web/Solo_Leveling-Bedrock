@@ -257,8 +257,8 @@ def profile_content():
                 "player": {
                     "type": "custom",
                     "renderer": "live_player_renderer",
-                    "size": [46, 80],
-                    "offset": [0, -8],
+                    "size": [64, 112],
+                    "offset": [0, -24],
                     "property_bag": {"#look_at_cursor": True},
                     "layer": 1,
                 }

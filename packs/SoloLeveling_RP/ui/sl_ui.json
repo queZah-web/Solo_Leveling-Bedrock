@@ -1000,12 +1000,12 @@
                       "type": "custom",
                       "renderer": "live_player_renderer",
                       "size": [
-                        46,
-                        80
+                        64,
+                        112
                       ],
                       "offset": [
                         0,
-                        -8
+                        -24
                       ],
                       "property_bag": {
                         "#look_at_cursor": true
