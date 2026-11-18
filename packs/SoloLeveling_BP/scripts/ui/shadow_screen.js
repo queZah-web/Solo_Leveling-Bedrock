@@ -1,14 +1,15 @@
 // Shadow Profile: one shadow's stats, equipment and actions.
 // Layout "sl:shadow|" (index map in tools/gen_ui.py).
-import { ItemLockMode } from "@minecraft/server";
+import { ItemLockMode, ItemStack } from "@minecraft/server";
 import { ModalFormData } from "@minecraft/server-ui";
 import {
   dismiss, entityOf, feed, findRecord, regenLeft, release, rename, saveActive, summon, train,
 } from "../army/army.js";
-import { canWearGear, GEAR_SLOTS, getGear, hasEquipment, isConstruct, setGear, updateCombatMode } from "../army/gear.js";
+import { canWearGear, gearInfo, GEAR_SLOTS, setGear, updateCombatMode } from "../army/gear.js";
 import {
   FEED_MP, GRADES, portraitOf, SHADOW_MAX_LEVEL, SHADOW_TYPES, shadowAtkMult, shadowDefMult, shadowXpToNext, TRAIN_MP,
 } from "../army/types.js";
+import { markDirty } from "../data.js";
 import { iconOf, prettyId } from "../vault/items.js";
 import { stateOf } from "./army_screen.js";
 import { barTex, BLANK, showForm, SystemForm, TEX } from "./form.js";
@@ -34,7 +35,6 @@ export async function shadowScreen(player) {
   const nextXp = shadowXpToNext(s.level);
   const maxed = s.level >= SHADOW_MAX_LEVEL;
   const wears = canWearGear(s.type);
-  const gearOk = !!e && wears && hasEquipment(e);
   const bag = player.getComponent("minecraft:inventory").container;
   const selItem = st.bagSel >= 0 ? bag.getItem(st.bagSel) : undefined;
   if (!selItem) st.bagSel = -1;
@@ -106,57 +106,63 @@ export async function shadowScreen(player) {
   // Gear
   GEAR_SLOTS.forEach((gs, i) => {
     const idx = 33 + i;
-    if (!gearOk) {
-      form.slot(idx, "", wears ? BLANK : TEX + "lock", () => {
-        toast(!wears ? "§7This shadow can't wear gear" : !e ? "§7Summon the shadow to change its gear" : "§cGear is not supported here");
+    if (!wears || !e) {
+      form.slot(idx, "N|", wears ? BLANK : TEX + "lock", () => {
+        toast(!wears ? "§7This shadow can't wear gear" : "§7Summon the shadow to change its gear");
         return again();
       });
       return;
     }
-    const cur = getGear(e, gs.slot);
-    form.slot(idx, "", cur ? iconOf(cur.typeId) : BLANK, async () => {
+    const cur = gearInfo(e, s, gs);
+    const curName = cur ? cur.item?.nameTag ?? prettyId(cur.id) : "empty";
+    form.slot(idx, "N|", cur ? iconOf(cur.id) : BLANK, async () => {
       const item = st.bagSel >= 0 ? bag.getItem(st.bagSel) : undefined;
       if (item) {
         if (item.lockMode !== ItemLockMode.none) return toast("§cThis item is bound to you"), again();
         if (!gs.accepts(item.typeId)) return toast(`§cThat can't go in the ${gs.label} slot`), again();
         const one = item.clone();
         one.amount = 1;
+        const how = setGear(e, s, gs, one);
+        if (!how) {
+          toast("§cThis server can't put enchanted/named/damaged gear on shadows yet");
+          return again();
+        }
+        // Equipped: take it from the player, give back what was there.
         if (item.amount > 1) bag.getSlot(st.bagSel).amount = item.amount - 1;
         else bag.setItem(st.bagSel, undefined);
-        if (!setGear(e, gs, one)) {
-          bag.addItem(one);
-          return toast("§cCould not equip"), again();
-        }
-        if (cur && !isConstruct(cur)) {
-          const left = bag.addItem(cur);
+        if (cur && !cur.construct) {
+          const back = cur.item ?? new ItemStack(cur.id, 1);
+          const left = bag.addItem(back);
           if (left) player.dimension.spawnItem(left, player.location);
         }
         st.bagSel = -1;
+        markDirty(player);
         toast(`§a${s.name} equipped ${one.nameTag ?? prettyId(one.typeId)}`);
       } else if (cur) {
-        if (isConstruct(cur)) {
-          setGear(e, gs, undefined);
-          toast("§8The shadow construct dissolved");
-        } else {
-          if (bag.emptySlotsCount === 0) return toast("§cYour inventory is full"), again();
-          bag.addItem(cur);
-          setGear(e, gs, undefined);
-          toast(`§7Took ${cur.nameTag ?? prettyId(cur.typeId)} back`);
+        if (!cur.construct && bag.emptySlotsCount === 0) return toast("§cYour inventory is full"), again();
+        const back = cur.item ?? new ItemStack(cur.id, 1);
+        if (!setGear(e, s, gs, undefined)) return toast("§cCould not unequip"), again();
+        if (cur.construct) toast("§8The shadow construct dissolved");
+        else {
+          bag.addItem(back);
+          toast(`§7Took ${curName} back`);
         }
+        markDirty(player);
       } else {
         return toast("§7Select an item from your inventory first"), again();
       }
-      updateCombatMode(e, s.type);
+      updateCombatMode(e, s);
       await saveActive(player, s.id);
       return again();
-    }, `${gs.label}: ${cur ? cur.nameTag ?? prettyId(cur.typeId) : "empty"}`);
+    }, `${gs.label}: ${curName}`);
   });
 
   // Your inventory
   BAG_ORDER.forEach((slot, i) => {
     const item = bag.getItem(slot);
     const idx = 40 + i;
-    const mark = slot === st.bagSel ? "*" : "";
+    // "S|" = selected, "N|" = not selected; the rest is the stack count.
+    const mark = slot === st.bagSel ? "S|" : "N|";
     if (!item) {
       form.slot(idx, mark, BLANK, () => ((st.bagSel = -1), again()));
       return;
@@ -164,7 +170,7 @@ export async function shadowScreen(player) {
     form.slot(idx, mark + (item.amount > 1 ? String(item.amount) : ""), iconOf(item.typeId), () => {
       st.bagSel = st.bagSel === slot ? -1 : slot;
       return again();
-    }, `${mark ? "§a> " : ""}${item.nameTag ?? prettyId(item.typeId)} §7x${item.amount}`);
+    }, `${slot === st.bagSel ? "§a> " : ""}${item.nameTag ?? prettyId(item.typeId)} §7x${item.amount}`);
   });
 
   if (selItem) {

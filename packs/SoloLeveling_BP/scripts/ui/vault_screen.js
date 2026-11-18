@@ -182,16 +182,17 @@ export async function vaultScreen(player) {
     const cell = pageCells[i];
     const idx = GRID_START + i;
     if (!cell) {
-      form.display(idx, "", BLANK);
+      form.display(idx, "N|", BLANK);
       continue;
     }
     if (cell.locked) {
       const lvl = unlockLevelFor(cell.slot);
-      form.slot(idx, "", TEX + "lock", () => (toast(`§7Unlocks at level §e${lvl}`), again()));
+      form.slot(idx, "N|", TEX + "lock", () => (toast(`§7Unlocks at level §e${lvl}`), again()));
       continue;
     }
     const item = container.getItem(cell.slot);
-    const sel = cell.slot === st.selected ? "*" : "";
+    // "S|" = selected, "N|" = not selected; the rest is the stack count.
+    const sel = cell.slot === st.selected ? "S|" : "N|";
     if (!item) {
       form.slot(idx, sel, BLANK, () => ((st.selected = -1), again()));
       continue;
@@ -206,7 +207,7 @@ export async function vaultScreen(player) {
         st.confirm = false;
         return again();
       },
-      `${sel ? "§a> " : ""}${item.nameTag ?? prettyId(item.typeId)} §7x${item.amount}`,
+      `${cell.slot === st.selected ? "§a> " : ""}${item.nameTag ?? prettyId(item.typeId)} §7x${item.amount}`,
     );
   }
 

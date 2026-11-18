@@ -3,7 +3,7 @@
 // Two structure slots (_a/_b) alternate so a failed save keeps the old copy.
 import { StructureSaveMode, system, world } from "@minecraft/server";
 import { markDirty } from "../data.js";
-import { pickBlock, vaultKey } from "../vault/storage.js";
+import { vaultKey } from "../vault/storage.js";
 import { entityIdOf } from "./types.js";
 
 const nameOf = (key, sid, ptr) => `slshadow:${key}_${sid}_${ptr}`;
@@ -12,16 +12,14 @@ export const shadowTag = (sid) => `sls_${sid}`;
 export const placing = new Set();
 
 const floorV = (v) => ({ x: Math.floor(v.x), y: Math.floor(v.y), z: Math.floor(v.z) });
-const sameBlock = (v, b) => Math.floor(v.x) === b.x && Math.floor(v.y) === b.y && Math.floor(v.z) === b.z;
 
-/** Is anything else (except players) standing in this block? */
-function crowded(e, block) {
-  return e.dimension
-    .getEntities({ location: { x: block.x + 0.5, y: block.y + 0.5, z: block.z + 0.5 }, maxDistance: 2 })
-    .some((x) => x.id !== e.id && x.typeId !== "minecraft:player" && sameBlock(x.location, block));
-}
+const near = (dim, block, r = 3) =>
+  dim.getEntities({ location: { x: block.x + 0.5, y: block.y + 0.5, z: block.z + 0.5 }, maxDistance: r });
 
 /**
+ * Saves the shadow where it stands (no teleport: teleporting can make the
+ * entity invisible). Other entities in the same block may be captured too;
+ * placeShadow() removes them again.
  * @param {import("@minecraft/server").Player} player
  * @param {import("../data.js").ShadowRecord} s
  * @param {import("@minecraft/server").Entity} e
@@ -30,19 +28,8 @@ export async function saveShadow(player, s, e) {
   if (!e.isValid) return false;
   const sm = world.structureManager;
   const key = vaultKey(player);
-  let block = floorV(e.location);
-  let back;
-  if (crowded(e, block)) {
-    // Move to a private block high above so only this shadow is captured.
-    back = { ...e.location };
-    block = pickBlock(player, e.dimension);
-    e.teleport({ x: block.x + 0.5, y: block.y + 0.3, z: block.z + 0.5 });
-    await system.waitTicks(1);
-    if (!e.isValid) return false;
-    block = floorV(e.location);
-  }
+  const block = floorV(e.location);
   const next = s.ptr === "a" ? "b" : "a";
-  let ok = false;
   try {
     const name = nameOf(key, s.id, next);
     if (sm.get(name)) sm.delete(name);
@@ -59,35 +46,36 @@ export async function saveShadow(player, s, e) {
         sm.delete(nameOf(key, s.id, old));
       } catch {}
     }
-    ok = true;
+    return true;
   } catch (err) {
     console.warn(`[SL] shadow save failed (${s.name}): ${err}`);
+    return false;
   }
-  if (back && e.isValid) e.teleport(back);
-  return ok;
 }
 
 /**
- * Places a saved shadow high above the player and returns the entity, or
- * undefined if the shadow has no save yet.
+ * Places a saved shadow at `location` and returns the entity, or undefined
+ * if the shadow has no save yet.
  */
-export async function placeShadow(player, s) {
+export async function placeShadow(player, s, location) {
   if (!s.ptr) return undefined;
   const sm = world.structureManager;
   const name = nameOf(vaultKey(player), s.id, s.ptr);
   if (!sm.get(name)) return undefined;
   const dim = player.dimension;
-  const block = pickBlock(player, dim);
+  const block = floorV(location);
   const tag = shadowTag(s.id);
+  const before = new Set(near(dim, block).map((x) => x.id));
   placing.add(tag);
   try {
     sm.place(name, dim, block, { includeBlocks: false, includeEntities: true });
-    const center = { x: block.x + 0.5, y: block.y + 0.5, z: block.z + 0.5 };
     for (let i = 0; i < 10; i++) {
-      const found = dim.getEntities({ type: entityIdOf(s.type), tags: [tag], location: center, maxDistance: 3 });
-      if (found.length) {
-        for (const extra of found.slice(1)) extra.remove();
-        return found[0];
+      const fresh = near(dim, block).filter((x) => !before.has(x.id) && x.typeId !== "minecraft:player");
+      const mine = fresh.filter((x) => x.typeId === entityIdOf(s.type) && x.hasTag(tag));
+      if (mine.length) {
+        // Anything else that came out of the structure is a copy: remove it.
+        for (const x of fresh) if (x.id !== mine[0].id) x.remove();
+        return mine[0];
       }
       await system.waitTicks(1);
     }

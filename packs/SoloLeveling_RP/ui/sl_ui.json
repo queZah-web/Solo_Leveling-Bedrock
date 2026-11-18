@@ -2784,7 +2784,7 @@
                                     },
                                     {
                                       "binding_type": "view",
-                                      "source_property_name": "(not ((#form_button_text - '*') = #form_button_text))",
+                                      "source_property_name": "(not ((#form_button_text - 'S|') = #form_button_text))",
                                       "target_property_name": "#visible"
                                     }
                                   ],
@@ -2836,7 +2836,7 @@
                                     },
                                     {
                                       "binding_type": "view",
-                                      "source_property_name": "(#form_button_text - '*')",
+                                      "source_property_name": "((#form_button_text - 'S|') - 'N|')",
                                       "target_property_name": "#sl_count"
                                     }
                                   ],
@@ -2928,7 +2928,7 @@
                                     },
                                     {
                                       "binding_type": "view",
-                                      "source_property_name": "(not ((#form_button_text - '*') = #form_button_text))",
+                                      "source_property_name": "(not ((#form_button_text - 'S|') = #form_button_text))",
                                       "target_property_name": "#visible"
                                     }
                                   ],
@@ -2980,7 +2980,7 @@
                                     },
                                     {
                                       "binding_type": "view",
-                                      "source_property_name": "(#form_button_text - '*')",
+                                      "source_property_name": "((#form_button_text - 'S|') - 'N|')",
                                       "target_property_name": "#sl_count"
                                     }
                                   ],
@@ -3072,7 +3072,7 @@
                                     },
                                     {
                                       "binding_type": "view",
-                                      "source_property_name": "(not ((#form_button_text - '*') = #form_button_text))",
+                                      "source_property_name": "(not ((#form_button_text - 'S|') = #form_button_text))",
                                       "target_property_name": "#visible"
                                     }
                                   ],
@@ -3124,7 +3124,7 @@
                                     },
                                     {
                                       "binding_type": "view",
-                                      "source_property_name": "(#form_button_text - '*')",
+                                      "source_property_name": "((#form_button_text - 'S|') - 'N|')",
                                       "target_property_name": "#sl_count"
                                     }
                                   ],
@@ -3216,7 +3216,7 @@
                                     },
                                     {
                                       "binding_type": "view",
-                                      "source_property_name": "(not ((#form_button_text - '*') = #form_button_text))",
+                                      "source_property_name": "(not ((#form_button_text - 'S|') = #form_button_text))",
                                       "target_property_name": "#visible"
                                     }
                                   ],
@@ -3268,7 +3268,7 @@
                                     },
                                     {
                                       "binding_type": "view",
-                                      "source_property_name": "(#form_button_text - '*')",
+                                      "source_property_name": "((#form_button_text - 'S|') - 'N|')",
                                       "target_property_name": "#sl_count"
                                     }
                                   ],
@@ -3360,7 +3360,7 @@
                                     },
                                     {
                                       "binding_type": "view",
-                                      "source_property_name": "(not ((#form_button_text - '*') = #form_button_text))",
+                                      "source_property_name": "(not ((#form_button_text - 'S|') = #form_button_text))",
                                       "target_property_name": "#visible"
                                     }
                                   ],
@@ -3412,7 +3412,7 @@
                                     },
                                     {
                                       "binding_type": "view",
-                                      "source_property_name": "(#form_button_text - '*')",
+                                      "source_property_name": "((#form_button_text - 'S|') - 'N|')",
                                       "target_property_name": "#sl_count"
                                     }
                                   ],
@@ -3504,7 +3504,7 @@
                                     },
                                     {
                                       "binding_type": "view",
-                                      "source_property_name": "(not ((#form_button_text - '*') = #form_button_text))",
+                                      "source_property_name": "(not ((#form_button_text - 'S|') = #form_button_text))",
                                       "target_property_name": "#visible"
                                     }
                                   ],
@@ -3556,7 +3556,7 @@
                                     },
                                     {
                                       "binding_type": "view",
-                                      "source_property_name": "(#form_button_text - '*')",
+                                      "source_property_name": "((#form_button_text - 'S|') - 'N|')",
                                       "target_property_name": "#sl_count"
                                     }
                                   ],
@@ -3648,7 +3648,7 @@
                                     },
                                     {
                                       "binding_type": "view",
-                                      "source_property_name": "(not ((#form_button_text - '*') = #form_button_text))",
+                                      "source_property_name": "(not ((#form_button_text - 'S|') = #form_button_text))",
                                       "target_property_name": "#visible"
                                     }
                                   ],
@@ -3700,7 +3700,7 @@
                                     },
                                     {
                                       "binding_type": "view",
-                                      "source_property_name": "(#form_button_text - '*')",
+                                      "source_property_name": "((#form_button_text - 'S|') - 'N|')",
                                       "target_property_name": "#sl_count"
                                     }
                                   ],
@@ -3792,7 +3792,7 @@
                                     },
                                     {
                                       "binding_type": "view",
-                                      "source_property_name": "(not ((#form_button_text - '*') = #form_button_text))",
+                                      "source_property_name": "(not ((#form_button_text - 'S|') = #form_button_text))",
                                       "target_property_name": "#visible"
                                     }
                                   ],
@@ -3844,7 +3844,7 @@
                                     },
                                     {
                                       "binding_type": "view",
-                                      "source_property_name": "(#form_button_text - '*')",
+                                      "source_property_name": "((#form_button_text - 'S|') - 'N|')",
                                       "target_property_name": "#sl_count"
                                     }
                                   ],
@@ -3936,7 +3936,7 @@
                                     },
                                     {
                                       "binding_type": "view",
-                                      "source_property_name": "(not ((#form_button_text - '*') = #form_button_text))",
+                                      "source_property_name": "(not ((#form_button_text - 'S|') = #form_button_text))",
                                       "target_property_name": "#visible"
                                     }
                                   ],
@@ -3988,7 +3988,7 @@
                                     },
                                     {
                                       "binding_type": "view",
-                                      "source_property_name": "(#form_button_text - '*')",
+                                      "source_property_name": "((#form_button_text - 'S|') - 'N|')",
                                       "target_property_name": "#sl_count"
                                     }
                                   ],
@@ -4093,7 +4093,7 @@
                                     },
                                     {
                                       "binding_type": "view",
-                                      "source_property_name": "(not ((#form_button_text - '*') = #form_button_text))",
+                                      "source_property_name": "(not ((#form_button_text - 'S|') = #form_button_text))",
                                       "target_property_name": "#visible"
                                     }
                                   ],
@@ -4145,7 +4145,7 @@
                                     },
                                     {
                                       "binding_type": "view",
-                                      "source_property_name": "(#form_button_text - '*')",
+                                      "source_property_name": "((#form_button_text - 'S|') - 'N|')",
                                       "target_property_name": "#sl_count"
                                     }
                                   ],
@@ -4237,7 +4237,7 @@
                                     },
                                     {
                                       "binding_type": "view",
-                                      "source_property_name": "(not ((#form_button_text - '*') = #form_button_text))",
+                                      "source_property_name": "(not ((#form_button_text - 'S|') = #form_button_text))",
                                       "target_property_name": "#visible"
                                     }
                                   ],
@@ -4289,7 +4289,7 @@
                                     },
                                     {
                                       "binding_type": "view",
-                                      "source_property_name": "(#form_button_text - '*')",
+                                      "source_property_name": "((#form_button_text - 'S|') - 'N|')",
                                       "target_property_name": "#sl_count"
                                     }
                                   ],
@@ -4381,7 +4381,7 @@
                                     },
                                     {
                                       "binding_type": "view",
-                                      "source_property_name": "(not ((#form_button_text - '*') = #form_button_text))",
+                                      "source_property_name": "(not ((#form_button_text - 'S|') = #form_button_text))",
                                       "target_property_name": "#visible"
                                     }
                                   ],
@@ -4433,7 +4433,7 @@
                                     },
                                     {
                                       "binding_type": "view",
-                                      "source_property_name": "(#form_button_text - '*')",
+                                      "source_property_name": "((#form_button_text - 'S|') - 'N|')",
                                       "target_property_name": "#sl_count"
                                     }
                                   ],
@@ -4525,7 +4525,7 @@
                                     },
                                     {
                                       "binding_type": "view",
-                                      "source_property_name": "(not ((#form_button_text - '*') = #form_button_text))",
+                                      "source_property_name": "(not ((#form_button_text - 'S|') = #form_button_text))",
                                       "target_property_name": "#visible"
                                     }
                                   ],
@@ -4577,7 +4577,7 @@
                                     },
                                     {
                                       "binding_type": "view",
-                                      "source_property_name": "(#form_button_text - '*')",
+                                      "source_property_name": "((#form_button_text - 'S|') - 'N|')",
                                       "target_property_name": "#sl_count"
                                     }
                                   ],
@@ -4669,7 +4669,7 @@
                                     },
                                     {
                                       "binding_type": "view",
-                                      "source_property_name": "(not ((#form_button_text - '*') = #form_button_text))",
+                                      "source_property_name": "(not ((#form_button_text - 'S|') = #form_button_text))",
                                       "target_property_name": "#visible"
                                     }
                                   ],
@@ -4721,7 +4721,7 @@
                                     },
                                     {
                                       "binding_type": "view",
-                                      "source_property_name": "(#form_button_text - '*')",
+                                      "source_property_name": "((#form_button_text - 'S|') - 'N|')",
                                       "target_property_name": "#sl_count"
                                     }
                                   ],
@@ -4813,7 +4813,7 @@
                                     },
                                     {
                                       "binding_type": "view",
-                                      "source_property_name": "(not ((#form_button_text - '*') = #form_button_text))",
+                                      "source_property_name": "(not ((#form_button_text - 'S|') = #form_button_text))",
                                       "target_property_name": "#visible"
                                     }
                                   ],
@@ -4865,7 +4865,7 @@
                                     },
                                     {
                                       "binding_type": "view",
-                                      "source_property_name": "(#form_button_text - '*')",
+                                      "source_property_name": "((#form_button_text - 'S|') - 'N|')",
                                       "target_property_name": "#sl_count"
                                     }
                                   ],
@@ -4957,7 +4957,7 @@
                                     },
                                     {
                                       "binding_type": "view",
-                                      "source_property_name": "(not ((#form_button_text - '*') = #form_button_text))",
+                                      "source_property_name": "(not ((#form_button_text - 'S|') = #form_button_text))",
                                       "target_property_name": "#visible"
                                     }
                                   ],
@@ -5009,7 +5009,7 @@
                                     },
                                     {
                                       "binding_type": "view",
-                                      "source_property_name": "(#form_button_text - '*')",
+                                      "source_property_name": "((#form_button_text - 'S|') - 'N|')",
                                       "target_property_name": "#sl_count"
                                     }
                                   ],
@@ -5101,7 +5101,7 @@
                                     },
                                     {
                                       "binding_type": "view",
-                                      "source_property_name": "(not ((#form_button_text - '*') = #form_button_text))",
+                                      "source_property_name": "(not ((#form_button_text - 'S|') = #form_button_text))",
                                       "target_property_name": "#visible"
                                     }
                                   ],
@@ -5153,7 +5153,7 @@
                                     },
                                     {
                                       "binding_type": "view",
-                                      "source_property_name": "(#form_button_text - '*')",
+                                      "source_property_name": "((#form_button_text - 'S|') - 'N|')",
                                       "target_property_name": "#sl_count"
                                     }
                                   ],
@@ -5245,7 +5245,7 @@
                                     },
                                     {
                                       "binding_type": "view",
-                                      "source_property_name": "(not ((#form_button_text - '*') = #form_button_text))",
+                                      "source_property_name": "(not ((#form_button_text - 'S|') = #form_button_text))",
                                       "target_property_name": "#visible"
                                     }
                                   ],
@@ -5297,7 +5297,7 @@
                                     },
                                     {
                                       "binding_type": "view",
-                                      "source_property_name": "(#form_button_text - '*')",
+                                      "source_property_name": "((#form_button_text - 'S|') - 'N|')",
                                       "target_property_name": "#sl_count"
                                     }
                                   ],
@@ -5402,7 +5402,7 @@
                                     },
                                     {
                                       "binding_type": "view",
-                                      "source_property_name": "(not ((#form_button_text - '*') = #form_button_text))",
+                                      "source_property_name": "(not ((#form_button_text - 'S|') = #form_button_text))",
                                       "target_property_name": "#visible"
                                     }
                                   ],
@@ -5454,7 +5454,7 @@
                                     },
                                     {
                                       "binding_type": "view",
-                                      "source_property_name": "(#form_button_text - '*')",
+                                      "source_property_name": "((#form_button_text - 'S|') - 'N|')",
                                       "target_property_name": "#sl_count"
                                     }
                                   ],
@@ -5546,7 +5546,7 @@
                                     },
                                     {
                                       "binding_type": "view",
-                                      "source_property_name": "(not ((#form_button_text - '*') = #form_button_text))",
+                                      "source_property_name": "(not ((#form_button_text - 'S|') = #form_button_text))",
                                       "target_property_name": "#visible"
                                     }
                                   ],
@@ -5598,7 +5598,7 @@
                                     },
                                     {
                                       "binding_type": "view",
-                                      "source_property_name": "(#form_button_text - '*')",
+                                      "source_property_name": "((#form_button_text - 'S|') - 'N|')",
                                       "target_property_name": "#sl_count"
                                     }
                                   ],
@@ -5690,7 +5690,7 @@
                                     },
                                     {
                                       "binding_type": "view",
-                                      "source_property_name": "(not ((#form_button_text - '*') = #form_button_text))",
+                                      "source_property_name": "(not ((#form_button_text - 'S|') = #form_button_text))",
                                       "target_property_name": "#visible"
                                     }
                                   ],
@@ -5742,7 +5742,7 @@
                                     },
                                     {
                                       "binding_type": "view",
-                                      "source_property_name": "(#form_button_text - '*')",
+                                      "source_property_name": "((#form_button_text - 'S|') - 'N|')",
                                       "target_property_name": "#sl_count"
                                     }
                                   ],
@@ -5834,7 +5834,7 @@
                                     },
                                     {
                                       "binding_type": "view",
-                                      "source_property_name": "(not ((#form_button_text - '*') = #form_button_text))",
+                                      "source_property_name": "(not ((#form_button_text - 'S|') = #form_button_text))",
                                       "target_property_name": "#visible"
                                     }
                                   ],
@@ -5886,7 +5886,7 @@
                                     },
                                     {
                                       "binding_type": "view",
-                                      "source_property_name": "(#form_button_text - '*')",
+                                      "source_property_name": "((#form_button_text - 'S|') - 'N|')",
                                       "target_property_name": "#sl_count"
                                     }
                                   ],
@@ -5978,7 +5978,7 @@
                                     },
                                     {
                                       "binding_type": "view",
-                                      "source_property_name": "(not ((#form_button_text - '*') = #form_button_text))",
+                                      "source_property_name": "(not ((#form_button_text - 'S|') = #form_button_text))",
                                       "target_property_name": "#visible"
                                     }
                                   ],
@@ -6030,7 +6030,7 @@
                                     },
                                     {
                                       "binding_type": "view",
-                                      "source_property_name": "(#form_button_text - '*')",
+                                      "source_property_name": "((#form_button_text - 'S|') - 'N|')",
                                       "target_property_name": "#sl_count"
                                     }
                                   ],
@@ -6122,7 +6122,7 @@
                                     },
                                     {
                                       "binding_type": "view",
-                                      "source_property_name": "(not ((#form_button_text - '*') = #form_button_text))",
+                                      "source_property_name": "(not ((#form_button_text - 'S|') = #form_button_text))",
                                       "target_property_name": "#visible"
                                     }
                                   ],
@@ -6174,7 +6174,7 @@
                                     },
                                     {
                                       "binding_type": "view",
-                                      "source_property_name": "(#form_button_text - '*')",
+                                      "source_property_name": "((#form_button_text - 'S|') - 'N|')",
                                       "target_property_name": "#sl_count"
                                     }
                                   ],
@@ -6266,7 +6266,7 @@
                                     },
                                     {
                                       "binding_type": "view",
-                                      "source_property_name": "(not ((#form_button_text - '*') = #form_button_text))",
+                                      "source_property_name": "(not ((#form_button_text - 'S|') = #form_button_text))",
                                       "target_property_name": "#visible"
                                     }
                                   ],
@@ -6318,7 +6318,7 @@
                                     },
                                     {
                                       "binding_type": "view",
-                                      "source_property_name": "(#form_button_text - '*')",
+                                      "source_property_name": "((#form_button_text - 'S|') - 'N|')",
                                       "target_property_name": "#sl_count"
                                     }
                                   ],
@@ -6410,7 +6410,7 @@
                                     },
                                     {
                                       "binding_type": "view",
-                                      "source_property_name": "(not ((#form_button_text - '*') = #form_button_text))",
+                                      "source_property_name": "(not ((#form_button_text - 'S|') = #form_button_text))",
                                       "target_property_name": "#visible"
                                     }
                                   ],
@@ -6462,7 +6462,7 @@
                                     },
                                     {
                                       "binding_type": "view",
-                                      "source_property_name": "(#form_button_text - '*')",
+                                      "source_property_name": "((#form_button_text - 'S|') - 'N|')",
                                       "target_property_name": "#sl_count"
                                     }
                                   ],
@@ -6554,7 +6554,7 @@
                                     },
                                     {
                                       "binding_type": "view",
-                                      "source_property_name": "(not ((#form_button_text - '*') = #form_button_text))",
+                                      "source_property_name": "(not ((#form_button_text - 'S|') = #form_button_text))",
                                       "target_property_name": "#visible"
                                     }
                                   ],
@@ -6606,7 +6606,7 @@
                                     },
                                     {
                                       "binding_type": "view",
-                                      "source_property_name": "(#form_button_text - '*')",
+                                      "source_property_name": "((#form_button_text - 'S|') - 'N|')",
                                       "target_property_name": "#sl_count"
                                     }
                                   ],
@@ -6711,7 +6711,7 @@
                                     },
                                     {
                                       "binding_type": "view",
-                                      "source_property_name": "(not ((#form_button_text - '*') = #form_button_text))",
+                                      "source_property_name": "(not ((#form_button_text - 'S|') = #form_button_text))",
                                       "target_property_name": "#visible"
                                     }
                                   ],
@@ -6763,7 +6763,7 @@
                                     },
                                     {
                                       "binding_type": "view",
-                                      "source_property_name": "(#form_button_text - '*')",
+                                      "source_property_name": "((#form_button_text - 'S|') - 'N|')",
                                       "target_property_name": "#sl_count"
                                     }
                                   ],
@@ -6855,7 +6855,7 @@
                                     },
                                     {
                                       "binding_type": "view",
-                                      "source_property_name": "(not ((#form_button_text - '*') = #form_button_text))",
+                                      "source_property_name": "(not ((#form_button_text - 'S|') = #form_button_text))",
                                       "target_property_name": "#visible"
                                     }
                                   ],
@@ -6907,7 +6907,7 @@
                                     },
                                     {
                                       "binding_type": "view",
-                                      "source_property_name": "(#form_button_text - '*')",
+                                      "source_property_name": "((#form_button_text - 'S|') - 'N|')",
                                       "target_property_name": "#sl_count"
                                     }
                                   ],
@@ -6999,7 +6999,7 @@
                                     },
                                     {
                                       "binding_type": "view",
-                                      "source_property_name": "(not ((#form_button_text - '*') = #form_button_text))",
+                                      "source_property_name": "(not ((#form_button_text - 'S|') = #form_button_text))",
                                       "target_property_name": "#visible"
                                     }
                                   ],
@@ -7051,7 +7051,7 @@
                                     },
                                     {
                                       "binding_type": "view",
-                                      "source_property_name": "(#form_button_text - '*')",
+                                      "source_property_name": "((#form_button_text - 'S|') - 'N|')",
                                       "target_property_name": "#sl_count"
                                     }
                                   ],
@@ -7143,7 +7143,7 @@
                                     },
                                     {
                                       "binding_type": "view",
-                                      "source_property_name": "(not ((#form_button_text - '*') = #form_button_text))",
+                                      "source_property_name": "(not ((#form_button_text - 'S|') = #form_button_text))",
                                       "target_property_name": "#visible"
                                     }
                                   ],
@@ -7195,7 +7195,7 @@
                                     },
                                     {
                                       "binding_type": "view",
-                                      "source_property_name": "(#form_button_text - '*')",
+                                      "source_property_name": "((#form_button_text - 'S|') - 'N|')",
                                       "target_property_name": "#sl_count"
                                     }
                                   ],
@@ -7287,7 +7287,7 @@
                                     },
                                     {
                                       "binding_type": "view",
-                                      "source_property_name": "(not ((#form_button_text - '*') = #form_button_text))",
+                                      "source_property_name": "(not ((#form_button_text - 'S|') = #form_button_text))",
                                       "target_property_name": "#visible"
                                     }
                                   ],
@@ -7339,7 +7339,7 @@
                                     },
                                     {
                                       "binding_type": "view",
-                                      "source_property_name": "(#form_button_text - '*')",
+                                      "source_property_name": "((#form_button_text - 'S|') - 'N|')",
                                       "target_property_name": "#sl_count"
                                     }
                                   ],
@@ -7431,7 +7431,7 @@
                                     },
                                     {
                                       "binding_type": "view",
-                                      "source_property_name": "(not ((#form_button_text - '*') = #form_button_text))",
+                                      "source_property_name": "(not ((#form_button_text - 'S|') = #form_button_text))",
                                       "target_property_name": "#visible"
                                     }
                                   ],
@@ -7483,7 +7483,7 @@
                                     },
                                     {
                                       "binding_type": "view",
-                                      "source_property_name": "(#form_button_text - '*')",
+                                      "source_property_name": "((#form_button_text - 'S|') - 'N|')",
                                       "target_property_name": "#sl_count"
                                     }
                                   ],
@@ -7575,7 +7575,7 @@
                                     },
                                     {
                                       "binding_type": "view",
-                                      "source_property_name": "(not ((#form_button_text - '*') = #form_button_text))",
+                                      "source_property_name": "(not ((#form_button_text - 'S|') = #form_button_text))",
                                       "target_property_name": "#visible"
                                     }
                                   ],
@@ -7627,7 +7627,7 @@
                                     },
                                     {
                                       "binding_type": "view",
-                                      "source_property_name": "(#form_button_text - '*')",
+                                      "source_property_name": "((#form_button_text - 'S|') - 'N|')",
                                       "target_property_name": "#sl_count"
                                     }
                                   ],
@@ -7719,7 +7719,7 @@
                                     },
                                     {
                                       "binding_type": "view",
-                                      "source_property_name": "(not ((#form_button_text - '*') = #form_button_text))",
+                                      "source_property_name": "(not ((#form_button_text - 'S|') = #form_button_text))",
                                       "target_property_name": "#visible"
                                     }
                                   ],
@@ -7771,7 +7771,7 @@
                                     },
                                     {
                                       "binding_type": "view",
-                                      "source_property_name": "(#form_button_text - '*')",
+                                      "source_property_name": "((#form_button_text - 'S|') - 'N|')",
                                       "target_property_name": "#sl_count"
                                     }
                                   ],
@@ -7863,7 +7863,7 @@
                                     },
                                     {
                                       "binding_type": "view",
-                                      "source_property_name": "(not ((#form_button_text - '*') = #form_button_text))",
+                                      "source_property_name": "(not ((#form_button_text - 'S|') = #form_button_text))",
                                       "target_property_name": "#visible"
                                     }
                                   ],
@@ -7915,7 +7915,7 @@
                                     },
                                     {
                                       "binding_type": "view",
-                                      "source_property_name": "(#form_button_text - '*')",
+                                      "source_property_name": "((#form_button_text - 'S|') - 'N|')",
                                       "target_property_name": "#sl_count"
                                     }
                                   ],
@@ -8020,7 +8020,7 @@
                                     },
                                     {
                                       "binding_type": "view",
-                                      "source_property_name": "(not ((#form_button_text - '*') = #form_button_text))",
+                                      "source_property_name": "(not ((#form_button_text - 'S|') = #form_button_text))",
                                       "target_property_name": "#visible"
                                     }
                                   ],
@@ -8072,7 +8072,7 @@
                                     },
                                     {
                                       "binding_type": "view",
-                                      "source_property_name": "(#form_button_text - '*')",
+                                      "source_property_name": "((#form_button_text - 'S|') - 'N|')",
                                       "target_property_name": "#sl_count"
                                     }
                                   ],
@@ -8164,7 +8164,7 @@
                                     },
                                     {
                                       "binding_type": "view",
-                                      "source_property_name": "(not ((#form_button_text - '*') = #form_button_text))",
+                                      "source_property_name": "(not ((#form_button_text - 'S|') = #form_button_text))",
                                       "target_property_name": "#visible"
                                     }
                                   ],
@@ -8216,7 +8216,7 @@
                                     },
                                     {
                                       "binding_type": "view",
-                                      "source_property_name": "(#form_button_text - '*')",
+                                      "source_property_name": "((#form_button_text - 'S|') - 'N|')",
                                       "target_property_name": "#sl_count"
                                     }
                                   ],
@@ -8308,7 +8308,7 @@
                                     },
                                     {
                                       "binding_type": "view",
-                                      "source_property_name": "(not ((#form_button_text - '*') = #form_button_text))",
+                                      "source_property_name": "(not ((#form_button_text - 'S|') = #form_button_text))",
                                       "target_property_name": "#visible"
                                     }
                                   ],
@@ -8360,7 +8360,7 @@
                                     },
                                     {
                                       "binding_type": "view",
-                                      "source_property_name": "(#form_button_text - '*')",
+                                      "source_property_name": "((#form_button_text - 'S|') - 'N|')",
                                       "target_property_name": "#sl_count"
                                     }
                                   ],
@@ -8452,7 +8452,7 @@
                                     },
                                     {
                                       "binding_type": "view",
-                                      "source_property_name": "(not ((#form_button_text - '*') = #form_button_text))",
+                                      "source_property_name": "(not ((#form_button_text - 'S|') = #form_button_text))",
                                       "target_property_name": "#visible"
                                     }
                                   ],
@@ -8504,7 +8504,7 @@
                                     },
                                     {
                                       "binding_type": "view",
-                                      "source_property_name": "(#form_button_text - '*')",
+                                      "source_property_name": "((#form_button_text - 'S|') - 'N|')",
                                       "target_property_name": "#sl_count"
                                     }
                                   ],
@@ -8596,7 +8596,7 @@
                                     },
                                     {
                                       "binding_type": "view",
-                                      "source_property_name": "(not ((#form_button_text - '*') = #form_button_text))",
+                                      "source_property_name": "(not ((#form_button_text - 'S|') = #form_button_text))",
                                       "target_property_name": "#visible"
                                     }
                                   ],
@@ -8648,7 +8648,7 @@
                                     },
                                     {
                                       "binding_type": "view",
-                                      "source_property_name": "(#form_button_text - '*')",
+                                      "source_property_name": "((#form_button_text - 'S|') - 'N|')",
                                       "target_property_name": "#sl_count"
                                     }
                                   ],
@@ -8740,7 +8740,7 @@
                                     },
                                     {
                                       "binding_type": "view",
-                                      "source_property_name": "(not ((#form_button_text - '*') = #form_button_text))",
+                                      "source_property_name": "(not ((#form_button_text - 'S|') = #form_button_text))",
                                       "target_property_name": "#visible"
                                     }
                                   ],
@@ -8792,7 +8792,7 @@
                                     },
                                     {
                                       "binding_type": "view",
-                                      "source_property_name": "(#form_button_text - '*')",
+                                      "source_property_name": "((#form_button_text - 'S|') - 'N|')",
                                       "target_property_name": "#sl_count"
                                     }
                                   ],
@@ -8884,7 +8884,7 @@
                                     },
                                     {
                                       "binding_type": "view",
-                                      "source_property_name": "(not ((#form_button_text - '*') = #form_button_text))",
+                                      "source_property_name": "(not ((#form_button_text - 'S|') = #form_button_text))",
                                       "target_property_name": "#visible"
                                     }
                                   ],
@@ -8936,7 +8936,7 @@
                                     },
                                     {
                                       "binding_type": "view",
-                                      "source_property_name": "(#form_button_text - '*')",
+                                      "source_property_name": "((#form_button_text - 'S|') - 'N|')",
                                       "target_property_name": "#sl_count"
                                     }
                                   ],
@@ -9028,7 +9028,7 @@
                                     },
                                     {
                                       "binding_type": "view",
-                                      "source_property_name": "(not ((#form_button_text - '*') = #form_button_text))",
+                                      "source_property_name": "(not ((#form_button_text - 'S|') = #form_button_text))",
                                       "target_property_name": "#visible"
                                     }
                                   ],
@@ -9080,7 +9080,7 @@
                                     },
                                     {
                                       "binding_type": "view",
-                                      "source_property_name": "(#form_button_text - '*')",
+                                      "source_property_name": "((#form_button_text - 'S|') - 'N|')",
                                       "target_property_name": "#sl_count"
                                     }
                                   ],
@@ -9172,7 +9172,7 @@
                                     },
                                     {
                                       "binding_type": "view",
-                                      "source_property_name": "(not ((#form_button_text - '*') = #form_button_text))",
+                                      "source_property_name": "(not ((#form_button_text - 'S|') = #form_button_text))",
                                       "target_property_name": "#visible"
                                     }
                                   ],
@@ -9224,7 +9224,7 @@
                                     },
                                     {
                                       "binding_type": "view",
-                                      "source_property_name": "(#form_button_text - '*')",
+                                      "source_property_name": "((#form_button_text - 'S|') - 'N|')",
                                       "target_property_name": "#sl_count"
                                     }
                                   ],
@@ -13786,7 +13786,7 @@
                                                 },
                                                 {
                                                   "binding_type": "view",
-                                                  "source_property_name": "(not ((#form_button_text - '*') = #form_button_text))",
+                                                  "source_property_name": "(not ((#form_button_text - 'S|') = #form_button_text))",
                                                   "target_property_name": "#visible"
                                                 }
                                               ],
@@ -13838,7 +13838,7 @@
                                                 },
                                                 {
                                                   "binding_type": "view",
-                                                  "source_property_name": "(#form_button_text - '*')",
+                                                  "source_property_name": "((#form_button_text - 'S|') - 'N|')",
                                                   "target_property_name": "#sl_count"
                                                 }
                                               ],
@@ -13990,7 +13990,7 @@
                                                 },
                                                 {
                                                   "binding_type": "view",
-                                                  "source_property_name": "(not ((#form_button_text - '*') = #form_button_text))",
+                                                  "source_property_name": "(not ((#form_button_text - 'S|') = #form_button_text))",
                                                   "target_property_name": "#visible"
                                                 }
                                               ],
@@ -14042,7 +14042,7 @@
                                                 },
                                                 {
                                                   "binding_type": "view",
-                                                  "source_property_name": "(#form_button_text - '*')",
+                                                  "source_property_name": "((#form_button_text - 'S|') - 'N|')",
                                                   "target_property_name": "#sl_count"
                                                 }
                                               ],
@@ -14197,7 +14197,7 @@
                                                 },
                                                 {
                                                   "binding_type": "view",
-                                                  "source_property_name": "(not ((#form_button_text - '*') = #form_button_text))",
+                                                  "source_property_name": "(not ((#form_button_text - 'S|') = #form_button_text))",
                                                   "target_property_name": "#visible"
                                                 }
                                               ],
@@ -14249,7 +14249,7 @@
                                                 },
                                                 {
                                                   "binding_type": "view",
-                                                  "source_property_name": "(#form_button_text - '*')",
+                                                  "source_property_name": "((#form_button_text - 'S|') - 'N|')",
                                                   "target_property_name": "#sl_count"
                                                 }
                                               ],
@@ -14401,7 +14401,7 @@
                                                 },
                                                 {
                                                   "binding_type": "view",
-                                                  "source_property_name": "(not ((#form_button_text - '*') = #form_button_text))",
+                                                  "source_property_name": "(not ((#form_button_text - 'S|') = #form_button_text))",
                                                   "target_property_name": "#visible"
                                                 }
                                               ],
@@ -14453,7 +14453,7 @@
                                                 },
                                                 {
                                                   "binding_type": "view",
-                                                  "source_property_name": "(#form_button_text - '*')",
+                                                  "source_property_name": "((#form_button_text - 'S|') - 'N|')",
                                                   "target_property_name": "#sl_count"
                                                 }
                                               ],
@@ -14608,7 +14608,7 @@
                                                 },
                                                 {
                                                   "binding_type": "view",
-                                                  "source_property_name": "(not ((#form_button_text - '*') = #form_button_text))",
+                                                  "source_property_name": "(not ((#form_button_text - 'S|') = #form_button_text))",
                                                   "target_property_name": "#visible"
                                                 }
                                               ],
@@ -14660,7 +14660,7 @@
                                                 },
                                                 {
                                                   "binding_type": "view",
-                                                  "source_property_name": "(#form_button_text - '*')",
+                                                  "source_property_name": "((#form_button_text - 'S|') - 'N|')",
                                                   "target_property_name": "#sl_count"
                                                 }
                                               ],
@@ -14812,7 +14812,7 @@
                                                 },
                                                 {
                                                   "binding_type": "view",
-                                                  "source_property_name": "(not ((#form_button_text - '*') = #form_button_text))",
+                                                  "source_property_name": "(not ((#form_button_text - 'S|') = #form_button_text))",
                                                   "target_property_name": "#visible"
                                                 }
                                               ],
@@ -14864,7 +14864,7 @@
                                                 },
                                                 {
                                                   "binding_type": "view",
-                                                  "source_property_name": "(#form_button_text - '*')",
+                                                  "source_property_name": "((#form_button_text - 'S|') - 'N|')",
                                                   "target_property_name": "#sl_count"
                                                 }
                                               ],
@@ -15086,7 +15086,7 @@
                                           },
                                           {
                                             "binding_type": "view",
-                                            "source_property_name": "(not ((#form_button_text - '*') = #form_button_text))",
+                                            "source_property_name": "(not ((#form_button_text - 'S|') = #form_button_text))",
                                             "target_property_name": "#visible"
                                           }
                                         ],
@@ -15138,7 +15138,7 @@
                                           },
                                           {
                                             "binding_type": "view",
-                                            "source_property_name": "(#form_button_text - '*')",
+                                            "source_property_name": "((#form_button_text - 'S|') - 'N|')",
                                             "target_property_name": "#sl_count"
                                           }
                                         ],
@@ -15230,7 +15230,7 @@
                                           },
                                           {
                                             "binding_type": "view",
-                                            "source_property_name": "(not ((#form_button_text - '*') = #form_button_text))",
+                                            "source_property_name": "(not ((#form_button_text - 'S|') = #form_button_text))",
                                             "target_property_name": "#visible"
                                           }
                                         ],
@@ -15282,7 +15282,7 @@
                                           },
                                           {
                                             "binding_type": "view",
-                                            "source_property_name": "(#form_button_text - '*')",
+                                            "source_property_name": "((#form_button_text - 'S|') - 'N|')",
                                             "target_property_name": "#sl_count"
                                           }
                                         ],
@@ -15374,7 +15374,7 @@
                                           },
                                           {
                                             "binding_type": "view",
-                                            "source_property_name": "(not ((#form_button_text - '*') = #form_button_text))",
+                                            "source_property_name": "(not ((#form_button_text - 'S|') = #form_button_text))",
                                             "target_property_name": "#visible"
                                           }
                                         ],
@@ -15426,7 +15426,7 @@
                                           },
                                           {
                                             "binding_type": "view",
-                                            "source_property_name": "(#form_button_text - '*')",
+                                            "source_property_name": "((#form_button_text - 'S|') - 'N|')",
                                             "target_property_name": "#sl_count"
                                           }
                                         ],
@@ -15518,7 +15518,7 @@
                                           },
                                           {
                                             "binding_type": "view",
-                                            "source_property_name": "(not ((#form_button_text - '*') = #form_button_text))",
+                                            "source_property_name": "(not ((#form_button_text - 'S|') = #form_button_text))",
                                             "target_property_name": "#visible"
                                           }
                                         ],
@@ -15570,7 +15570,7 @@
                                           },
                                           {
                                             "binding_type": "view",
-                                            "source_property_name": "(#form_button_text - '*')",
+                                            "source_property_name": "((#form_button_text - 'S|') - 'N|')",
                                             "target_property_name": "#sl_count"
                                           }
                                         ],
@@ -15662,7 +15662,7 @@
                                           },
                                           {
                                             "binding_type": "view",
-                                            "source_property_name": "(not ((#form_button_text - '*') = #form_button_text))",
+                                            "source_property_name": "(not ((#form_button_text - 'S|') = #form_button_text))",
                                             "target_property_name": "#visible"
                                           }
                                         ],
@@ -15714,7 +15714,7 @@
                                           },
                                           {
                                             "binding_type": "view",
-                                            "source_property_name": "(#form_button_text - '*')",
+                                            "source_property_name": "((#form_button_text - 'S|') - 'N|')",
                                             "target_property_name": "#sl_count"
                                           }
                                         ],
@@ -15806,7 +15806,7 @@
                                           },
                                           {
                                             "binding_type": "view",
-                                            "source_property_name": "(not ((#form_button_text - '*') = #form_button_text))",
+                                            "source_property_name": "(not ((#form_button_text - 'S|') = #form_button_text))",
                                             "target_property_name": "#visible"
                                           }
                                         ],
@@ -15858,7 +15858,7 @@
                                           },
                                           {
                                             "binding_type": "view",
-                                            "source_property_name": "(#form_button_text - '*')",
+                                            "source_property_name": "((#form_button_text - 'S|') - 'N|')",
                                             "target_property_name": "#sl_count"
                                           }
                                         ],
@@ -15950,7 +15950,7 @@
                                           },
                                           {
                                             "binding_type": "view",
-                                            "source_property_name": "(not ((#form_button_text - '*') = #form_button_text))",
+                                            "source_property_name": "(not ((#form_button_text - 'S|') = #form_button_text))",
                                             "target_property_name": "#visible"
                                           }
                                         ],
@@ -16002,7 +16002,7 @@
                                           },
                                           {
                                             "binding_type": "view",
-                                            "source_property_name": "(#form_button_text - '*')",
+                                            "source_property_name": "((#form_button_text - 'S|') - 'N|')",
                                             "target_property_name": "#sl_count"
                                           }
                                         ],
@@ -16094,7 +16094,7 @@
                                           },
                                           {
                                             "binding_type": "view",
-                                            "source_property_name": "(not ((#form_button_text - '*') = #form_button_text))",
+                                            "source_property_name": "(not ((#form_button_text - 'S|') = #form_button_text))",
                                             "target_property_name": "#visible"
                                           }
                                         ],
@@ -16146,7 +16146,7 @@
                                           },
                                           {
                                             "binding_type": "view",
-                                            "source_property_name": "(#form_button_text - '*')",
+                                            "source_property_name": "((#form_button_text - 'S|') - 'N|')",
                                             "target_property_name": "#sl_count"
                                           }
                                         ],
@@ -16238,7 +16238,7 @@
                                           },
                                           {
                                             "binding_type": "view",
-                                            "source_property_name": "(not ((#form_button_text - '*') = #form_button_text))",
+                                            "source_property_name": "(not ((#form_button_text - 'S|') = #form_button_text))",
                                             "target_property_name": "#visible"
                                           }
                                         ],
@@ -16290,7 +16290,7 @@
                                           },
                                           {
                                             "binding_type": "view",
-                                            "source_property_name": "(#form_button_text - '*')",
+                                            "source_property_name": "((#form_button_text - 'S|') - 'N|')",
                                             "target_property_name": "#sl_count"
                                           }
                                         ],
@@ -16395,7 +16395,7 @@
                                           },
                                           {
                                             "binding_type": "view",
-                                            "source_property_name": "(not ((#form_button_text - '*') = #form_button_text))",
+                                            "source_property_name": "(not ((#form_button_text - 'S|') = #form_button_text))",
                                             "target_property_name": "#visible"
                                           }
                                         ],
@@ -16447,7 +16447,7 @@
                                           },
                                           {
                                             "binding_type": "view",
-                                            "source_property_name": "(#form_button_text - '*')",
+                                            "source_property_name": "((#form_button_text - 'S|') - 'N|')",
                                             "target_property_name": "#sl_count"
                                           }
                                         ],
@@ -16539,7 +16539,7 @@
                                           },
                                           {
                                             "binding_type": "view",
-                                            "source_property_name": "(not ((#form_button_text - '*') = #form_button_text))",
+                                            "source_property_name": "(not ((#form_button_text - 'S|') = #form_button_text))",
                                             "target_property_name": "#visible"
                                           }
                                         ],
@@ -16591,7 +16591,7 @@
                                           },
                                           {
                                             "binding_type": "view",
-                                            "source_property_name": "(#form_button_text - '*')",
+                                            "source_property_name": "((#form_button_text - 'S|') - 'N|')",
                                             "target_property_name": "#sl_count"
                                           }
                                         ],
@@ -16683,7 +16683,7 @@
                                           },
                                           {
                                             "binding_type": "view",
-                                            "source_property_name": "(not ((#form_button_text - '*') = #form_button_text))",
+                                            "source_property_name": "(not ((#form_button_text - 'S|') = #form_button_text))",
                                             "target_property_name": "#visible"
                                           }
                                         ],
@@ -16735,7 +16735,7 @@
                                           },
                                           {
                                             "binding_type": "view",
-                                            "source_property_name": "(#form_button_text - '*')",
+                                            "source_property_name": "((#form_button_text - 'S|') - 'N|')",
                                             "target_property_name": "#sl_count"
                                           }
                                         ],
@@ -16827,7 +16827,7 @@
                                           },
                                           {
                                             "binding_type": "view",
-                                            "source_property_name": "(not ((#form_button_text - '*') = #form_button_text))",
+                                            "source_property_name": "(not ((#form_button_text - 'S|') = #form_button_text))",
                                             "target_property_name": "#visible"
                                           }
                                         ],
@@ -16879,7 +16879,7 @@
                                           },
                                           {
                                             "binding_type": "view",
-                                            "source_property_name": "(#form_button_text - '*')",
+                                            "source_property_name": "((#form_button_text - 'S|') - 'N|')",
                                             "target_property_name": "#sl_count"
                                           }
                                         ],
@@ -16971,7 +16971,7 @@
                                           },
                                           {
                                             "binding_type": "view",
-                                            "source_property_name": "(not ((#form_button_text - '*') = #form_button_text))",
+                                            "source_property_name": "(not ((#form_button_text - 'S|') = #form_button_text))",
                                             "target_property_name": "#visible"
                                           }
                                         ],
@@ -17023,7 +17023,7 @@
                                           },
                                           {
                                             "binding_type": "view",
-                                            "source_property_name": "(#form_button_text - '*')",
+                                            "source_property_name": "((#form_button_text - 'S|') - 'N|')",
                                             "target_property_name": "#sl_count"
                                           }
                                         ],
@@ -17115,7 +17115,7 @@
                                           },
                                           {
                                             "binding_type": "view",
-                                            "source_property_name": "(not ((#form_button_text - '*') = #form_button_text))",
+                                            "source_property_name": "(not ((#form_button_text - 'S|') = #form_button_text))",
                                             "target_property_name": "#visible"
                                           }
                                         ],
@@ -17167,7 +17167,7 @@
                                           },
                                           {
                                             "binding_type": "view",
-                                            "source_property_name": "(#form_button_text - '*')",
+                                            "source_property_name": "((#form_button_text - 'S|') - 'N|')",
                                             "target_property_name": "#sl_count"
                                           }
                                         ],
@@ -17259,7 +17259,7 @@
                                           },
                                           {
                                             "binding_type": "view",
-                                            "source_property_name": "(not ((#form_button_text - '*') = #form_button_text))",
+                                            "source_property_name": "(not ((#form_button_text - 'S|') = #form_button_text))",
                                             "target_property_name": "#visible"
                                           }
                                         ],
@@ -17311,7 +17311,7 @@
                                           },
                                           {
                                             "binding_type": "view",
-                                            "source_property_name": "(#form_button_text - '*')",
+                                            "source_property_name": "((#form_button_text - 'S|') - 'N|')",
                                             "target_property_name": "#sl_count"
                                           }
                                         ],
@@ -17403,7 +17403,7 @@
                                           },
                                           {
                                             "binding_type": "view",
-                                            "source_property_name": "(not ((#form_button_text - '*') = #form_button_text))",
+                                            "source_property_name": "(not ((#form_button_text - 'S|') = #form_button_text))",
                                             "target_property_name": "#visible"
                                           }
                                         ],
@@ -17455,7 +17455,7 @@
                                           },
                                           {
                                             "binding_type": "view",
-                                            "source_property_name": "(#form_button_text - '*')",
+                                            "source_property_name": "((#form_button_text - 'S|') - 'N|')",
                                             "target_property_name": "#sl_count"
                                           }
                                         ],
@@ -17547,7 +17547,7 @@
                                           },
                                           {
                                             "binding_type": "view",
-                                            "source_property_name": "(not ((#form_button_text - '*') = #form_button_text))",
+                                            "source_property_name": "(not ((#form_button_text - 'S|') = #form_button_text))",
                                             "target_property_name": "#visible"
                                           }
                                         ],
@@ -17599,7 +17599,7 @@
                                           },
                                           {
                                             "binding_type": "view",
-                                            "source_property_name": "(#form_button_text - '*')",
+                                            "source_property_name": "((#form_button_text - 'S|') - 'N|')",
                                             "target_property_name": "#sl_count"
                                           }
                                         ],
@@ -17704,7 +17704,7 @@
                                           },
                                           {
                                             "binding_type": "view",
-                                            "source_property_name": "(not ((#form_button_text - '*') = #form_button_text))",
+                                            "source_property_name": "(not ((#form_button_text - 'S|') = #form_button_text))",
                                             "target_property_name": "#visible"
                                           }
                                         ],
@@ -17756,7 +17756,7 @@
                                           },
                                           {
                                             "binding_type": "view",
-                                            "source_property_name": "(#form_button_text - '*')",
+                                            "source_property_name": "((#form_button_text - 'S|') - 'N|')",
                                             "target_property_name": "#sl_count"
                                           }
                                         ],
@@ -17848,7 +17848,7 @@
                                           },
                                           {
                                             "binding_type": "view",
-                                            "source_property_name": "(not ((#form_button_text - '*') = #form_button_text))",
+                                            "source_property_name": "(not ((#form_button_text - 'S|') = #form_button_text))",
                                             "target_property_name": "#visible"
                                           }
                                         ],
@@ -17900,7 +17900,7 @@
                                           },
                                           {
                                             "binding_type": "view",
-                                            "source_property_name": "(#form_button_text - '*')",
+                                            "source_property_name": "((#form_button_text - 'S|') - 'N|')",
                                             "target_property_name": "#sl_count"
                                           }
                                         ],
@@ -17992,7 +17992,7 @@
                                           },
                                           {
                                             "binding_type": "view",
-                                            "source_property_name": "(not ((#form_button_text - '*') = #form_button_text))",
+                                            "source_property_name": "(not ((#form_button_text - 'S|') = #form_button_text))",
                                             "target_property_name": "#visible"
                                           }
                                         ],
@@ -18044,7 +18044,7 @@
                                           },
                                           {
                                             "binding_type": "view",
-                                            "source_property_name": "(#form_button_text - '*')",
+                                            "source_property_name": "((#form_button_text - 'S|') - 'N|')",
                                             "target_property_name": "#sl_count"
                                           }
                                         ],
@@ -18136,7 +18136,7 @@
                                           },
                                           {
                                             "binding_type": "view",
-                                            "source_property_name": "(not ((#form_button_text - '*') = #form_button_text))",
+                                            "source_property_name": "(not ((#form_button_text - 'S|') = #form_button_text))",
                                             "target_property_name": "#visible"
                                           }
                                         ],
@@ -18188,7 +18188,7 @@
                                           },
                                           {
                                             "binding_type": "view",
-                                            "source_property_name": "(#form_button_text - '*')",
+                                            "source_property_name": "((#form_button_text - 'S|') - 'N|')",
                                             "target_property_name": "#sl_count"
                                           }
                                         ],
@@ -18280,7 +18280,7 @@
                                           },
                                           {
                                             "binding_type": "view",
-                                            "source_property_name": "(not ((#form_button_text - '*') = #form_button_text))",
+                                            "source_property_name": "(not ((#form_button_text - 'S|') = #form_button_text))",
                                             "target_property_name": "#visible"
                                           }
                                         ],
@@ -18332,7 +18332,7 @@
                                           },
                                           {
                                             "binding_type": "view",
-                                            "source_property_name": "(#form_button_text - '*')",
+                                            "source_property_name": "((#form_button_text - 'S|') - 'N|')",
                                             "target_property_name": "#sl_count"
                                           }
                                         ],
@@ -18424,7 +18424,7 @@
                                           },
                                           {
                                             "binding_type": "view",
-                                            "source_property_name": "(not ((#form_button_text - '*') = #form_button_text))",
+                                            "source_property_name": "(not ((#form_button_text - 'S|') = #form_button_text))",
                                             "target_property_name": "#visible"
                                           }
                                         ],
@@ -18476,7 +18476,7 @@
                                           },
                                           {
                                             "binding_type": "view",
-                                            "source_property_name": "(#form_button_text - '*')",
+                                            "source_property_name": "((#form_button_text - 'S|') - 'N|')",
                                             "target_property_name": "#sl_count"
                                           }
                                         ],
@@ -18568,7 +18568,7 @@
                                           },
                                           {
                                             "binding_type": "view",
-                                            "source_property_name": "(not ((#form_button_text - '*') = #form_button_text))",
+                                            "source_property_name": "(not ((#form_button_text - 'S|') = #form_button_text))",
                                             "target_property_name": "#visible"
                                           }
                                         ],
@@ -18620,7 +18620,7 @@
                                           },
                                           {
                                             "binding_type": "view",
-                                            "source_property_name": "(#form_button_text - '*')",
+                                            "source_property_name": "((#form_button_text - 'S|') - 'N|')",
                                             "target_property_name": "#sl_count"
                                           }
                                         ],
@@ -18712,7 +18712,7 @@
                                           },
                                           {
                                             "binding_type": "view",
-                                            "source_property_name": "(not ((#form_button_text - '*') = #form_button_text))",
+                                            "source_property_name": "(not ((#form_button_text - 'S|') = #form_button_text))",
                                             "target_property_name": "#visible"
                                           }
                                         ],
@@ -18764,7 +18764,7 @@
                                           },
                                           {
                                             "binding_type": "view",
-                                            "source_property_name": "(#form_button_text - '*')",
+                                            "source_property_name": "((#form_button_text - 'S|') - 'N|')",
                                             "target_property_name": "#sl_count"
                                           }
                                         ],
@@ -18856,7 +18856,7 @@
                                           },
                                           {
                                             "binding_type": "view",
-                                            "source_property_name": "(not ((#form_button_text - '*') = #form_button_text))",
+                                            "source_property_name": "(not ((#form_button_text - 'S|') = #form_button_text))",
                                             "target_property_name": "#visible"
                                           }
                                         ],
@@ -18908,7 +18908,7 @@
                                           },
                                           {
                                             "binding_type": "view",
-                                            "source_property_name": "(#form_button_text - '*')",
+                                            "source_property_name": "((#form_button_text - 'S|') - 'N|')",
                                             "target_property_name": "#sl_count"
                                           }
                                         ],
@@ -19013,7 +19013,7 @@
                                           },
                                           {
                                             "binding_type": "view",
-                                            "source_property_name": "(not ((#form_button_text - '*') = #form_button_text))",
+                                            "source_property_name": "(not ((#form_button_text - 'S|') = #form_button_text))",
                                             "target_property_name": "#visible"
                                           }
                                         ],
@@ -19065,7 +19065,7 @@
                                           },
                                           {
                                             "binding_type": "view",
-                                            "source_property_name": "(#form_button_text - '*')",
+                                            "source_property_name": "((#form_button_text - 'S|') - 'N|')",
                                             "target_property_name": "#sl_count"
                                           }
                                         ],
@@ -19157,7 +19157,7 @@
                                           },
                                           {
                                             "binding_type": "view",
-                                            "source_property_name": "(not ((#form_button_text - '*') = #form_button_text))",
+                                            "source_property_name": "(not ((#form_button_text - 'S|') = #form_button_text))",
                                             "target_property_name": "#visible"
                                           }
                                         ],
@@ -19209,7 +19209,7 @@
                                           },
                                           {
                                             "binding_type": "view",
-                                            "source_property_name": "(#form_button_text - '*')",
+                                            "source_property_name": "((#form_button_text - 'S|') - 'N|')",
                                             "target_property_name": "#sl_count"
                                           }
                                         ],
@@ -19301,7 +19301,7 @@
                                           },
                                           {
                                             "binding_type": "view",
-                                            "source_property_name": "(not ((#form_button_text - '*') = #form_button_text))",
+                                            "source_property_name": "(not ((#form_button_text - 'S|') = #form_button_text))",
                                             "target_property_name": "#visible"
                                           }
                                         ],
@@ -19353,7 +19353,7 @@
                                           },
                                           {
                                             "binding_type": "view",
-                                            "source_property_name": "(#form_button_text - '*')",
+                                            "source_property_name": "((#form_button_text - 'S|') - 'N|')",
                                             "target_property_name": "#sl_count"
                                           }
                                         ],
@@ -19445,7 +19445,7 @@
                                           },
                                           {
                                             "binding_type": "view",
-                                            "source_property_name": "(not ((#form_button_text - '*') = #form_button_text))",
+                                            "source_property_name": "(not ((#form_button_text - 'S|') = #form_button_text))",
                                             "target_property_name": "#visible"
                                           }
                                         ],
@@ -19497,7 +19497,7 @@
                                           },
                                           {
                                             "binding_type": "view",
-                                            "source_property_name": "(#form_button_text - '*')",
+                                            "source_property_name": "((#form_button_text - 'S|') - 'N|')",
                                             "target_property_name": "#sl_count"
                                           }
                                         ],
@@ -19589,7 +19589,7 @@
                                           },
                                           {
                                             "binding_type": "view",
-                                            "source_property_name": "(not ((#form_button_text - '*') = #form_button_text))",
+                                            "source_property_name": "(not ((#form_button_text - 'S|') = #form_button_text))",
                                             "target_property_name": "#visible"
                                           }
                                         ],
@@ -19641,7 +19641,7 @@
                                           },
                                           {
                                             "binding_type": "view",
-                                            "source_property_name": "(#form_button_text - '*')",
+                                            "source_property_name": "((#form_button_text - 'S|') - 'N|')",
                                             "target_property_name": "#sl_count"
                                           }
                                         ],
@@ -19733,7 +19733,7 @@
                                           },
                                           {
                                             "binding_type": "view",
-                                            "source_property_name": "(not ((#form_button_text - '*') = #form_button_text))",
+                                            "source_property_name": "(not ((#form_button_text - 'S|') = #form_button_text))",
                                             "target_property_name": "#visible"
                                           }
                                         ],
@@ -19785,7 +19785,7 @@
                                           },
                                           {
                                             "binding_type": "view",
-                                            "source_property_name": "(#form_button_text - '*')",
+                                            "source_property_name": "((#form_button_text - 'S|') - 'N|')",
                                             "target_property_name": "#sl_count"
                                           }
                                         ],
@@ -19877,7 +19877,7 @@
                                           },
                                           {
                                             "binding_type": "view",
-                                            "source_property_name": "(not ((#form_button_text - '*') = #form_button_text))",
+                                            "source_property_name": "(not ((#form_button_text - 'S|') = #form_button_text))",
                                             "target_property_name": "#visible"
                                           }
                                         ],
@@ -19929,7 +19929,7 @@
                                           },
                                           {
                                             "binding_type": "view",
-                                            "source_property_name": "(#form_button_text - '*')",
+                                            "source_property_name": "((#form_button_text - 'S|') - 'N|')",
                                             "target_property_name": "#sl_count"
                                           }
                                         ],
@@ -20021,7 +20021,7 @@
                                           },
                                           {
                                             "binding_type": "view",
-                                            "source_property_name": "(not ((#form_button_text - '*') = #form_button_text))",
+                                            "source_property_name": "(not ((#form_button_text - 'S|') = #form_button_text))",
                                             "target_property_name": "#visible"
                                           }
                                         ],
@@ -20073,7 +20073,7 @@
                                           },
                                           {
                                             "binding_type": "view",
-                                            "source_property_name": "(#form_button_text - '*')",
+                                            "source_property_name": "((#form_button_text - 'S|') - 'N|')",
                                             "target_property_name": "#sl_count"
                                           }
                                         ],
@@ -20165,7 +20165,7 @@
                                           },
                                           {
                                             "binding_type": "view",
-                                            "source_property_name": "(not ((#form_button_text - '*') = #form_button_text))",
+                                            "source_property_name": "(not ((#form_button_text - 'S|') = #form_button_text))",
                                             "target_property_name": "#visible"
                                           }
                                         ],
@@ -20217,7 +20217,7 @@
                                           },
                                           {
                                             "binding_type": "view",
-                                            "source_property_name": "(#form_button_text - '*')",
+                                            "source_property_name": "((#form_button_text - 'S|') - 'N|')",
                                             "target_property_name": "#sl_count"
                                           }
                                         ],

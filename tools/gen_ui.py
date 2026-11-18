@@ -380,8 +380,10 @@ def sub_tab(idx, size):
 
 
 def grid_cell(idx, size=None):
-    """Item slot: '*' in the text marks the selected slot, the rest is the count."""
-    sel_vis = {"binding_type": "view", "source_property_name": contains("#form_button_text", "*"), "target_property_name": "#visible"}
+    """Item slot. Text = "S|" (selected) or "N|" (not) + stack count.
+    The prefix keeps the text non-numeric: JSON UI turns numeric strings
+    into numbers, which breaks the string checks."""
+    sel_vis = {"binding_type": "view", "source_property_name": contains("#form_button_text", "S|"), "target_property_name": "#visible"}
     size = size or CELL
     return slot(idx, [size, size], [
         {"btn": button("slot", "slot_hover", "slot_sel")},
@@ -393,7 +395,7 @@ def grid_cell(idx, size=None):
                     anchor_from="bottom_right", anchor_to="bottom_right", offset=[0, 1]),
             "bindings": [
                 btn_text_binding(),
-                {"binding_type": "view", "source_property_name": "(#form_button_text - '*')", "target_property_name": "#sl_count"},
+                {"binding_type": "view", "source_property_name": "((#form_button_text - 'S|') - 'N|')", "target_property_name": "#sl_count"},
             ],
         }},
     ])

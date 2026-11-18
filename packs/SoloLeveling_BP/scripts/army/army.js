@@ -82,9 +82,10 @@ function spawnFresh(player, s, location, dimension = player.dimension) {
   if (ARCHERS.has(s.type)) {
     try {
       // Archers always rise holding a (System-made) bow.
-      if (!setGear(e, GEAR_SLOTS[4], shadowBow())) e.runCommand("replaceitem entity @s slot.weapon.mainhand 0 bow 1");
+      setGear(e, s, GEAR_SLOTS[4], shadowBow(), true);
+      markDirty(player);
     } catch {}
-    updateCombatMode(e, s.type);
+    updateCombatMode(e, s);
   }
   return register(player, s, e);
 }
@@ -108,14 +109,14 @@ export async function summon(player, s, { free = false, location = undefined } =
   summoning.add(s.id);
   try {
     const target = location ?? nearOwner(player);
-    // Restore the saved shadow (equipment, health...) if there is one.
-    const saved = await placeShadow(player, s);
+    // Restore the saved shadow (equipment, health...) right next to the owner.
+    // (No teleport after placing: that can leave the entity invisible.)
+    const saved = await placeShadow(player, s, target);
     if (!player.isValid) {
       saved?.remove();
       return "Owner left.";
     }
     if (saved) {
-      saved.teleport(target, { dimension: player.dimension });
       register(player, s, saved);
     } else {
       spawnFresh(player, s, target);
