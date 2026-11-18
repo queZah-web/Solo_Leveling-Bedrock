@@ -8,30 +8,8 @@ import {
 import { getData, markDirty } from "../data.js";
 import { allocate, getHealth, rankOf } from "../stats.js";
 import { barTex, BLANK, showForm, SystemForm, TEX } from "./form.js";
-
-const TABS = [
-  ["profile", "STATUS"],
-  ["inventory", "INVENTORY"],
-  ["shadows", "SHADOWS"],
-  ["quests", "QUESTS"],
-  ["settings", "SETTINGS"],
-];
-
-/** Common frame: 0 close, 1..5 tabs, 6 header. */
-function frame(form, player, active) {
-  const d = getData(player);
-  form.slot(0, "CLOSE [X]", BLANK, () => undefined);
-  TABS.forEach(([id, label], i) => {
-    form.slot(i + 1, label, id === active ? TEX + "tab_active" : BLANK, () => id);
-  });
-  const next = xpToNext(d.level);
-  const xpText = d.level >= MAX_LEVEL ? "MAX" : `${d.xp}/${next}`;
-  form.display(
-    6,
-    `§bHUNTER: §f${player.name}  §eLV ${d.level} §7(${xpText})`,
-    barTex("xp", d.level >= MAX_LEVEL ? 1 : d.xp, d.level >= MAX_LEVEL ? 1 : next),
-  );
-}
+import { frame } from "./frame.js";
+import { endVault, vaultScreen } from "./vault_screen.js";
 
 // ---------------------------------------------------------------- STATUS
 async function profileScreen(player) {
@@ -143,10 +121,7 @@ async function settingsScreen(player) {
 
 const SCREENS = {
   profile: profileScreen,
-  inventory: lockedScreen("inventory", "SYSTEM INVENTORY", 2, [
-    "§bSystem Inventory & Shadow Vault",
-    "§7Store items in the System, sort, stack, filter, and move them back to your inventory.",
-  ]),
+  inventory: vaultScreen,
   shadows: lockedScreen("shadows", "SHADOW ARMY", 3, [
     "§5Shadow Extraction §7- ARISE.",
     "§7Extract shadows from defeated monsters and command your army.",
@@ -171,11 +146,17 @@ export async function openSystem(player, start = "profile") {
     while (next && player.isValid && guard++ < 500) {
       const screen = SCREENS[next];
       if (!screen) break;
+      const current = next;
       next = await screen(player);
+      if (current === "inventory" && next !== "inventory") endVault(player);
     }
   } catch (e) {
     console.warn(`[SL] UI error: ${e}`);
+    try {
+      player.sendMessage(`§b[System] §c${e?.message ?? e}`);
+    } catch {}
   } finally {
+    endVault(player);
     open.delete(player.id);
   }
 }

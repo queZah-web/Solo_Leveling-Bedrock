@@ -83,6 +83,29 @@ def gen_ui():
     # Slot (for later inventory phases)
     save(framed(18, 18, (6, 14, 26, 235), CYAN_DIM), UI, "slot.png")
     nineslice_meta("slot", 3, [18, 18])
+    save(framed(18, 18, (16, 44, 70, 245), (190, 250, 255, 255)), UI, "slot_hover.png")
+    nineslice_meta("slot_hover", 3, [18, 18])
+    # Selected-slot highlight: transparent centre, bright purple border
+    sel = Image.new("RGBA", (18, 18), (0, 0, 0, 0))
+    ds = ImageDraw.Draw(sel)
+    ds.rectangle([0, 0, 17, 17], outline=PURPLE)
+    ds.rectangle([1, 1, 16, 16], outline=(230, 170, 255, 255))
+    ds.rectangle([2, 2, 15, 15], fill=(150, 60, 220, 70))
+    save(sel, UI, "slot_sel.png")
+    nineslice_meta("slot_sel", 3, [18, 18])
+    # Lock icon for locked vault slots
+    lk = Image.new("RGBA", (12, 12), (0, 0, 0, 0))
+    dl = ImageDraw.Draw(lk)
+    dl.rectangle([3, 1, 8, 6], outline=(150, 170, 190, 255))
+    dl.rectangle([2, 5, 9, 11], fill=(110, 130, 150, 255))
+    dl.rectangle([5, 7, 6, 9], fill=(30, 40, 50, 255))
+    save(lk, UI, "lock.png")
+    # Fallback icon for items without a known texture
+    uk = framed(16, 16, (40, 20, 70, 255), PURPLE)
+    du = ImageDraw.Draw(uk)
+    for (x, y) in [(6, 4), (7, 3), (8, 3), (9, 4), (9, 5), (8, 6), (7, 7), (7, 8), (7, 11)]:
+        du.point((x, y), fill=(255, 255, 255, 255))
+    save(uk, UI, "unknown.png")
     # Invisible button background (display-only elements)
     save(Image.new("RGBA", (4, 4), (0, 0, 0, 0)), UI, "blank.png")
     # Thin separator line

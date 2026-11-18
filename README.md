@@ -8,7 +8,7 @@
 | المرحلة | المحتوى | الحالة |
 |---|---|---|
 | 1 | النظام: مستويات، XP، إحصائيات، HP/MP/Fatigue، نافذة النظام المخصصة، جوهرة النظام، `/system` | ✅ |
-| 2 | System Inventory + Shadow Vault | ⏳ |
+| 2 | System Inventory + Shadow Vault | ✅ |
 | 3 | جيش الظلال (ARISE) وإدارة الجيش | ⏳ |
 | 4 | المهارات + المهام اليومية + منطقة العقوبة | ⏳ |
 | 5 | البوابات والدانجن والزعماء | ⏳ |
@@ -33,6 +33,16 @@
 - **HUD** فوق الهوت بار (تقدر تطفيه من الإعدادات).
 - **Custom UI: OFF** في الإعدادات: يحوّل النوافذ للشكل العادي، احتياطًا لو الواجهة ما ضبطت على جهاز معين.
 
+## المرحلة 2 — Shadow Vault (تبويب INVENTORY)
+
+- **SHADOW VAULT**: خزنة خاصة بكل لاعب، فيها 45 خانة في البداية، وتزيد 9 خانات كل 5 مستويات لين توصل 225 خانة (5 صفحات).
+  - تحفظ الأغراض **بكل بياناتها**: السحر، الأسماء، المتانة، وحتى الشلكر بوكس بمحتوياته.
+  - الخانات المقفلة يطلع عليها قفل، ولما تضغطها يقولك عند أي مستوى تنفتح.
+- **YOUR BAG**: انفنتوري اللاعب. تختار الغرض وتضغط STORE IN VAULT، أو STORE ALL عشان تخزّن كل شيء ما عدا الهوت بار.
+- **الأزرار**: MOVE TO INVENTORY / TAKE 1 / DISCARD (يطلب تأكيد) / FILTER (ALL, BLOCKS, GEAR, FOOD, MATERIALS) / SORT ALL / STACK ALL / تقليب الصفحات.
+- جوهرة النظام وأي غرض مقفول ما ينحط في الخزنة.
+- **طريقة الحفظ**: الأغراض تنحفظ كـ structure داخل ملف العالم (`slvault:*`)، وفيه نسختين بالتبادل عشان لو فشل حفظ ما تضيع النسخة السليمة. **لا تحذف structures اللي تبدأ بـ `slvault:`**.
+
 ### أوامر الأدمن (للـ OP فقط)
 ```
 /sl:setlevel <level> [player]
@@ -51,11 +61,11 @@
 
 `world_behavior_packs.json`
 ```json
-[ { "pack_id": "c63f3ea1-b815-4c86-8d08-fa4f1f13d4e2", "version": [0, 1, 2] } ]
+[ { "pack_id": "c63f3ea1-b815-4c86-8d08-fa4f1f13d4e2", "version": [0, 2, 0] } ]
 ```
 `world_resource_packs.json`
 ```json
-[ { "pack_id": "74a1ff86-af96-45c3-8ccf-94d3550211ba", "version": [0, 1, 2] } ]
+[ { "pack_id": "74a1ff86-af96-45c3-8ccf-94d3550211ba", "version": [0, 2, 0] } ]
 ```
 4. في `server.properties` خلّ:
 ```
@@ -72,4 +82,5 @@ python3 tools/build.py     # يولّد التكستشرات والواجهة و
 ```
 - `tools/gen_textures.py`: كل تكستشرات الواجهة والجوهرة
 - `tools/gen_ui.py`: ملفات JSON UI (الواجهة المخصصة)
+- `tools/gen_icons.py`: خريطة أيقونات الأغراض (من Mojang/bedrock-samples و @minecraft/vanilla-data)
 - `packs/SoloLeveling_BP/scripts/`: منطق اللعبة (Script API `@minecraft/server` 2.10.0)

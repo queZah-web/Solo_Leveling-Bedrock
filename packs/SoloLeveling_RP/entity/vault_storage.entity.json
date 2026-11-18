@@ -1,0 +1,12 @@
+{
+  "format_version": "1.10.0",
+  "minecraft:client_entity": {
+    "description": {
+      "identifier": "sl:vault_storage",
+      "materials": { "default": "entity_alphatest" },
+      "textures": { "default": "textures/sl/ui/blank" },
+      "geometry": { "default": "geometry.sl.empty" },
+      "render_controllers": ["controller.render.default"]
+    }
+  }
+}

@@ -24,7 +24,7 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 UI_DIR = os.path.join(ROOT, "packs", "SoloLeveling_RP", "ui")
 T = "textures/sl/ui/"
 
-LAYOUTS = ["sl:profile|", "sl:list|"]
+LAYOUTS = ["sl:profile|", "sl:list|", "sl:vault|"]
 # The form factory gives long_form no size, so percentages at the top level
 # resolve to 0. The window therefore uses a fixed size that fits phones.
 SCREEN_SIZE = [392, 206]
@@ -340,6 +340,112 @@ def list_content():
     }
 
 
+# ---------------------------------------------------------------- vault layout
+# sl:vault| indices:
+#   7,8 sub-tabs (VAULT / BAG)   9 capacity label   10 prev  11 page label  12 next
+#   13 filter  14 sort  15 stack  16 primary action  17 secondary action  18 discard
+#   19 selected item icon        20..64 grid cells (9 x 5)
+GRID_START, GRID_COLS, GRID_ROWS, CELL = 20, 9, 5, 20
+
+
+def plain_label(idx, size, color=WHITE, scale=0.85, align="center"):
+    anchor = {"center": "center", "left": "left_middle", "right": "right_middle"}[align]
+    return slot(idx, size, [{"txt": bound_label(color, font_scale_factor=scale, anchor_from=anchor, anchor_to=anchor)}])
+
+
+def small_btn(idx, size, red=False):
+    tex = ("close", "close_hover", "btn_pressed") if red else ("btn", "btn_hover", "btn_pressed")
+    return slot(idx, size, [
+        {"btn": button(*tex)},
+        {"txt": bound_label(WHITE, layer=3, font_scale_factor=0.8)},
+    ])
+
+
+def sub_tab(idx, size):
+    return slot(idx, size, [
+        {"btn": button("tab", "tab_hover", "btn_pressed")},
+        {"active": bound_image(size=["100%", "100%"], layer=2)},
+        {"txt": bound_label(WHITE, layer=3, font_scale_factor=0.8)},
+    ])
+
+
+def grid_cell(idx):
+    """Item slot: '*' in the text marks the selected slot, the rest is the count."""
+    sel_vis = {"binding_type": "view", "source_property_name": contains("#form_button_text", "*"), "target_property_name": "#visible"}
+    return slot(idx, [CELL, CELL], [
+        {"btn": button("slot", "slot_hover", "slot_sel")},
+        {"sel": {"type": "image", "texture": T + "slot_sel", "size": ["100%", "100%"], "layer": 2,
+                 "bindings": [btn_text_binding(), sel_vis]}},
+        {"icon": bound_image(size=[15, 15], layer=3)},
+        {"count": {
+            **label("#sl_count", WHITE, layer=4, font_scale_factor=0.65,
+                    anchor_from="bottom_right", anchor_to="bottom_right", offset=[0, 1]),
+            "bindings": [
+                btn_text_binding(),
+                {"binding_type": "view", "source_property_name": "(#form_button_text - '*')", "target_property_name": "#sl_count"},
+            ],
+        }},
+    ])
+
+
+def row(name, ctrls, height):
+    return {name: {"type": "stack_panel", "orientation": "horizontal", "size": ["100%", height], "controls": ctrls}}
+
+
+def vault_content():
+    grid_rows = []
+    for r in range(GRID_ROWS):
+        cells = [{f"c{GRID_START + r * GRID_COLS + c}": grid_cell(GRID_START + r * GRID_COLS + c)} for c in range(GRID_COLS)]
+        grid_rows.append({f"r{r}": {"type": "stack_panel", "orientation": "horizontal",
+                                    "size": [CELL * GRID_COLS, CELL], "controls": cells}})
+    left = {
+        "type": "stack_panel",
+        "orientation": "vertical",
+        "size": [CELL * GRID_COLS, "100%"],
+        "controls": [
+            row("subtabs", [{"t7": sub_tab(7, ["50% - 1px", 16])}, {"g": gap(2, 16)}, {"t8": sub_tab(8, ["fill", 16])}], 16),
+            {"g1": gap("100%", 3)},
+            {"grid": {"type": "stack_panel", "orientation": "vertical", "size": [CELL * GRID_COLS, CELL * GRID_ROWS], "controls": grid_rows}},
+            {"g2": gap("100%", 3)},
+            row("pager", [{"prev": small_btn(10, [34, 15])}, {"page": plain_label(11, ["fill", 15], CYAN)}, {"next": small_btn(12, [34, 15])}], 15),
+        ],
+    }
+    icon_box = slot(19, [26, 26], [
+        {"bg": {"type": "image", "texture": T + "slot", "size": ["100%", "100%"], "layer": 1}},
+        {"icon": bound_image(size=[20, 20], layer=2)},
+    ])
+    details = {
+        "type": "stack_panel",
+        "orientation": "horizontal",
+        "size": ["100%", "fill"],
+        "controls": [
+            {"icon": {"type": "panel", "size": [26, "100%"], "controls": [
+                {"box": {**icon_box, "anchor_from": "top_left", "anchor_to": "top_left"}}]}},
+            {"g": gap(4, "100%")},
+            {"body": {"type": "panel", "size": ["fill", "100%"], "controls": [
+                {"txt": {**body_text(), "anchor_from": "top_left", "anchor_to": "top_left", "font_scale_factor": 0.8}}]}},
+        ],
+    }
+    right = inner_panel(["fill", "100%"], [
+        {"cap": plain_label(9, ["100%", 12], PURPLE, 0.85, "left")},
+        {"g0": gap("100%", 2)},
+        {"details": details},
+        {"g1": gap("100%", 2)},
+        {"a16": small_btn(16, ["100%", 16])},
+        {"g2": gap("100%", 2)},
+        row("r2", [{"a17": small_btn(17, ["50% - 1px", 16])}, {"g": gap(2, 16)}, {"a18": small_btn(18, ["fill", 16], red=True)}], 16),
+        {"g3": gap("100%", 2)},
+        row("r3", [{"a13": small_btn(13, ["34%", 16])}, {"g": gap(2, 16)}, {"a14": small_btn(14, ["32%", 16])},
+                   {"g2": gap(2, 16)}, {"a15": small_btn(15, ["fill", 16])}], 16),
+    ])
+    return {
+        "type": "stack_panel",
+        "orientation": "horizontal",
+        "size": ["100%", "100%"],
+        "controls": [{"left": left}, {"g": gap(5, "100%")}, {"right": right}],
+    }
+
+
 def visible_if_title(marker):
     return [
         {"binding_name": "#title_text"},
@@ -355,6 +461,7 @@ def screen():
         "controls": [
             {"profile@sl_ui.profile_content": {"bindings": visible_if_title("sl:profile|")}},
             {"list@sl_ui.list_content": {"bindings": visible_if_title("sl:list|")}},
+            {"vault@sl_ui.vault_content": {"bindings": visible_if_title("sl:vault|")}},
         ],
     }
     return {
@@ -449,9 +556,10 @@ def main():
         "screen": screen(),
         "profile_content": profile_content(),
         "list_content": list_content(),
+        "vault_content": vault_content(),
         "list_item": list_item(),
     }
-    for key in ("screen", "profile_content", "list_content"):
+    for key in ("screen", "profile_content", "list_content", "vault_content"):
         add_collection_name(sl_ui[key])
     with open(os.path.join(UI_DIR, "sl_ui.json"), "w") as f:
         json.dump(sl_ui, f, indent=2, ensure_ascii=False)

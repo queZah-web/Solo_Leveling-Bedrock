@@ -16,16 +16,17 @@ export function barTex(kind, cur, max) {
 }
 
 /**
- * @typedef {{text:string, icon?:string, onPress?:Function, display?:boolean}} Slot
+ * @typedef {{text:string, icon?:string, onPress?:Function, display?:boolean, classic?:string}} Slot
  */
 export class SystemForm {
   /**
-   * @param {"profile"|"list"} layout
+   * @param {"profile"|"list"|"vault"} layout
    * @param {string} title
    */
   constructor(layout, title) {
     this.layout = layout;
     this.title = title;
+    /** @type {string | import("@minecraft/server").RawMessage} */
     this.bodyText = "";
     /** @type {Slot[]} */
     this.slots = [];
@@ -33,14 +34,18 @@ export class SystemForm {
     this.list = [];
   }
 
+  /** @param {string | import("@minecraft/server").RawMessage} text */
   body(text) {
     this.bodyText = text;
     return this;
   }
 
-  /** Fixed-position element. */
-  slot(index, text, icon, onPress) {
-    this.slots[index] = { text, icon, onPress };
+  /**
+   * Fixed-position element.
+   * `classic` is the label used when Custom UI is off (defaults to `text`).
+   */
+  slot(index, text, icon, onPress, classic) {
+    this.slots[index] = { text, icon, onPress, classic };
     return this;
   }
 
@@ -84,11 +89,13 @@ export class SystemForm {
       // Classic fallback: display elements become body lines.
       const extra = this.slots.filter((s) => s?.display && s.text).map((s) => s.text);
       form.title(this.title);
-      form.body([...extra, "", this.bodyText].join("\n"));
+      const head = [...extra, ""].join("\n") + "\n";
+      form.body(typeof this.bodyText === "string" ? head + this.bodyText : { rawtext: [{ text: head }, this.bodyText] });
       for (const s of [...this.slots, ...this.list]) {
-        if (!s || s.display || !s.text) continue;
-        if (s.icon && s.icon !== BLANK && !s.icon.includes("/sl/ui/")) form.button(s.text, s.icon);
-        else form.button(s.text);
+        const text = s?.classic ?? s?.text;
+        if (!s || s.display || !text || !s.onPress) continue;
+        if (s.icon && s.icon !== BLANK && !s.icon.includes("/sl/ui/")) form.button(text, s.icon);
+        else form.button(text);
         map.push(s);
       }
     }
