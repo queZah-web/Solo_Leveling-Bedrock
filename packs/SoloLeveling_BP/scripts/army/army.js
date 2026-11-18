@@ -14,7 +14,7 @@ import { domainUntil } from "../state.js";
 import {
   creeperCharges, creeperPower, healValue,
   activeLimit, ARISE_ATTEMPTS, ARISE_MP, armyCapacity, CORPSE_SECONDS, entityIdOf, FEED_MP, GRADES,
-  canRankUp, levelCap, MOB_TO_TYPE, rankUpCost, reviveSeconds, SHADOW_MAX_LEVEL, SHADOW_TYPES, shadowAtkMult, shadowDefMult,
+  canRankUp, freePoints, levelCap, POINTS_PER_LEVEL, POINTS_PER_RANK, SHADOW_STATS, statOf, MOB_TO_TYPE, rankUpCost, reviveSeconds, SHADOW_MAX_LEVEL, SHADOW_TYPES, shadowAtkMult, shadowDefMult,
   shadowXpToNext, TRAIN_MP,
 } from "./types.js";
 
@@ -81,11 +81,50 @@ function register(player, s, e) {
   delete s.guard; // a (re)summoned shadow comes back to its owner
   applyMode(e, effectiveMode(player, s));
   applyOrder(e, s);
+  applyStats(e, s);
   try {
     e.dimension.spawnParticle("minecraft:soul_particle", { ...e.location, y: e.location.y + 1 });
     e.dimension.spawnParticle("minecraft:large_explosion", e.location);
   } catch {}
   return e;
+}
+
+// ---------------------------------------------------------------- stat points
+const LONG = 20000000;
+/** Puts the shadow's HP / SPD points on its entity (as lasting effects). */
+export function applyStats(e, s) {
+  try {
+    /** @type {[string, number][]} */
+    const want = [
+      ["health_boost", Math.floor(statOf(s, "hp") / 4) - 1], // +4 HP per 4 points
+      ["speed", Math.floor(statOf(s, "spd") / 10) - 1],
+    ];
+    for (const [id, amp] of want) {
+      const cur = e.getEffect(id);
+      if (amp < 0) {
+        if (cur) e.removeEffect(id);
+        continue;
+      }
+      if (cur?.amplifier === amp && cur.duration > 6000) continue;
+      if (cur) e.removeEffect(id);
+      e.addEffect(id, LONG, { amplifier: amp, showParticles: false });
+    }
+  } catch {}
+}
+
+/** Spends free points on a stat. Returns an error message or undefined. */
+export function allocate(player, sid, key, amount) {
+  const s = findRecord(player, sid);
+  const st = SHADOW_STATS[key];
+  if (!s || !st) return "Shadow not found.";
+  const n = Math.min(Math.floor(amount), freePoints(s), st.cap - statOf(s, key));
+  if (n <= 0) return statOf(s, key) >= st.cap ? `${st.label} is maxed (${st.cap}).` : "No free points.";
+  s.sp ??= {};
+  s.sp[key] = statOf(s, key) + n;
+  markDirty(player);
+  const e = entityOf(player, sid);
+  if (e) applyStats(e, s);
+  return undefined;
 }
 
 /** A brand new shadow entity (first summon, or a shadow without a save). */
@@ -333,7 +372,7 @@ function giveShadowXp(player, s, amount) {
   }
   if (s.level >= SHADOW_MAX_LEVEL) s.xp = 0;
   if (up) {
-    player.sendMessage(`§5[Shadow] §f${s.name} §7reached level §e${s.level}`);
+    player.sendMessage(`§5[Shadow] §f${s.name} §7reached level §e${s.level} §8| §a+${POINTS_PER_LEVEL} stat points §7(${freePoints(s)} free - profile: STATS)`);
     if (canRankUp(s)) {
       const g = GRADES[s.grade + 1];
       player.sendMessage(`§5[Shadow] §f${s.name} §dis ready to rank up to ${g.color}${g.name} §7[Rank ${g.rank}] §d- open its profile: RANK UP`);
@@ -392,6 +431,7 @@ export function rankUp(player, sid) {
   s.grade++;
   markDirty(player);
   const g = GRADES[s.grade];
+  player.sendMessage(`§5[Shadow] §f${s.name} §7gained §a+${POINTS_PER_RANK} stat points §7(${freePoints(s)} free)`);
   player.onScreenDisplay.setTitle(`${g.color}§lRANK UP`, { subtitle: `§f${s.name} §7is now ${g.color}${g.name} [Rank ${g.rank}]`, fadeInDuration: 5, stayDuration: 50, fadeOutDuration: 10 });
   player.playSound("random.levelup", { pitch: 0.5 });
   player.playSound("mob.wither.spawn", { volume: 0.3, pitch: 1.6 });
@@ -810,7 +850,11 @@ system.runInterval(() => {
           if (far) e.teleport(nearOwner(player), { dimension: player.dimension });
         }
         const h = e.getComponent("minecraft:health");
-        if (h && h.currentValue < h.effectiveMax) h.setCurrentValue(Math.min(h.effectiveMax, h.currentValue + h.effectiveMax * 0.02));
+        if (h && h.currentValue < h.effectiveMax) {
+          const rate = 0.02 + (rec ? statOf(rec, "regen") : 0) * 0.002;
+          h.setCurrentValue(Math.min(h.effectiveMax, h.currentValue + h.effectiveMax * rate));
+        }
+        if (rec) applyStats(e, rec);
         if (h) autoEat(player, sid, e, h);
         // Shadow aura: also shows where a shadow is in the dark.
         e.dimension.spawnParticle("minecraft:soul_particle", { x: e.location.x, y: e.location.y + 0.4, z: e.location.z });

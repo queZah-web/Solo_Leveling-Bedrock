@@ -7,7 +7,9 @@
 // Layout (along +x): start room, N monster rooms, boss room. Every room is
 // 15x15 inside, rooms are joined by corridors. The exit of a room is sealed
 // with barriers until its monsters are dead.
-import { BlockVolume, ItemStack, Player, system, world } from "@minecraft/server";
+import { BlockPermutation, BlockVolume, ItemStack, Player, system, world } from "@minecraft/server";
+import { boundsOf, design, doorsOf, fallenZ, hallHalf, layout, vaultBars } from "./architecture.js";
+import { fillChest } from "./loot.js";
 import { getData, markDirty } from "../data.js";
 import { addXp, flash } from "../stats.js";
 import { addGold } from "../economy.js";
@@ -15,26 +17,20 @@ import { addGold } from "../economy.js";
 const DUNGEON_GOLD = [60, 150, 350, 800, 1800, 4000];
 import { GATE_RANKS, MAX_DUNGEONS, RED_REWARD } from "./ranks.js";
 
-const ROOM = 24; // distance between room centers
-const HALF = 7; // room interior half-size
-const H = 7; // ceiling height
 const base = (slot) => ({ x: 80000 + slot * 600, y: 100, z: 80000 });
 const ow = () => world.getDimension("overworld");
 
 /**
  * @typedef {{gateId:string, slot:number, rank:number, red:boolean, members:Set<string>,
  *  state:"building"|"ready"|"cleared", next:number, fighting:number, bossId?:string, clearedAt?:number,
- *  rooms:number, startedAt:number}} Instance
+ *  rooms:number, startedAt:number, n:number}} Instance
  */
 /** @type {Map<string, Instance>} gateId -> instance */
 export const instances = new Map();
 const slotsInUse = () => new Set([...instances.values()].map((i) => i.slot));
 
 export const roomCount = (inst) => GATE_RANKS[inst.rank].rooms + 2; // start + monsters + boss
-const roomCenter = (inst, i) => {
-  const b = base(inst.slot);
-  return { x: b.x + i * ROOM, y: b.y, z: b.z };
-};
+const roomCenter = (inst, i) => layout(base(inst.slot), inst.n).halls[i];
 const tagAll = (inst) => `sl_dg${inst.slot}`;
 const tagRoom = (inst, i) => `sl_dg${inst.slot}_r${i}`;
 const areaName = (inst) => `sl_dungeon${inst.slot}`;
@@ -47,64 +43,13 @@ export function instanceOf(player) {
 }
 
 // ---------------------------------------------------------------- building
-function bounds(inst) {
-  const b = base(inst.slot);
-  const n = roomCount(inst);
-  return {
-    from: { x: b.x - HALF - 2, y: b.y - 2, z: b.z - HALF - 2 },
-    to: { x: b.x + (n - 1) * ROOM + HALF + 2, y: b.y + H + 1, z: b.z + HALF + 2 },
-  };
-}
-
-/** @returns {Generator<[number, number, number, string]>} absolute block placements */
-function* design(inst) {
-  const t = GATE_RANKS[inst.rank].theme;
-  const n = roomCount(inst);
-  for (let i = 0; i < n; i++) {
-    const c = roomCenter(inst, i);
-    for (let dx = -HALF - 1; dx <= HALF + 1; dx++) {
-      for (let dz = -HALF - 1; dz <= HALF + 1; dz++) {
-        const wall = Math.abs(dx) === HALF + 1 || Math.abs(dz) === HALF + 1;
-        const x = c.x + dx;
-        const z = c.z + dz;
-        // floor and ceiling
-        const ring = Math.max(Math.abs(dx), Math.abs(dz));
-        yield [x, c.y - 1, z, wall ? t.wall : ring % 4 === 0 ? t.accent : t.floor];
-        const lamp = !wall && Math.abs(dx) % 5 === 0 && Math.abs(dz) % 5 === 0 && dx !== 0;
-        yield [x, c.y + H, z, lamp ? t.light : t.wall];
-        if (!wall) continue;
-        // walls, with openings toward the corridors (x = +-8, |dz| <= 1, y 0..3)
-        for (let y = 0; y < H; y++) {
-          const opening = Math.abs(dz) <= 1 && y <= 3 && ((dx === HALF + 1 && i < n - 1) || (dx === -HALF - 1 && i > 0));
-          if (opening) {
-            // The exit of a monster room starts sealed.
-            if (dx === HALF + 1 && i >= 1) yield [x, c.y + y, z, "minecraft:barrier"];
-            continue;
-          }
-          yield [x, c.y + y, z, y === 3 ? t.accent : t.wall];
-        }
-      }
-    }
-    // corridor to the next room
-    if (i < n - 1) {
-      for (let dx = HALF + 2; dx <= ROOM - HALF - 2; dx++) {
-        for (let dz = -2; dz <= 2; dz++) {
-          const x = c.x + dx;
-          const z = c.z + dz;
-          yield [x, c.y - 1, z, t.floor];
-          yield [x, c.y + 4, z, dz === 0 && dx % 3 === 0 ? t.light : t.wall];
-          if (Math.abs(dz) === 2) for (let y = 0; y <= 3; y++) yield [x, c.y + y, z, t.wall];
-        }
-      }
-    }
-  }
-}
+const bounds = (inst) => boundsOf(base(inst.slot), inst.n);
 
 function* clearJob(inst, done) {
   const { from, to } = bounds(inst);
-  for (let x = from.x; x <= to.x; x += 30) {
+  for (let x = from.x; x <= to.x; x += 20) {
     try {
-      ow().fillBlocks(new BlockVolume({ x, y: from.y, z: from.z }, { x: Math.min(x + 29, to.x), y: to.y, z: to.z }), "minecraft:air");
+      ow().fillBlocks(new BlockVolume({ x, y: from.y, z: from.z }, { x: Math.min(x + 19, to.x), y: to.y, z: to.z }), "minecraft:air");
     } catch (e) {
       console.warn(`[SL] dungeon clear: ${e}`);
     }
@@ -122,11 +67,28 @@ function* buildJob(inst, resolve) {
   }
   let n = 0;
   const dim = ow();
-  for (const [x, y, z, id] of design(inst)) {
+  const chests = [];
+  const perms = new Map();
+  for (const [x, y, z, b] of design(inst, base(inst.slot), chests)) {
     try {
-      dim.getBlock({ x, y, z })?.setType(id);
+      const block = dim.getBlock({ x, y, z });
+      if (typeof b === "string") block?.setType(b);
+      else {
+        const key = b.id + JSON.stringify(b.states);
+        if (!perms.has(key)) perms.set(key, BlockPermutation.resolve(b.id, b.states));
+        block?.setPermutation(perms.get(key));
+      }
     } catch {}
-    if (++n % 250 === 0) yield;
+    if (++n % 300 === 0) yield;
+  }
+  // Loot chests (treasure rooms and the boss vault)
+  for (const c of chests) {
+    try {
+      const block = dim.getBlock(c);
+      block?.setType("minecraft:chest");
+      fillChest(dim.getBlock(c), inst.rank, c.kind);
+    } catch {}
+    yield;
   }
   inst.state = "ready";
   spawnExit(inst, roomCenter(inst, 0), inst.red);
@@ -152,7 +114,7 @@ function areaLoaded(inst) {
 function spawnExit(inst, center, hidden) {
   if (hidden) return;
   try {
-    const e = ow().spawnEntity("sl:gate", { x: center.x - 5 + 0.5, y: center.y, z: center.z + 0.5 });
+    const e = ow().spawnEntity("sl:gate", { x: center.x - 7 + 0.5, y: center.y, z: center.z + 0.5 });
     e.triggerEvent("sl:small"); // fits inside a room
     e.nameTag = "§b[ EXIT ]";
     e.addTag("sl_exit");
@@ -179,6 +141,7 @@ export function enterDungeon(player, gate) {
     }
     if (slot < 0) return "All dungeon spaces are busy. Try again soon.";
     inst = {
+      n: GATE_RANKS[gate.rank].rooms + 2,
       gateId: gate.id, slot, rank: gate.rank, red: gate.red, members: new Set(), state: "building",
       next: 1, fighting: -1, rooms: GATE_RANKS[gate.rank].rooms, startedAt: Date.now(),
     };
@@ -287,7 +250,11 @@ function spawnRoom(inst, i) {
   const boss = i === roomCount(inst) - 1;
   const count = Math.min(14, 3 + inst.rank + (inst.members.size - 1) * 2) - (boss ? 2 : 0);
   for (let k = 0; k < count; k++) {
-    const pos = { x: c.x + 0.5 + (Math.random() * 10 - 3), y: c.y + 0.1, z: c.z + 0.5 + (Math.random() * 12 - 6) };
+    let px = Math.random() * 16 - 8;
+    let pz = Math.random() * 16 - 8;
+    if (Math.abs(Math.abs(px) - 6) < 1.2 && Math.abs(Math.abs(pz) - 6) < 1.2) px *= 0.6; // not inside a pillar
+    if (!boss && fallenZ(i) && Math.abs(pz - fallenZ(i)) < 2.2 && px > -7 && px < 4) pz -= Math.sign(fallenZ(i)) * 3; // not in the fallen column
+    const pos = { x: c.x + 0.5 + px, y: c.y + 0.1, z: c.z + 0.5 + pz };
     try {
       const m = ow().spawnEntity(r.mobs[Math.floor(Math.random() * r.mobs.length)], pos);
       m.addTag(tagAll(inst));
@@ -297,7 +264,7 @@ function spawnRoom(inst, i) {
   }
   if (boss) {
     try {
-      const b = ow().spawnEntity(r.boss.id, { x: c.x + 3.5, y: c.y + 0.1, z: c.z + 0.5 });
+      const b = ow().spawnEntity(r.boss.id, { x: c.x + 5.5, y: c.y + 0.1, z: c.z + 0.5 });
       b.nameTag = `§c[BOSS] ${r.boss.name}`;
       b.addTag(tagAll(inst));
       b.addTag(tagRoom(inst, i));
@@ -318,10 +285,12 @@ function spawnRoom(inst, i) {
 }
 
 function openDoor(inst, i) {
-  const c = roomCenter(inst, i);
-  try {
-    ow().fillBlocks(new BlockVolume({ x: c.x + HALF + 1, y: c.y, z: c.z - 1 }, { x: c.x + HALF + 1, y: c.y + 3, z: c.z + 1 }), "minecraft:air");
-  } catch {}
+  const dim = ow();
+  for (const p of doorsOf(inst, base(inst.slot), i)) {
+    try {
+      dim.getBlock(p)?.setType("minecraft:air");
+    } catch {}
+  }
 }
 
 function forMembers(inst, fn) {
@@ -356,12 +325,20 @@ function clearDungeon(inst) {
     p.sendMessage("§b[System] §7The gate will close in 60 seconds. Use the §bEXIT §7gate or the QUESTS tab to leave.");
     p.playSound("random.levelup", { pitch: 0.8 });
   });
+  // Open the boss vault and the exit.
+  for (const p of vaultBars(inst, base(inst.slot))) {
+    try {
+      ow().getBlock(p)?.setType("minecraft:air");
+    } catch {}
+  }
+  forMembers(inst, (p) => p.sendMessage("§6[System] §fThe treasure vault beside the throne is open!"));
   spawnExit(inst, roomCenter(inst, roomCount(inst) - 1), false);
 }
 
 const inRoom = (inst, i, l) => {
   const c = roomCenter(inst, i);
-  return Math.abs(l.x - (c.x + 0.5)) <= HALF + 0.5 && Math.abs(l.z - (c.z + 0.5)) <= HALF + 0.5 && Math.abs(l.y - c.y) < 6;
+  const R = hallHalf(inst, i);
+  return Math.abs(l.x - (c.x + 0.5)) <= R + 0.5 && Math.abs(l.z - (c.z + 0.5)) <= R + 0.5 && Math.abs(l.y - c.y) < 8;
 };
 const inDungeon = (inst, l) => {
   const { from, to } = bounds(inst);

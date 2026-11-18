@@ -3,11 +3,11 @@
 import { ItemLockMode, ItemStack } from "@minecraft/server";
 import { ActionFormData, ModalFormData } from "@minecraft/server-ui";
 import {
-  dismiss, entityOf, feed, findRecord, rankUp, rankUpStatus, regenLeft, release, rename, saveActive, setOrder, summon, train,
+  allocate, dismiss, entityOf, feed, findRecord, rankUp, rankUpStatus, regenLeft, release, rename, saveActive, setOrder, summon, train,
 } from "../army/army.js";
 import { canWearGear, gearInfo, GEAR_SLOTS, isPlain, setGear, updateCombatMode } from "../army/gear.js";
 import {
-  canRankUp, creeperCharges, DIETS, FEED_MP, FOOD_MAX, GRADES, healValue, levelCap, portraitOf, SHADOW_MAX_LEVEL, SHADOW_TYPES, shadowAtkMult, shadowDefMult, shadowXpToNext, TRAIN_MP,
+  canRankUp, creeperCharges, freePoints, SHADOW_STATS, STAT_KEYS, statOf, DIETS, FEED_MP, FOOD_MAX, GRADES, healValue, levelCap, portraitOf, SHADOW_MAX_LEVEL, SHADOW_TYPES, shadowAtkMult, shadowDefMult, shadowXpToNext, TRAIN_MP,
 } from "../army/types.js";
 import { markDirty } from "../data.js";
 import { iconOf, prettyId } from "../vault/items.js";
@@ -54,7 +54,8 @@ export async function shadowScreen(player) {
     [
       `§7${def.label}`,
       `${g.color}${g.name} §8| §7Lv §f${s.level}§8/${levelCap(s)} §8| §7Kills §f${s.kills}`,
-      `§7ATK §cx${shadowAtkMult(s).toFixed(2)} §7DEF §a${Math.round((1 - shadowDefMult(s)) * 100)}%%`,
+      `§7ATK §cx${shadowAtkMult(s).toFixed(2)} §7DEF §a${Math.round((1 - shadowDefMult(s)) * 100)}%% §8| ${freePoints(s) ? `§a${freePoints(s)} free points` : "§8no free points"}`,
+      STAT_KEYS.map((k) => `${SHADOW_STATS[k].color}${SHADOW_STATS[k].label} §f${statOf(s, k)}`).join(" §8| "),
       `§7${status} §8| §9${g.cost} MP`,
       `§5${def.skill}§7: ${def.skillDesc}`,
       `§7Eats: §f${DIETS[s.type].hint}`,
@@ -90,14 +91,38 @@ export async function shadowScreen(player) {
   }, food && e ? "Feed selected food" : `Feed (${FEED_MP} MP)`);
   form.slot(18, `TRAIN §9${TRAIN_MP}`, BLANK, () => (report(train(player, s.id), `§e${s.name} trained`), again()), `Train (${TRAIN_MP} MP)`);
   form.slot(7, "< ARMY", BLANK, () => "shadows", "« Back to Army");
-  form.slot(30, "RENAME", BLANK, async () => {
+  // STATS: spend the shadow's level points (and rename it)
+  const free = freePoints(s);
+  form.slot(30, free ? `§aSTATS +${free}` : "STATS", BLANK, async () => {
     const res = await showForm(
       player,
-      new ModalFormData().title("Rename Shadow").textField("New name", s.name, { defaultValue: s.name }).submitButton("Rename"),
+      new ModalFormData()
+        .title(`${s.name} - Stats`)
+        .dropdown(
+          `§7Free points: §a${free} §8(+3 per level, +5 per rank up)\n\n§fStat`,
+          STAT_KEYS.map((k) => {
+            const x = SHADOW_STATS[k];
+            return `${x.label} (${statOf(s, k)}/${x.cap}) - ${x.per}`;
+          }),
+        )
+        .slider("Points", 0, Math.max(1, free), { defaultValue: free, valueStep: 1 })
+        .textField("Name", s.name, { defaultValue: s.name })
+        .submitButton("Apply"),
     );
-    if (res && !res.canceled && typeof res.formValues?.[0] === "string") rename(player, s.id, res.formValues[0]);
+    if (!res || res.canceled || !res.formValues) return again();
+    const [statIdx, amount, name] = res.formValues;
+    if (typeof name === "string" && name.trim() && name !== s.name) rename(player, s.id, name);
+    const key = STAT_KEYS[Number(statIdx)];
+    if (key && Number(amount) > 0) {
+      const err = allocate(player, s.id, key, Math.min(free, Number(amount)));
+      if (err) toast(`§c${err}`);
+      else {
+        toast(`§a${s.name}: ${SHADOW_STATS[key].label} +${Math.min(free, Number(amount))}`);
+        player.playSound("random.orb", { pitch: 1.2 });
+      }
+    }
     return again();
-  });
+  }, "Stats & name");
   form.slot(31, st.confirm ? "CONFIRM?" : "RELEASE", BLANK, () => {
     if (!st.confirm) {
       st.confirm = true;

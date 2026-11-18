@@ -72,10 +72,30 @@ export const portraitOf = (type) => `textures/sl/shadows/${type}`;
 // ---------------------------------------------------------------- progression
 export const SHADOW_MAX_LEVEL = 100;
 export const shadowXpToNext = (level) => Math.floor(40 * Math.pow(level, 1.4));
+// ---------------------------------------------------------------- stat points
+// Shadows earn points like the player: +3 per level, +5 per rank up. The
+// owner spends them on the shadow's own stats. Earned points are derived
+// from level and grade, so existing shadows get theirs automatically.
+export const POINTS_PER_LEVEL = 3;
+export const POINTS_PER_RANK = 5;
+/** key -> label, color, cap (max points), effect text per point */
+export const SHADOW_STATS = {
+  hp: { label: "HP", color: "§c", cap: 80, per: "+1 max HP" },
+  atk: { label: "ATK", color: "§6", cap: 75, per: "+2%% damage" },
+  def: { label: "DEF", color: "§a", cap: 75, per: "-~2%% damage taken" },
+  spd: { label: "SPD", color: "§b", cap: 30, per: "Speed I/II/III at 10/20/30" },
+  regen: { label: "REGEN", color: "§d", cap: 50, per: "+0.2%% HP regen / 2s" },
+};
+export const STAT_KEYS = Object.keys(SHADOW_STATS);
+export const statOf = (s, k) => s.sp?.[k] ?? 0;
+export const pointsEarned = (s) => (s.level - 1) * POINTS_PER_LEVEL + Math.max(0, s.grade - (s.base ?? s.grade)) * POINTS_PER_RANK;
+export const pointsSpent = (s) => STAT_KEYS.reduce((n, k) => n + statOf(s, k), 0);
+export const freePoints = (s) => Math.max(0, pointsEarned(s) - pointsSpent(s));
+
 /** Damage dealt multiplier. */
-export const shadowAtkMult = (s) => 1 + (s.level - 1) * 0.05 + s.grade * 0.15;
+export const shadowAtkMult = (s) => 1 + (s.level - 1) * 0.05 + s.grade * 0.15 + statOf(s, "atk") * 0.02;
 /** Damage taken multiplier (lower = tougher). */
-export const shadowDefMult = (s) => 1 / (1 + (s.level - 1) * 0.04 + s.grade * 0.12);
+export const shadowDefMult = (s) => 1 / (1 + (s.level - 1) * 0.04 + s.grade * 0.12 + statOf(s, "def") * 0.02);
 // ---------------------------------------------------------------- rank-up (breakthrough)
 /**
  * A shadow stops leveling at (grade + 1) * 10 until it is ranked up with

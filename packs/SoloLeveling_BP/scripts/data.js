@@ -12,7 +12,7 @@ import { BASE_STAT, DATA_KEY, DATA_VERSION, maxMp } from "./config.js";
 /** @typedef {{id:string, type:string, name:string, grade:number, base:number,
  *  level:number, xp:number, kills:number, deadUntil:number, ptr?:string, gear?:Record<string,string>,
  *  food?:{id:string, count:number}, totem?:number, mode?:string, targets?:string[],
- *  guard?:{x:number, y:number, z:number, dim:string}}} ShadowRecord */
+ *  guard?:{x:number, y:number, z:number, dim:string}, sp?:Record<string, number>}} ShadowRecord */
 
 /** @returns {HunterData} */
 export function defaultData() {

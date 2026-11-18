@@ -191,6 +191,25 @@
 - **Dungeon Break**: البوابة اللي ما أحد يخلصها خلال 60 دقيقة تنفجر وتطلع منها الوحوش.
 - الدانجن **ما ينكسر**، وينمسح لما يطلع آخر لاعب منه.
 
+### 🏰 شكل الدانجن (v0.7.5)
+- **قاعات ضخمة** (21×21، وقاعة الزعيم 27×27) فيها أرضية شطرنج وأعمدة بتيجان وفوانيس معلّقة وسجادة من باب لباب وإضاءة بالسقف والجدران.
+- **خضرة**: Moss وAzalea بأحواض بين الأعمدة، وأوراق نازلة من أعلى الجدران وحول الأعمدة، وطحلب منتشر على الأرض والممرات (بالـ Nether: Warped).
+- **تفرعات**: كل قاعة وحوش فيها ممر جانبي (شمال/جنوب بالتناوب) يوصل لـ **غرفة كنز** فيها 3 صناديق. بابها ينفتح لما تخلص القاعة.
+- **عوائق**: حفر Lava بالممرات (من رتبة D)، وأعمدة طايحة وأنقاض بالقاعات، وشباك عنكبوت.
+- **تماثيل** فرسان بمدخل الدانجن وعلى جانبي قاعة الزعيم، و**عرش** الزعيم وجنبه **خزنتين ذهب** (صناديق الزعيم) ينفتح قفصها لما يموت الزعيم.
+- كل رتبة لها **طابع**: E حجر، D رمل، C ثلج، B Nether، A Deepslate، S Obsidian/Purpur.
+
+| الرتبة | سلاح/دروع/أدوات بالصناديق | موارد |
+|---|---|---|
+| E | Stone / Chainmail، سحر قليل | Iron، Bread، Arrows، Healing Elixir |
+| D | Iron | Gold، Golden Apple، Mana Potion |
+| C | Iron بسحر أقوى | Diamond، Emerald، Mana Crystal |
+| B | Diamond | Diamond، Ender Pearl، Netherite Scrap |
+| A | Diamond بسحر عالي | Totem، Enchanted Golden Apple، Random Box |
+| S | Netherite | Netherite Ingot، Elixir of Life |
+
+صناديق الزعيم فيها 3 قطع عتاد + موارد، ومن رتبة C ممكن تطلع أسلحة Solo Leveling (Kasaka's Fang، Knight Killer، Baruka's Dagger، Demon King's Dagger).
+
 ## المرحلة 6 — الوحوش والأسلحة والمتجر
 
 ### 👹 وحوش جديدة
@@ -246,6 +265,18 @@ Healing Elixir, Mana Potion, Fatigue Recovery Potion, Elixir of Life, Random Box
 | Mana Potion | Glass Bottle + Lapis + Mana Crystal |
 | Fatigue Potion | Glass Bottle + Sugar + Frost Essence |
 | Elixir of Life | Glass Bottle + Golden Apple + 2 Mana Crystal + Demon Horn |
+
+### 🧬 نقاط الظلال (STATS)
+- كل ظل ياخذ **+3 نقاط بكل مستوى** و **+5 نقاط بكل RANK UP** (الظلال القديمة تاخذ نقاطها تلقائياً).
+- من Shadow Profile ← **STATS** توزّع النقاط (وتقدر تغيّر الاسم من نفس النافذة):
+
+| الإحصائية | لكل نقطة | الحد |
+|---|---|---|
+| HP | +1 صحة (كل 4 نقاط = +4) | 80 |
+| ATK | +2% ضرر | 75 |
+| DEF | تقليل ~2% من الضرر | 75 |
+| SPD | Speed I / II / III عند 10 / 20 / 30 | 30 |
+| REGEN | +0.2% تجديد صحة كل ثانيتين | 50 |
 
 ### 📈 رتب الظلال (RANK UP)
 - الظل **يوقف عند كل 10 مستويات** لين ترقّيه من Shadow Profile ← **RANK UP**:
@@ -310,11 +341,11 @@ Healing Elixir, Mana Potion, Fatigue Recovery Potion, Elixir of Life, Random Box
 
 `world_behavior_packs.json`
 ```json
-[ { "pack_id": "c63f3ea1-b815-4c86-8d08-fa4f1f13d4e2", "version": [0, 7, 4] } ]
+[ { "pack_id": "c63f3ea1-b815-4c86-8d08-fa4f1f13d4e2", "version": [0, 7, 5] } ]
 ```
 `world_resource_packs.json`
 ```json
-[ { "pack_id": "74a1ff86-af96-45c3-8ccf-94d3550211ba", "version": [0, 7, 4] } ]
+[ { "pack_id": "74a1ff86-af96-45c3-8ccf-94d3550211ba", "version": [0, 7, 5] } ]
 ```
 4. في `server.properties` خلّ:
 ```
