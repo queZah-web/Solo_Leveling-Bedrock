@@ -20,8 +20,14 @@ const inZone = (l, dim) =>
   (dim === undefined || dim === "minecraft:overworld") &&
   Math.abs(l.x - C.x) <= OUTER + 1 && Math.abs(l.z - C.z) <= OUTER + 1 && l.y >= C.y - 4 && l.y <= C.y + TOP + 2;
 
-/** "idle" | "building" | "ready" */
-let zoneState = world.getDynamicProperty("sl:zone_built") === true ? "ready" : "idle";
+/** "idle" | "building" | "ready". Read from the world on the first tick:
+ * world data can't be read while scripts are still loading. */
+let zoneState = "idle";
+system.run(() => {
+  try {
+    if (world.getDynamicProperty("sl:zone_built") === true && zoneState === "idle") zoneState = "ready";
+  } catch {}
+});
 let buildPromise;
 
 // ---------------------------------------------------------------- building

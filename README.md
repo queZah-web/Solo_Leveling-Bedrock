@@ -166,11 +166,11 @@
 
 `world_behavior_packs.json`
 ```json
-[ { "pack_id": "c63f3ea1-b815-4c86-8d08-fa4f1f13d4e2", "version": [0, 4, 2] } ]
+[ { "pack_id": "c63f3ea1-b815-4c86-8d08-fa4f1f13d4e2", "version": [0, 4, 3] } ]
 ```
 `world_resource_packs.json`
 ```json
-[ { "pack_id": "74a1ff86-af96-45c3-8ccf-94d3550211ba", "version": [0, 4, 2] } ]
+[ { "pack_id": "74a1ff86-af96-45c3-8ccf-94d3550211ba", "version": [0, 4, 3] } ]
 ```
 4. في `server.properties` خلّ:
 ```

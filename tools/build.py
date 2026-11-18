@@ -36,6 +36,7 @@ def add_pack(zf, pack, prefix):
 
 
 def main():
+    run("check_early.py")
     run("gen_textures.py")
     run("gen_ui.py")
     run("gen_skill_icons.py")
