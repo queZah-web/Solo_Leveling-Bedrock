@@ -20,7 +20,7 @@ export function barTex(kind, cur, max) {
  */
 export class SystemForm {
   /**
-   * @param {"profile"|"list"|"vault"} layout
+   * @param {"profile"|"list"|"vault"|"army"} layout
    * @param {string} title
    */
   constructor(layout, title) {
@@ -32,6 +32,8 @@ export class SystemForm {
     this.slots = [];
     /** @type {Slot[]} */
     this.list = [];
+    /** Screen to reopen when a non-button element is pressed (set by frame()). */
+    this.screenId = undefined;
   }
 
   /** @param {string | import("@minecraft/server").RawMessage} text */
@@ -103,7 +105,8 @@ export class SystemForm {
     const res = await showForm(player, form);
     if (!res || res.canceled || res.selection === undefined) return undefined;
     const picked = map[res.selection];
-    return picked?.onPress ? await picked.onPress() : undefined;
+    // Pressing a display-only element just refreshes the current screen.
+    return picked?.onPress ? await picked.onPress() : this.screenId;
   }
 }
 

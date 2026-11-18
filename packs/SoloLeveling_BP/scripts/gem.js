@@ -2,6 +2,7 @@
 // dropped, stored in chests, or lost on death.
 import { ItemLockMode, ItemStack, system, world } from "@minecraft/server";
 import { GEM_ID } from "./config.js";
+import { arise, corpsesNear } from "./army/army.js";
 import { openSystem } from "./ui/screens.js";
 
 function makeGem() {
@@ -41,7 +42,10 @@ export function ensureGem(player) {
 }
 
 world.afterEvents.itemUse.subscribe(({ source, itemStack }) => {
-  if (itemStack?.typeId === GEM_ID) openSystem(source);
+  if (itemStack?.typeId !== GEM_ID) return;
+  // Sneak + use near a fresh kill = ARISE. Otherwise open the System.
+  if (source.isSneaking && corpsesNear(source).length > 0) arise(source);
+  else openSystem(source);
 });
 
 world.afterEvents.playerSpawn.subscribe(({ player, initialSpawn }) => {

@@ -6,6 +6,7 @@ import {
 import { BASE_STAT, maxMp, STATS } from "./config.js";
 import { getData, markDirty, resetData } from "./data.js";
 import { addXp, applyStatEffects, setLevel } from "./stats.js";
+import { arise } from "./army/army.js";
 import { openSystem } from "./ui/screens.js";
 
 const ok = (message) => ({ status: CustomCommandStatus.Success, message });
@@ -30,6 +31,21 @@ system.beforeEvents.startup.subscribe(({ customCommandRegistry: reg }) => {
       const p = origin.sourceEntity ?? origin.initiator;
       if (!(p instanceof Player)) return fail("Only players can open the System.");
       system.run(() => openSystem(p));
+      return ok();
+    },
+  );
+
+  reg.registerCommand(
+    {
+      name: "sl:arise",
+      description: "Extract a shadow from a nearby fallen enemy",
+      permissionLevel: CommandPermissionLevel.Any,
+      cheatsRequired: false,
+    },
+    (origin) => {
+      const p = origin.sourceEntity ?? origin.initiator;
+      if (!(p instanceof Player)) return fail("Only players can use ARISE.");
+      system.run(() => arise(p));
       return ok();
     },
   );

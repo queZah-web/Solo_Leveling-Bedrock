@@ -127,6 +127,13 @@ export function flash(player, msg, ticks = 40) {
   } catch {}
 }
 
+/** @type {((ev: import("@minecraft/server").EntityHurtBeforeEvent) => void)[]} */
+const damageHooks = [];
+/** Lets other modules (shadow army) adjust damage in the same before-event. */
+export function addDamageHook(fn) {
+  damageHooks.push(fn);
+}
+
 world.beforeEvents.entityHurt.subscribe((ev) => {
   const src = ev.damageSource;
   const attacker = src.damagingEntity;
@@ -154,6 +161,11 @@ world.beforeEvents.entityHurt.subscribe((ev) => {
     dmg *= 1 - vitReduction(getData(victim).vit);
   }
   ev.damage = dmg;
+  for (const hook of damageHooks) {
+    try {
+      hook(ev);
+    } catch {}
+  }
 });
 
 world.afterEvents.entityHurt.subscribe(({ damageSource, hurtEntity }) => {
@@ -170,7 +182,8 @@ world.afterEvents.entityHurt.subscribe(({ damageSource, hurtEntity }) => {
 });
 
 // ---------------------------------------------------------------- XP from kills
-function xpFor(entity) {
+/** System XP for killing an entity. */
+export function xpFor(entity) {
   if (entity.typeId in XP_OVERRIDES) return XP_OVERRIDES[entity.typeId];
   let maxHp = 10;
   try {

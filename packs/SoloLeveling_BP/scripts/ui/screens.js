@@ -9,6 +9,7 @@ import { getData, markDirty } from "../data.js";
 import { allocate, getHealth, rankOf } from "../stats.js";
 import { barTex, BLANK, showForm, SystemForm, TEX } from "./form.js";
 import { frame } from "./frame.js";
+import { armyScreen } from "./army_screen.js";
 import { endVault, vaultScreen } from "./vault_screen.js";
 
 // ---------------------------------------------------------------- STATUS
@@ -122,10 +123,7 @@ async function settingsScreen(player) {
 const SCREENS = {
   profile: profileScreen,
   inventory: vaultScreen,
-  shadows: lockedScreen("shadows", "SHADOW ARMY", 3, [
-    "§5Shadow Extraction §7- ARISE.",
-    "§7Extract shadows from defeated monsters and command your army.",
-  ]),
+  shadows: armyScreen,
   quests: lockedScreen("quests", "QUESTS", 4, [
     "§eDaily Quest: Preparation to Become Powerful",
     "§7Push-ups, sit-ups, squats and running.",

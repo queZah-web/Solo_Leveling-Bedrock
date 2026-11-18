@@ -9,7 +9,7 @@
 |---|---|---|
 | 1 | النظام: مستويات، XP، إحصائيات، HP/MP/Fatigue، نافذة النظام المخصصة، جوهرة النظام، `/system` | ✅ |
 | 2 | System Inventory + Shadow Vault | ✅ |
-| 3 | جيش الظلال (ARISE) وإدارة الجيش | ⏳ |
+| 3 | جيش الظلال (ARISE) وإدارة الجيش | ✅ |
 | 4 | المهارات + المهام اليومية + منطقة العقوبة | ⏳ |
 | 5 | البوابات والدانجن والزعماء | ⏳ |
 | 6 | الوحوش والأسلحة والمتجر | ⏳ |
@@ -43,12 +43,35 @@
 - جوهرة النظام وأي غرض مقفول ما ينحط في الخزنة.
 - **طريقة الحفظ**: الأغراض تنحفظ كـ structure داخل ملف العالم (`slvault:*`)، وفيه نسختين بالتبادل عشان لو فشل حفظ ما تضيع النسخة السليمة. **لا تحذف structures اللي تبدأ بـ `slvault:`**.
 
+## المرحلة 3 — جيش الظلال (تبويب SHADOWS)
+
+- **ARISE**: اقتل وحش، وخلال 20 ثانية **اضغط Sneak واستخدم جوهرة النظام** جنب الجثة، أو اكتب `/arise`، أو اضغط زر ARISE في القائمة.
+  - كل محاولة تكلف 10 MP، وعندك 3 محاولات لكل جثة.
+  - نسبة النجاح تعتمد على رتبة الوحش، و INT، والمستوى.
+- **13 نوع ظل**: Zombie, Husk, Drowned, Skeleton, Stray, Spider, Wolf, Wither Skeleton, Enderman, Vindicator, Iron Golem, Ravager, Warden.
+  - كل نوع له مهارة خاصة: سم، تجميد، Wither، إطلاق للهواء، وغيرها.
+- **ظلال بأسماء**: أول استخراج من Wither Skeleton يطلع لك **Igris**، ومن Iron Golem يطلع **Iron**، ومن Ravager يطلع **Tank**، ومن Warden يطلع **Beru**.
+- **الرتب**: Normal ← Elite ← Knight ← Elite Knight ← Commander ← Marshal ← Grand Marshal. الظل يترقّى كل 20 مستوى.
+- **الظلال تقاتل معك**: تتبعك، وتحميك، وتهاجم الوحوش، وتلحقك لو ابتعدت أو انتقلت لبُعد ثاني. لما تقتل وحش، الظل ياخذ XP وأنت تاخذ 50%.
+- **لما يموت الظل** يرجع لظلك ويتجدد بعد 30 ثانية أو أكثر حسب رتبته.
+- **الأزرار**: SUMMON / DISMISS / FEED (يعالج أو يحيي الظل فورًا) / TRAIN (XP للظل) / RENAME / RELEASE / SUMMON ALL / CALL / DISMISS ALL.
+- **الحدود**:
+  - حجم الجيش: 5 + نص مستواك (أقصى شي 100).
+  - عدد الظلال النشطة: يزيد مع المستوى و INT (أقصى شي 30، عشان أداء السيرفر).
+- لو السيرفر أعاد التشغيل، الظلال ترجع لجيشك تلقائيًا وتقدر تستدعيها من جديد.
+
 ### أوامر الأدمن (للـ OP فقط)
 ```
 /sl:setlevel <level> [player]
 /sl:addxp <amount> [player]
 /sl:resetstats [player]
 /sl:resetplayer [player]
+```
+
+### أوامر اللاعبين
+```
+/system   - نافذة النظام
+/arise    - استخراج ظل من وحش ميت قريب
 ```
 
 ## التثبيت على سيرفر استضافة (BDS)
@@ -61,11 +84,11 @@
 
 `world_behavior_packs.json`
 ```json
-[ { "pack_id": "c63f3ea1-b815-4c86-8d08-fa4f1f13d4e2", "version": [0, 2, 3] } ]
+[ { "pack_id": "c63f3ea1-b815-4c86-8d08-fa4f1f13d4e2", "version": [0, 3, 0] } ]
 ```
 `world_resource_packs.json`
 ```json
-[ { "pack_id": "74a1ff86-af96-45c3-8ccf-94d3550211ba", "version": [0, 2, 3] } ]
+[ { "pack_id": "74a1ff86-af96-45c3-8ccf-94d3550211ba", "version": [0, 3, 0] } ]
 ```
 4. في `server.properties` خلّ:
 ```
@@ -82,5 +105,6 @@ python3 tools/build.py     # يولّد التكستشرات والواجهة و
 ```
 - `tools/gen_textures.py`: كل تكستشرات الواجهة والجوهرة
 - `tools/gen_ui.py`: ملفات JSON UI (الواجهة المخصصة)
+- `tools/gen_shadows.py` / `tools/gen_shadow_art.py`: كيانات الظلال وصورها
 - `tools/gen_icons.py`: خريطة أيقونات الأغراض (من Mojang/bedrock-samples و @minecraft/vanilla-data)
 - `packs/SoloLeveling_BP/scripts/`: منطق اللعبة (Script API `@minecraft/server` 2.10.0)

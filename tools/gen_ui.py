@@ -24,7 +24,7 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 UI_DIR = os.path.join(ROOT, "packs", "SoloLeveling_RP", "ui")
 T = "textures/sl/ui/"
 
-LAYOUTS = ["sl:profile|", "sl:list|", "sl:vault|"]
+LAYOUTS = ["sl:profile|", "sl:list|", "sl:vault|", "sl:army|"]
 # The form factory gives long_form no size, so percentages at the top level
 # resolve to 0. The window therefore uses a fixed size that fits phones.
 SCREEN_SIZE = [392, 206]
@@ -456,6 +456,81 @@ def vault_content():
     }
 
 
+# ---------------------------------------------------------------- army layout
+# sl:army| indices:
+#   7 army header   9 selected title   10 prev 11 page 12 next
+#   13 summon all 14 call 15 dismiss all   16 summon/dismiss 17 feed 18 train
+#   19 portrait   20..27 cards (4 x 2)   28 hp bar 29 xp bar
+#   30 rename 31 release 32 arise
+CARD = 48
+
+
+def army_card(idx):
+    sel_vis = {"binding_type": "view", "source_property_name": contains("#form_button_text", "*"), "target_property_name": "#visible"}
+    return slot(idx, [CARD, CARD], [
+        {"btn": button("slot", "slot_hover", "slot_sel")},
+        {"sel": {"type": "image", "texture": T + "slot_sel", "size": ["100%", "100%"], "layer": 2,
+                 "bindings": [btn_text_binding(), sel_vis]}},
+        {"portrait": bound_image(size=[26, 26], layer=3, anchor_from="top_middle", anchor_to="top_middle", offset=[0, 3])},
+        {"txt": {
+            **label("#sl_card", WHITE, layer=4, font_scale_factor=0.55,
+                    anchor_from="bottom_middle", anchor_to="bottom_middle", offset=[0, -1], text_alignment="center"),
+            "bindings": [
+                btn_text_binding(),
+                {"binding_type": "view", "source_property_name": "(#form_button_text - '*')", "target_property_name": "#sl_card"},
+            ],
+        }},
+    ])
+
+
+def army_content():
+    rows = []
+    for r in range(2):
+        cards = [{f"c{20 + r * 4 + c}": army_card(20 + r * 4 + c)} for c in range(4)]
+        rows.append({f"r{r}": {"type": "stack_panel", "orientation": "horizontal", "size": [CARD * 4, CARD], "controls": cards}})
+    left = {
+        "type": "stack_panel",
+        "orientation": "vertical",
+        "size": [CARD * 4, "100%"],
+        "controls": [
+            {"head": plain_label(7, ["100%", 12], WHITE, 0.8, "left")},
+            {"g1": gap("100%", 2)},
+            {"cards": {"type": "stack_panel", "orientation": "vertical", "size": [CARD * 4, CARD * 2], "controls": rows}},
+            {"g2": gap("100%", 2)},
+            row("pager", [{"prev": small_btn(10, [34, 15])}, {"page": plain_label(11, ["fill", 15], CYAN)}, {"next": small_btn(12, [34, 15])}], 15),
+            {"g3": gap("100%", 2)},
+            row("acts", [{"a13": small_btn(13, ["34%", 16])}, {"g": gap(2, 16)}, {"a14": small_btn(14, ["30%", 16])},
+                         {"g2": gap(2, 16)}, {"a15": small_btn(15, ["fill", 16], red=True)}], 16),
+        ],
+    }
+    portrait = slot(19, [34, 34], [
+        {"bg": {"type": "image", "texture": T + "slot", "size": ["100%", "100%"], "layer": 1}},
+        {"img": bound_image(size=[30, 30], layer=2)},
+    ])
+    bars = {"type": "stack_panel", "orientation": "vertical", "size": ["fill", 34],
+            "controls": [{"hp": bar(28)}, {"xp": bar(29)}]}
+    right = inner_panel(["fill", "100%"], [
+        {"title": plain_label(9, ["100%", 12], WHITE, 0.85, "left")},
+        {"g0": gap("100%", 2)},
+        row("top", [{"p": portrait}, {"g": gap(4, 34)}, {"bars": bars}], 34),
+        {"g1": gap("100%", 2)},
+        {"body": {"type": "panel", "size": ["100%", "fill"], "controls": [
+            {"txt": {**body_text(), "anchor_from": "top_left", "anchor_to": "top_left", "font_scale_factor": 0.75}}]}},
+        {"g2": gap("100%", 2)},
+        row("b1", [{"a16": small_btn(16, ["36%", 16])}, {"g": gap(2, 16)}, {"a17": small_btn(17, ["30%", 16])},
+                   {"g2": gap(2, 16)}, {"a18": small_btn(18, ["fill", 16])}], 16),
+        {"g3": gap("100%", 2)},
+        row("b2", [{"a30": small_btn(30, ["32%", 16])}, {"g": gap(2, 16)}, {"a31": small_btn(31, ["32%", 16], red=True)},
+                   {"g2": gap(2, 16)}, {"a32": small_btn(32, ["fill", 16])}], 16),
+    ])
+    return {
+        "type": "stack_panel",
+        "orientation": "horizontal",
+        "size": ["100%", "100%"],
+        "controls": [{"left": left}, {"g": gap(5, "100%")}, {"right": right}],
+    }
+
+
 def visible_if_title(marker):
     return [
         {"binding_name": "#title_text"},
@@ -472,6 +547,7 @@ def screen():
             {"profile@sl_ui.profile_content": {"bindings": visible_if_title("sl:profile|")}},
             {"list@sl_ui.list_content": {"bindings": visible_if_title("sl:list|")}},
             {"vault@sl_ui.vault_content": {"bindings": visible_if_title("sl:vault|")}},
+            {"army@sl_ui.army_content": {"bindings": visible_if_title("sl:army|")}},
         ],
     }
     return {
@@ -567,9 +643,10 @@ def main():
         "profile_content": profile_content(),
         "list_content": list_content(),
         "vault_content": vault_content(),
+        "army_content": army_content(),
         "list_item": list_item(),
     }
-    for key in ("screen", "profile_content", "list_content", "vault_content"):
+    for key in ("screen", "profile_content", "list_content", "vault_content", "army_content"):
         add_collection_name(sl_ui[key])
     with open(os.path.join(UI_DIR, "sl_ui.json"), "w") as f:
         json.dump(sl_ui, f, indent=2, ensure_ascii=False)
