@@ -38,14 +38,14 @@ export const GATE_RANKS = [
   {
     rank: "A", color: "§d", level: 50, rooms: 4,
     mobs: ["minecraft:vindicator", "minecraft:evocation_illager", "minecraft:wither_skeleton", "minecraft:piglin_brute"],
-    boss: { id: "minecraft:wither_skeleton", name: "Igris the Bloodred" },
+    boss: { id: "sl:boss_igris", name: "Igris the Bloodred" },
     theme: { floor: "minecraft:deepslate_tiles", wall: "minecraft:polished_blackstone_bricks", accent: "minecraft:gilded_blackstone", light: "minecraft:pearlescent_froglight" },
     xp: 10000, loot: [["minecraft:diamond", 8, 16], ["minecraft:netherite_scrap", 2, 4], ["minecraft:totem_of_undying", 1, 1]],
   },
   {
     rank: "S", color: "§c", level: 70, rooms: 5,
     mobs: ["minecraft:wither_skeleton", "minecraft:ravager", "minecraft:evocation_illager", "minecraft:piglin_brute"],
-    boss: { id: "minecraft:warden", name: "Beru, the Ant King" },
+    boss: { id: "sl:boss_beru", name: "Beru, the Ant King" },
     theme: { floor: "minecraft:obsidian", wall: "minecraft:crying_obsidian", accent: "minecraft:purpur_pillar", light: "minecraft:verdant_froglight" },
     xp: 25000, loot: [["minecraft:netherite_ingot", 1, 3], ["minecraft:enchanted_golden_apple", 1, 2], ["minecraft:totem_of_undying", 1, 2]],
   },

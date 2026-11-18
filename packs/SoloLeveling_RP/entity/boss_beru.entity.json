@@ -1,0 +1,38 @@
+{
+  "format_version": "1.10.0",
+  "minecraft:client_entity": {
+    "description": {
+      "identifier": "sl:boss_beru",
+      "materials": {
+        "default": "entity_alphatest"
+      },
+      "textures": {
+        "default": "textures/sl/entity/shadow_beru"
+      },
+      "geometry": {
+        "default": "geometry.sl.beru"
+      },
+      "particle_effects": {
+        "aura": "minecraft:dragon_breath_trail"
+      },
+      "animations": {
+        "idle": "animation.sl.beru.idle",
+        "walk": "animation.sl.beru.walk",
+        "look": "animation.sl.look_at_target",
+        "aura": "animation.sl.beru.aura"
+      },
+      "scripts": {
+        "animate": [
+          "idle",
+          "walk",
+          "look",
+          "aura"
+        ]
+      },
+      "render_controllers": [
+        "controller.render.sl_shadow_custom"
+      ],
+      "enable_attachables": true
+    }
+  }
+}

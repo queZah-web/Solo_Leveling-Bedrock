@@ -1,0 +1,135 @@
+{
+  "format_version": "1.8.0",
+  "animations": {
+    "animation.sl.igris.idle": {
+      "loop": true,
+      "bones": {
+        "cape": {
+          "rotation": [
+            "math.sin(query.life_time * 90.0) * 4.0 + query.modified_move_speed * 25.0",
+            0,
+            0
+          ]
+        },
+        "collar0": {
+          "scale": "1.0 + math.sin(query.life_time * 120.0 + 0) * 0.06"
+        },
+        "collar1": {
+          "scale": "1.0 + math.sin(query.life_time * 120.0 + 37) * 0.06"
+        },
+        "collar2": {
+          "scale": "1.0 + math.sin(query.life_time * 120.0 + 74) * 0.06"
+        },
+        "collar3": {
+          "scale": "1.0 + math.sin(query.life_time * 120.0 + 111) * 0.06"
+        },
+        "collar4": {
+          "scale": "1.0 + math.sin(query.life_time * 120.0 + 148) * 0.06"
+        },
+        "back0": {
+          "scale": "1.0 + math.sin(query.life_time * 120.0 + 185) * 0.06"
+        },
+        "back1": {
+          "scale": "1.0 + math.sin(query.life_time * 120.0 + 222) * 0.06"
+        },
+        "back2": {
+          "scale": "1.0 + math.sin(query.life_time * 120.0 + 259) * 0.06"
+        },
+        "back3": {
+          "scale": "1.0 + math.sin(query.life_time * 120.0 + 296) * 0.06"
+        },
+        "right_pad0": {
+          "scale": "1.0 + math.sin(query.life_time * 120.0 + 333) * 0.06"
+        },
+        "right_pad1": {
+          "scale": "1.0 + math.sin(query.life_time * 120.0 + 370) * 0.06"
+        },
+        "right_pad2": {
+          "scale": "1.0 + math.sin(query.life_time * 120.0 + 407) * 0.06"
+        },
+        "right_pad3": {
+          "scale": "1.0 + math.sin(query.life_time * 120.0 + 444) * 0.06"
+        },
+        "right_pad4": {
+          "scale": "1.0 + math.sin(query.life_time * 120.0 + 481) * 0.06"
+        },
+        "left_pad0": {
+          "scale": "1.0 + math.sin(query.life_time * 120.0 + 518) * 0.06"
+        },
+        "left_pad1": {
+          "scale": "1.0 + math.sin(query.life_time * 120.0 + 555) * 0.06"
+        },
+        "left_pad2": {
+          "scale": "1.0 + math.sin(query.life_time * 120.0 + 592) * 0.06"
+        },
+        "left_pad3": {
+          "scale": "1.0 + math.sin(query.life_time * 120.0 + 629) * 0.06"
+        },
+        "left_pad4": {
+          "scale": "1.0 + math.sin(query.life_time * 120.0 + 666) * 0.06"
+        }
+      }
+    },
+    "animation.sl.igris.walk": {
+      "loop": true,
+      "bones": {
+        "rightLeg": {
+          "rotation": [
+            "(math.cos(query.modified_distance_moved * 38.17) * 40.0 * query.modified_move_speed)",
+            0,
+            0
+          ]
+        },
+        "leftLeg": {
+          "rotation": [
+            "-(math.cos(query.modified_distance_moved * 38.17) * 40.0 * query.modified_move_speed)",
+            0,
+            0
+          ]
+        },
+        "leftArm": {
+          "rotation": [
+            "(math.cos(query.modified_distance_moved * 38.17) * 40.0 * query.modified_move_speed) * 0.8",
+            0,
+            0
+          ]
+        },
+        "rightArm": {
+          "rotation": [
+            "-(math.cos(query.modified_distance_moved * 38.17) * 40.0 * query.modified_move_speed) * 0.3",
+            0,
+            0
+          ]
+        }
+      }
+    },
+    "animation.sl.igris.attack": {
+      "loop": true,
+      "bones": {
+        "rightArm": {
+          "rotation": [
+            "-110.0 * math.sin(variable.attack_time * 180.0)",
+            0,
+            0
+          ]
+        }
+      }
+    },
+    "animation.sl.igris.aura": {
+      "loop": true,
+      "animation_length": 0.4,
+      "particle_effects": {
+        "0.0": [
+          {
+            "effect": "flame",
+            "locator": "sword_tip"
+          },
+          {
+            "effect": "aura",
+            "locator": "aura"
+          }
+        ]
+      }
+    }
+  }
+}

@@ -1,0 +1,43 @@
+{
+  "format_version": "1.10.0",
+  "minecraft:client_entity": {
+    "description": {
+      "identifier": "sl:boss_igris",
+      "materials": {
+        "default": "entity_alphatest"
+      },
+      "textures": {
+        "default": "textures/sl/entity/igris"
+      },
+      "geometry": {
+        "default": "geometry.sl.igris"
+      },
+      "particle_effects": {
+        "flame": "minecraft:basic_flame_particle",
+        "aura": "minecraft:redstone_ore_dust_particle"
+      },
+      "animations": {
+        "idle": "animation.sl.igris.idle",
+        "walk": "animation.sl.igris.walk",
+        "look": "animation.sl.look_at_target",
+        "attack": "animation.sl.igris.attack",
+        "aura": "animation.sl.igris.aura"
+      },
+      "scripts": {
+        "animate": [
+          "idle",
+          "walk",
+          "look",
+          {
+            "attack": "variable.attack_time > 0.0"
+          },
+          "aura"
+        ]
+      },
+      "render_controllers": [
+        "controller.render.sl_shadow_custom"
+      ],
+      "enable_attachables": true
+    }
+  }
+}

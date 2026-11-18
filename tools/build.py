@@ -43,7 +43,9 @@ def main():
     run("gen_gate.py")
     run("gen_mobs.py")
     run("gen_art.py")
-    run("gen_beru.py")  # detailed art, overwrites gen_mobs placeholders
+    run("gen_beru.py")
+    run("gen_igris.py")
+    run("gen_bosses.py")  # detailed art, overwrites gen_mobs placeholders
     check_json()
     os.makedirs(DIST, exist_ok=True)
     with zipfile.ZipFile(os.path.join(DIST, "SoloLeveling.mcaddon"), "w", zipfile.ZIP_DEFLATED) as zf:

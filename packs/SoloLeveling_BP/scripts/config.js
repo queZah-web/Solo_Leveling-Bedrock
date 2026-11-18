@@ -55,6 +55,8 @@ export const XP_OVERRIDES = {
   "minecraft:ender_dragon": 5000,
   "minecraft:wither": 3000,
   "minecraft:warden": 2500,
+  "sl:boss_beru": 3000,
+  "sl:boss_igris": 1600,
   "minecraft:elder_guardian": 800,
   "minecraft:ravager": 300,
   "minecraft:evocation_illager": 250,

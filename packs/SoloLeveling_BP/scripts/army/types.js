@@ -49,7 +49,12 @@ export const SHADOW_TYPES = {
 };
 
 /** vanilla mob id -> shadow type id */
-export const MOB_TO_TYPE = Object.fromEntries(Object.entries(SHADOW_TYPES).map(([k, v]) => [v.mob, k]));
+export const MOB_TO_TYPE = {
+  ...Object.fromEntries(Object.entries(SHADOW_TYPES).map(([k, v]) => [v.mob, k])),
+  // Gate bosses with their own models rise as the named shadows.
+  "sl:boss_igris": "wither_skeleton",
+  "sl:boss_beru": "warden",
+};
 
 export const entityIdOf = (type) => `sl:shadow_${type}`;
 export const portraitOf = (type) => `textures/sl/shadows/${type}`;
