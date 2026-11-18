@@ -10,7 +10,7 @@
 import { EquipmentSlot, ItemStack } from "@minecraft/server";
 
 /** Shadows whose model can show armor and held items. */
-const GEAR_TYPES = new Set(["zombie", "husk", "drowned", "skeleton", "stray", "wither_skeleton", "vindicator", "goblin", "orc", "ice_elf", "warden"]);
+const GEAR_TYPES = new Set(["zombie", "husk", "drowned", "skeleton", "stray", "wither_skeleton", "vindicator", "goblin", "orc", "ice_elf", "warden", "iron_golem"]);
 export const canWearGear = (type) => GEAR_TYPES.has(type);
 /** Archers switch between bow (ranged) and melee depending on the main hand. */
 export const ARCHERS = new Set(["skeleton", "stray", "ice_elf"]);

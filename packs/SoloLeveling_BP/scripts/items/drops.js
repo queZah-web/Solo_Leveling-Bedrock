@@ -12,6 +12,14 @@ export const DROPS = {
   "minecraft:blaze": [["sl:demon_horn", 0.2, 1, 1]],
   "minecraft:wither_skeleton": [["sl:demon_horn", 0.2, 1, 1]],
   "minecraft:piglin_brute": [["sl:demon_horn", 0.2, 1, 2]],
+  "sl:dg_spider": [["sl:venom_gland", 0.3, 1, 1]],
+  "sl:dg_hound": [["sl:demon_horn", 0.15, 1, 1]],
+  "sl:dg_ice_bear": [["sl:frost_essence", 0.4, 1, 2]],
+  "sl:dg_knight": [["sl:demon_horn", 0.2, 1, 1]],
+  "sl:dg_mage": [["sl:mana_crystal", 0.15, 1, 1]],
+  "sl:dg_ant": [["sl:demon_horn", 0.25, 1, 2]],
+  "sl:dg_soldier": [["minecraft:bone", 0.5, 1, 3]],
+  "sl:dg_archer": [["minecraft:arrow", 0.6, 2, 5]],
 };
 
 function drop(entity, id, n) {

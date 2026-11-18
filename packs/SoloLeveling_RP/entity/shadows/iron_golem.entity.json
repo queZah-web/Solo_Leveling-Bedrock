@@ -7,19 +7,25 @@
         "default": "entity_alphatest"
       },
       "textures": {
-        "default": "textures/sl/entity/shadow_iron_golem"
+        "default": "textures/sl/models/iron"
       },
       "geometry": {
-        "default": "geometry.sl.shadow_iron_golem"
+        "default": "geometry.sl.m_iron"
       },
       "animations": {
-        "walk": "animation.sl.golem.walk",
+        "walk": "animation.sl.m_iron.walk",
+        "idle": "animation.sl.m_iron.idle",
+        "attack": "animation.sl.m_iron.attack",
         "look": "animation.sl.look_at_target"
       },
       "scripts": {
         "animate": [
           "walk",
-          "look"
+          "idle",
+          "look",
+          {
+            "attack": "variable.attack_time > 0.0"
+          }
         ]
       },
       "render_controllers": [

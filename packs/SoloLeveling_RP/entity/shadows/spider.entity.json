@@ -1,31 +1,37 @@
 {
-  "format_version": "1.8.0",
+  "format_version": "1.10.0",
   "minecraft:client_entity": {
     "description": {
       "identifier": "sl:shadow_spider",
       "materials": {
-        "default": "spider"
+        "default": "entity_alphatest"
       },
       "textures": {
-        "default": "textures/entity/spider/spider"
+        "default": "textures/sl/models/shadow_spider"
       },
       "geometry": {
-        "default": "geometry.spider.v1.8"
+        "default": "geometry.sl.m_shadow_spider"
+      },
+      "animations": {
+        "walk": "animation.sl.m_shadow_spider.walk",
+        "idle": "animation.sl.m_shadow_spider.idle",
+        "attack": "animation.sl.m_shadow_spider.attack",
+        "look": "animation.sl.look_at_target"
+      },
+      "scripts": {
+        "animate": [
+          "walk",
+          "idle",
+          "look",
+          {
+            "attack": "variable.attack_time > 0.0"
+          }
+        ]
       },
       "render_controllers": [
-        "controller.render.sl_shadow"
+        "controller.render.sl_shadow_custom"
       ],
-      "min_engine_version": "1.8.0",
-      "animations": {
-        "default_leg_pose": "animation.spider.default_leg_pose",
-        "look_at_target": "animation.spider.look_at_target",
-        "walk": "animation.spider.walk"
-      },
-      "animation_controllers": [
-        {
-          "move": "controller.animation.spider.move"
-        }
-      ]
+      "enable_attachables": true
     }
   }
 }

@@ -1,0 +1,41 @@
+{
+  "format_version": "1.10.0",
+  "minecraft:client_entity": {
+    "description": {
+      "identifier": "sl:dg_ice_bear",
+      "materials": {
+        "default": "entity_alphatest"
+      },
+      "textures": {
+        "default": "textures/sl/models/dg_ice_bear"
+      },
+      "geometry": {
+        "default": "geometry.sl.m_dg_ice_bear"
+      },
+      "animations": {
+        "walk": "animation.sl.m_dg_ice_bear.walk",
+        "idle": "animation.sl.m_dg_ice_bear.idle",
+        "attack": "animation.sl.m_dg_ice_bear.attack",
+        "look": "animation.sl.look_at_target"
+      },
+      "scripts": {
+        "animate": [
+          "walk",
+          "idle",
+          "look",
+          {
+            "attack": "variable.attack_time > 0.0"
+          }
+        ]
+      },
+      "render_controllers": [
+        "controller.render.sl_shadow_custom"
+      ],
+      "enable_attachables": true,
+      "spawn_egg": {
+        "base_color": "#20101a",
+        "overlay_color": "#ff5566"
+      }
+    }
+  }
+}

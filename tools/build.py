@@ -45,6 +45,7 @@ def main():
     run("gen_art.py")
     run("gen_beru.py")
     run("gen_igris.py")
+    run("gen_models.py")  # shadow + dungeon models (overrides earlier shadow skins)
     run("gen_bosses.py")  # detailed art, overwrites gen_mobs placeholders
     check_json()
     os.makedirs(DIST, exist_ok=True)

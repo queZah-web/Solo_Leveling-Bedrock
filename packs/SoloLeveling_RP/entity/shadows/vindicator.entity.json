@@ -7,19 +7,25 @@
         "default": "entity_alphatest"
       },
       "textures": {
-        "default": "textures/sl/entity/shadow_vindicator"
+        "default": "textures/sl/models/shadow_executioner"
       },
       "geometry": {
-        "default": "geometry.sl.shadow_vindicator"
+        "default": "geometry.sl.m_shadow_executioner"
       },
       "animations": {
-        "walk": "animation.sl.humanoid.walk",
+        "walk": "animation.sl.m_shadow_executioner.walk",
+        "idle": "animation.sl.m_shadow_executioner.idle",
+        "attack": "animation.sl.m_shadow_executioner.attack",
         "look": "animation.sl.look_at_target"
       },
       "scripts": {
         "animate": [
           "walk",
-          "look"
+          "idle",
+          "look",
+          {
+            "attack": "variable.attack_time > 0.0"
+          }
         ]
       },
       "render_controllers": [

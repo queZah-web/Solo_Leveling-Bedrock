@@ -4,41 +4,34 @@
     "description": {
       "identifier": "sl:shadow_ravager",
       "materials": {
-        "default": "ravager"
+        "default": "entity_alphatest"
       },
       "textures": {
-        "default": "textures/entity/illager/ravager"
+        "default": "textures/sl/models/tank"
       },
       "geometry": {
-        "default": "geometry.ravager"
-      },
-      "render_controllers": [
-        "controller.render.sl_shadow"
-      ],
-      "scripts": {
-        "pre_animation": [
-          "variable.roar_length = 1.0;",
-          "variable.bite_anim_duration = 0.75f;",
-          "variable.bite_neck_length = 10;"
-        ],
-        "animate": [
-          "move",
-          "head"
-        ]
+        "default": "geometry.sl.m_tank"
       },
       "animations": {
-        "walk": "animation.ravager.walk",
-        "look_at_target": "animation.common.look_at_target",
-        "idle_mouth": "animation.ravager.idle_mouth",
-        "stunned": "animation.ravager.stunned",
-        "roaring": "animation.ravager.roaring",
-        "move": "controller.animation.ravager.move",
-        "head": "controller.animation.ravager.head_movement",
-        "biting": "animation.ravager.biting"
+        "walk": "animation.sl.m_tank.walk",
+        "idle": "animation.sl.m_tank.idle",
+        "attack": "animation.sl.m_tank.attack",
+        "look": "animation.sl.look_at_target"
       },
-      "particle_effects": {
-        "stun_particles": "minecraft:stunned_emitter"
-      }
+      "scripts": {
+        "animate": [
+          "walk",
+          "idle",
+          "look",
+          {
+            "attack": "variable.attack_time > 0.0"
+          }
+        ]
+      },
+      "render_controllers": [
+        "controller.render.sl_shadow_custom"
+      ],
+      "enable_attachables": true
     }
   }
 }

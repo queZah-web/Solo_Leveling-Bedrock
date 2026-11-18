@@ -7,19 +7,25 @@
         "default": "entity_alphatest"
       },
       "textures": {
-        "default": "textures/sl/entity/shadow_husk"
+        "default": "textures/sl/models/shadow_husk"
       },
       "geometry": {
-        "default": "geometry.sl.shadow_husk"
+        "default": "geometry.sl.m_shadow_husk"
       },
       "animations": {
-        "move": "animation.sl.zombie.move",
+        "walk": "animation.sl.m_shadow_husk.walk",
+        "idle": "animation.sl.m_shadow_husk.idle",
+        "attack": "animation.sl.m_shadow_husk.attack",
         "look": "animation.sl.look_at_target"
       },
       "scripts": {
         "animate": [
-          "move",
-          "look"
+          "walk",
+          "idle",
+          "look",
+          {
+            "attack": "variable.attack_time > 0.0"
+          }
         ]
       },
       "render_controllers": [

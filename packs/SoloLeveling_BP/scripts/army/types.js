@@ -54,6 +54,16 @@ export const MOB_TO_TYPE = {
   // Gate bosses with their own models rise as the named shadows.
   "sl:boss_igris": "wither_skeleton",
   "sl:boss_beru": "warden",
+  "sl:boss_tank": "ravager",
+  // Dungeon monsters rise as the closest shadow type.
+  "sl:dg_soldier": "zombie",
+  "sl:dg_archer": "skeleton",
+  "sl:dg_spider": "spider",
+  "sl:dg_hound": "wolf",
+  "sl:dg_ice_bear": "ravager",
+  "sl:dg_knight": "wither_skeleton",
+  "sl:dg_mage": "enderman",
+  "sl:dg_ant": "vindicator",
 };
 
 export const entityIdOf = (type) => `sl:shadow_${type}`;

@@ -14,6 +14,7 @@ BOSSES = {
     # id: hp, damage, speed, (w, h), boss bar name
     "boss_beru": (320, 16, 0.32, (0.9, 3.0), "Beru, the Ant King"),
     "boss_igris": (240, 13, 0.3, (0.8, 2.8), "Igris the Bloodred"),
+    "boss_tank": (180, 12, 0.3, (2.0, 2.4), "Tank, the Ice Bear"),
 }
 
 
@@ -44,6 +45,7 @@ def behavior(bid, hp, dmg, speed, size, name):
             "minecraft:nameable": {"always_show": True},
             "minecraft:follow_range": {"value": 32, "max": 48},
             "minecraft:boss": {"should_darken_sky": False, "hud_range": 40, "name": name},
+            **({"minecraft:scale": {"value": 1.5}} if bid == "boss_tank" else {}),
             "minecraft:damage_sensor": {"triggers": [{"cause": "fall", "deals_damage": "no"}]},
             "minecraft:equipment": {"table": "loot_tables/sl/empty.json"},
             "minecraft:behavior.float": {"priority": 0},
@@ -69,6 +71,13 @@ def main():
     beru = json.load(open(os.path.join(RP, "entity", "shadows", "warden.entity.json")))
     beru["minecraft:client_entity"]["description"]["identifier"] = "sl:boss_beru"
     write(os.path.join(RP, "entity", "boss_beru.entity.json"), beru)
+    # Tank boss: the ice bear dungeon model (needs gen_models.py output)
+    bear = os.path.join(RP, "entity", "dungeon", "dg_ice_bear.entity.json")
+    if os.path.exists(bear):
+        tank = json.load(open(bear))
+        tank["minecraft:client_entity"]["description"]["identifier"] = "sl:boss_tank"
+        tank["minecraft:client_entity"]["description"].pop("spawn_egg", None)
+        write(os.path.join(RP, "entity", "boss_tank.entity.json"), tank)
     print("bosses generated")
 
 

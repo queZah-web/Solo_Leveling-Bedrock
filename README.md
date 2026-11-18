@@ -66,6 +66,14 @@
 - **Beru** (ظل الـ Warden): موديل خاص فيه جسم أسود بعروق بنفسجية متوهجة، وتاج من 8 مجسات، و6 مجسات هالة من الظهر، ومخالب، ودائرة رونية تدور تحته. ويقدر يلبس دروع ويمسك أسلحة.
 - **Igris** (ظل الـ Wither Skeleton): فارس قرمزي بحواف متوهجة، وكريستالات على الكتفين والظهر، وخوذة بعرف، وعباءة، وسيف ضخم يحترق.
 - **زعماء البوابات**: زعيم بوابة **A** هو **Igris** وزعيم بوابة **S** هو **Beru**، بموديلاتهم الخاصة ومعهم شريط زعيم (Boss bar). ولما تستخرج ظلهم بالـ ARISE يطلع لك الظل المسمّى بنفس الشكل.
+- **موديلات كل الظلال** (من `tools/gen_models.py`): كلها سوداء بعروق زرقاء بنفسجية متوهجة، ولكل نوع شكل:
+  - Soldier, Husk, Drowned, Archer, Frost Archer, Executioner, Goblin, Orc, Ice Elf
+  - Spider بثمان أرجل
+  - Wolf بعرف شوكي
+  - **Tank**: دب ظل عملاق
+  - **Iron**: فارس ضخم بفأس
+  - Stalker للـ Enderman
+- **وحوش الدانجن الجديدة**: Undead Soldier, Bone Archer, Giant Spider, Hellhound, Ice Bear, Red Knight, Dark Mage (يرمي كرات نار), Ant Soldier. وزعيم بوابة **B** صار **Tank**.
 - **ظلال بأسماء**: أول استخراج من Wither Skeleton يطلع لك **Igris**، ومن Iron Golem يطلع **Iron**، ومن Ravager يطلع **Tank**، ومن Warden يطلع **Beru**.
 - **الرتب**: Normal ← Elite ← Knight ← Elite Knight ← Commander ← Marshal ← Grand Marshal. الظل يترقّى كل 20 مستوى.
 - **شكل الظلال**: طبقة بنفسجية داكنة تنرسم بإضاءتها الخاصة (تبان بالليل وداخل الكهوف)، وحولها هالة أرواح خفيفة.
@@ -302,11 +310,11 @@ Healing Elixir, Mana Potion, Fatigue Recovery Potion, Elixir of Life, Random Box
 
 `world_behavior_packs.json`
 ```json
-[ { "pack_id": "c63f3ea1-b815-4c86-8d08-fa4f1f13d4e2", "version": [0, 7, 3] } ]
+[ { "pack_id": "c63f3ea1-b815-4c86-8d08-fa4f1f13d4e2", "version": [0, 7, 4] } ]
 ```
 `world_resource_packs.json`
 ```json
-[ { "pack_id": "74a1ff86-af96-45c3-8ccf-94d3550211ba", "version": [0, 7, 3] } ]
+[ { "pack_id": "74a1ff86-af96-45c3-8ccf-94d3550211ba", "version": [0, 7, 4] } ]
 ```
 4. في `server.properties` خلّ:
 ```
