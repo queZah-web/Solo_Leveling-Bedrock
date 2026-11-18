@@ -1,0 +1,41 @@
+{
+  "format_version": "1.20.10",
+  "minecraft:recipe_shaped": {
+    "description": {
+      "identifier": "sl:craft_demon_king_longsword"
+    },
+    "tags": [
+      "crafting_table"
+    ],
+    "pattern": [
+      "MHC",
+      "HNH",
+      "SHM"
+    ],
+    "key": {
+      "C": {
+        "item": "sl:demon_core"
+      },
+      "H": {
+        "item": "sl:demon_horn"
+      },
+      "M": {
+        "item": "sl:mana_crystal"
+      },
+      "N": {
+        "item": "minecraft:netherite_scrap"
+      },
+      "S": {
+        "item": "minecraft:stick"
+      }
+    },
+    "unlock": [
+      {
+        "item": "sl:demon_core"
+      }
+    ],
+    "result": {
+      "item": "sl:demon_king_longsword"
+    }
+  }
+}

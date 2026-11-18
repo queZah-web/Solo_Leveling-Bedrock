@@ -198,6 +198,27 @@ CONSUMABLES = {
     "fatigue_potion": ("Fatigue Recovery Potion", (90, 230, 120)),
     "elixir_of_life": ("Elixir of Life", (255, 210, 60)),
 }
+MATERIALS = {
+    "goblin_fang": "Goblin Fang", "orc_tusk": "Orc Tusk", "frost_essence": "Frost Essence", "venom_gland": "Venom Gland",
+    "demon_horn": "Demon Horn", "mana_crystal": "Mana Crystal", "demon_core": "Demon King's Core",
+}
+
+# Crafting recipes (crafting table). Keys map to item ids.
+RECIPES = {
+    "kasaka_fang": ([" VV", "GVG", "S  "], {"V": "sl:venom_gland", "G": "sl:goblin_fang", "S": "minecraft:stick"}, None),
+    "knight_killer": ([" IT", "MI ", "S  "], {"I": "minecraft:iron_ingot", "T": "sl:orc_tusk", "M": "sl:mana_crystal", "S": "minecraft:stick"}, None),
+    "baruka_dagger": ([" FF", "MDF", "SM "], {"F": "sl:frost_essence", "M": "sl:mana_crystal", "D": "minecraft:diamond", "S": "minecraft:stick"}, None),
+    "demon_king_dagger": ([" HH", "MDH", "SM "], {"H": "sl:demon_horn", "M": "sl:mana_crystal", "D": "minecraft:diamond", "S": "minecraft:stick"}, None),
+    "demon_king_longsword": (["MHC", "HNH", "SHM"], {"C": "sl:demon_core", "H": "sl:demon_horn", "M": "sl:mana_crystal",
+                                                     "N": "minecraft:netherite_scrap", "S": "minecraft:stick"}, None),
+}
+SHAPELESS = {
+    "healing_elixir": ["minecraft:glass_bottle", "minecraft:glistering_melon_slice", "sl:goblin_fang"],
+    "mana_potion": ["minecraft:glass_bottle", "minecraft:lapis_lazuli", "sl:mana_crystal"],
+    "fatigue_potion": ["minecraft:glass_bottle", "minecraft:sugar", "sl:frost_essence"],
+    "elixir_of_life": ["minecraft:glass_bottle", "minecraft:golden_apple", "sl:mana_crystal", "sl:mana_crystal", "sl:demon_horn"],
+}
+
 USABLES = {
     "random_box": "Random Box",
     "dungeon_key": "Instant Dungeon Key",
@@ -262,6 +283,7 @@ def weapon_item(iid, dmg):
             "minecraft:damage": dmg,
             "minecraft:enchantable": {"slot": "sword", "value": 15},
             "minecraft:rarity": "epic" if "demon" in iid else "rare",
+            "minecraft:glint": True,  # moving shimmer, drawn client-side
             "minecraft:tags": {"tags": ["minecraft:is_sword", "sl:weapon"]},
         },
     }}
@@ -279,6 +301,40 @@ def consumable_item(iid):
             "minecraft:use_animation": "drink",
             "minecraft:rarity": "rare",
         },
+    }}
+
+
+def material_item(iid):
+    return {"format_version": "1.21.100", "minecraft:item": {
+        "description": {"identifier": f"sl:{iid}", "menu_category": {"category": "items"}},
+        "components": {
+            "minecraft:icon": f"sl_{iid}",
+            "minecraft:display_name": {"value": f"item.sl:{iid}.name"},
+            "minecraft:max_stack_size": 64,
+            "minecraft:rarity": "epic" if iid == "demon_core" else "uncommon",
+            "minecraft:glint": iid in ("demon_core", "mana_crystal"),
+        },
+    }}
+
+
+def shaped(iid, pattern, key):
+    return {"format_version": "1.20.10", "minecraft:recipe_shaped": {
+        "description": {"identifier": f"sl:craft_{iid}"},
+        "tags": ["crafting_table"],
+        "pattern": pattern,
+        "key": {k: {"item": v} for k, v in key.items()},
+        "unlock": [{"item": v} for v in key.values() if v.startswith("sl:")][:1],
+        "result": {"item": f"sl:{iid}"},
+    }}
+
+
+def shapeless(iid, ingredients):
+    return {"format_version": "1.20.10", "minecraft:recipe_shapeless": {
+        "description": {"identifier": f"sl:craft_{iid}"},
+        "tags": ["crafting_table"],
+        "ingredients": [{"item": i} for i in ingredients],
+        "unlock": [{"item": i} for i in ingredients if i.startswith("sl:")][:1],
+        "result": {"item": f"sl:{iid}"},
     }}
 
 
@@ -322,6 +378,13 @@ def main():
         names[iid] = name
     box_icon()
     key_icon()
+    for iid, name in MATERIALS.items():
+        write(os.path.join(BP, "items", f"{iid}.json"), material_item(iid))
+        names[iid] = name
+    for iid, (pattern, key, _) in RECIPES.items():
+        write(os.path.join(BP, "recipes", f"{iid}.json"), shaped(iid, pattern, key))
+    for iid, ing in SHAPELESS.items():
+        write(os.path.join(BP, "recipes", f"{iid}.json"), shapeless(iid, ing))
     for iid, name in USABLES.items():
         write(os.path.join(BP, "items", f"{iid}.json"), usable_item(iid))
         names[iid] = name
@@ -335,8 +398,9 @@ def main():
     lang_path = os.path.join(RP, "texts", "en_US.lang")
     lines = [l for l in open(lang_path).read().splitlines() if l and not l.startswith(("item.sl:", "entity.sl:", "item.spawn_egg.entity.sl:"))]
     lines.insert(0, "item.sl:system_gem.name=§5System Gem")
-    colors = {"kasaka": "§a", "knight": "§f", "baruka": "§b", "demon": "§5", "healing": "§c", "mana": "§9", "fatigue": "§a", "elixir": "§6",
-              "random": "§d", "dungeon": "§b"}
+    colors = {"kasaka": "§a", "knight": "§f", "baruka": "§b", "demon_king": "§5", "healing": "§c", "mana_potion": "§9", "fatigue": "§a",
+              "elixir": "§6", "random": "§d", "dungeon": "§b", "goblin": "§a", "orc": "§e", "frost": "§b", "venom": "§2",
+              "demon_horn": "§4", "mana_crystal": "§9", "demon_core": "§c"}
     for iid, name in names.items():
         col = next((v for k, v in colors.items() if iid.startswith(k)), "§f")
         lines.append(f"item.sl:{iid}.name={col}{name}")

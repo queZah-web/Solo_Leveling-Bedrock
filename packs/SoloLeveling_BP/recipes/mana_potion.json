@@ -1,0 +1,30 @@
+{
+  "format_version": "1.20.10",
+  "minecraft:recipe_shapeless": {
+    "description": {
+      "identifier": "sl:craft_mana_potion"
+    },
+    "tags": [
+      "crafting_table"
+    ],
+    "ingredients": [
+      {
+        "item": "minecraft:glass_bottle"
+      },
+      {
+        "item": "minecraft:lapis_lazuli"
+      },
+      {
+        "item": "sl:mana_crystal"
+      }
+    ],
+    "unlock": [
+      {
+        "item": "sl:mana_crystal"
+      }
+    ],
+    "result": {
+      "item": "sl:mana_potion"
+    }
+  }
+}

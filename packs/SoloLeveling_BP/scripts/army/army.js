@@ -14,7 +14,7 @@ import { domainUntil } from "../state.js";
 import {
   creeperCharges, creeperPower, healValue,
   activeLimit, ARISE_ATTEMPTS, ARISE_MP, armyCapacity, CORPSE_SECONDS, entityIdOf, FEED_MP, GRADES,
-  gradeForLevel, MOB_TO_TYPE, reviveSeconds, SHADOW_MAX_LEVEL, SHADOW_TYPES, shadowAtkMult, shadowDefMult,
+  canRankUp, levelCap, MOB_TO_TYPE, rankUpCost, reviveSeconds, SHADOW_MAX_LEVEL, SHADOW_TYPES, shadowAtkMult, shadowDefMult,
   shadowXpToNext, TRAIN_MP,
 } from "./types.js";
 
@@ -308,6 +308,7 @@ export function train(player, sid) {
   const s = findRecord(player, sid);
   if (!s) return "Shadow not found.";
   if (s.level >= SHADOW_MAX_LEVEL) return `${s.name} is at max level.`;
+  if (s.level >= levelCap(s)) return `${s.name} needs a RANK UP to grow further.`;
   if (d.mp < TRAIN_MP) return `Not enough MP (${TRAIN_MP} needed).`;
   d.mp -= TRAIN_MP;
   markDirty(player);
@@ -316,28 +317,92 @@ export function train(player, sid) {
 }
 
 function giveShadowXp(player, s, amount) {
-  if (s.level >= SHADOW_MAX_LEVEL) return;
+  const cap = levelCap(s);
+  if (s.level >= cap) {
+    // Waiting for a breakthrough: keep XP just below the next level.
+    s.xp = Math.min(shadowXpToNext(s.level) - 1, s.xp + Math.floor(amount));
+    markDirty(player);
+    return;
+  }
   s.xp += Math.floor(amount);
   let up = false;
-  while (s.level < SHADOW_MAX_LEVEL && s.xp >= shadowXpToNext(s.level)) {
+  while (s.level < cap && s.xp >= shadowXpToNext(s.level)) {
     s.xp -= shadowXpToNext(s.level);
     s.level++;
     up = true;
   }
   if (s.level >= SHADOW_MAX_LEVEL) s.xp = 0;
   if (up) {
-    const oldGrade = s.grade;
-    s.grade = Math.max(s.grade, gradeForLevel(s.base, s.level));
     player.sendMessage(`§5[Shadow] §f${s.name} §7reached level §e${s.level}`);
-    if (s.grade > oldGrade) {
-      const g = GRADES[s.grade];
-      player.sendMessage(`§5[Shadow] §f${s.name} §dwas promoted to ${g.color}${g.name} §7[Rank ${g.rank}]`);
+    if (canRankUp(s)) {
+      const g = GRADES[s.grade + 1];
+      player.sendMessage(`§5[Shadow] §f${s.name} §dis ready to rank up to ${g.color}${g.name} §7[Rank ${g.rank}] §d- open its profile: RANK UP`);
       player.playSound("random.levelup", { pitch: 0.6 });
     }
     const e = entityOf(player, s.id);
     if (e) e.nameTag = shadowName(s);
   }
   markDirty(player);
+}
+
+/** Counts an item in the player's inventory (plain stacks only). */
+function countItem(inv, id) {
+  let n = 0;
+  for (let i = 0; i < inv.size; i++) {
+    const it = inv.getItem(i);
+    if (it?.typeId === id && !it.nameTag) n += it.amount;
+  }
+  return n;
+}
+
+/** What the player has / needs for this shadow's next rank. */
+export function rankUpStatus(player, s) {
+  const inv = player.getComponent("minecraft:inventory").container;
+  const { items, gold } = rankUpCost(s);
+  const d = getData(player);
+  return {
+    items: items.map(([id, n]) => ({ id, need: n, have: countItem(inv, id) })),
+    gold, haveGold: d.gold ?? 0,
+  };
+}
+
+/** Breakthrough: consume the materials and raise the shadow's grade. */
+export function rankUp(player, sid) {
+  const s = findRecord(player, sid);
+  if (!s) return "Shadow not found.";
+  if (s.grade >= GRADES.length - 1) return `${s.name} is already at the highest rank.`;
+  if (!canRankUp(s)) return `${s.name} must reach level ${(s.grade + 1) * 10} first.`;
+  const st = rankUpStatus(player, s);
+  const missing = st.items.filter((x) => x.have < x.need);
+  if (missing.length || st.haveGold < st.gold) return "Missing materials or gold.";
+  const inv = player.getComponent("minecraft:inventory").container;
+  for (const x of st.items) {
+    let left = x.need;
+    for (let i = 0; i < inv.size && left > 0; i++) {
+      const it = inv.getItem(i);
+      if (it?.typeId !== x.id || it.nameTag) continue;
+      const k = Math.min(left, it.amount);
+      if (it.amount > k) inv.getSlot(i).amount = it.amount - k;
+      else inv.setItem(i, undefined);
+      left -= k;
+    }
+  }
+  const d = getData(player);
+  d.gold -= st.gold;
+  s.grade++;
+  markDirty(player);
+  const g = GRADES[s.grade];
+  player.onScreenDisplay.setTitle(`${g.color}§lRANK UP`, { subtitle: `§f${s.name} §7is now ${g.color}${g.name} [Rank ${g.rank}]`, fadeInDuration: 5, stayDuration: 50, fadeOutDuration: 10 });
+  player.playSound("random.levelup", { pitch: 0.5 });
+  player.playSound("mob.wither.spawn", { volume: 0.3, pitch: 1.6 });
+  const e = entityOf(player, sid);
+  if (e) {
+    e.nameTag = shadowName(s);
+    try {
+      for (let i = 0; i < 6; i++) e.dimension.spawnParticle("minecraft:soul_particle", { ...e.location, y: e.location.y + i * 0.3 });
+    } catch {}
+  }
+  return undefined;
 }
 
 // ---------------------------------------------------------------- extraction (ARISE)

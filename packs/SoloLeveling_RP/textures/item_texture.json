@@ -37,6 +37,27 @@
     },
     "sl_dungeon_key": {
       "textures": "textures/items/sl/dungeon_key"
+    },
+    "sl_goblin_fang": {
+      "textures": "textures/items/sl/goblin_fang"
+    },
+    "sl_orc_tusk": {
+      "textures": "textures/items/sl/orc_tusk"
+    },
+    "sl_frost_essence": {
+      "textures": "textures/items/sl/frost_essence"
+    },
+    "sl_venom_gland": {
+      "textures": "textures/items/sl/venom_gland"
+    },
+    "sl_demon_horn": {
+      "textures": "textures/items/sl/demon_horn"
+    },
+    "sl_mana_crystal": {
+      "textures": "textures/items/sl/mana_crystal"
+    },
+    "sl_demon_core": {
+      "textures": "textures/items/sl/demon_core"
     }
   }
 }

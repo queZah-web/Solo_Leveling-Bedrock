@@ -1,0 +1,30 @@
+{
+  "format_version": "1.20.10",
+  "minecraft:recipe_shapeless": {
+    "description": {
+      "identifier": "sl:craft_healing_elixir"
+    },
+    "tags": [
+      "crafting_table"
+    ],
+    "ingredients": [
+      {
+        "item": "minecraft:glass_bottle"
+      },
+      {
+        "item": "minecraft:glistering_melon_slice"
+      },
+      {
+        "item": "sl:goblin_fang"
+      }
+    ],
+    "unlock": [
+      {
+        "item": "sl:goblin_fang"
+      }
+    ],
+    "result": {
+      "item": "sl:healing_elixir"
+    }
+  }
+}

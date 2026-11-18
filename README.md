@@ -206,6 +206,68 @@ Healing Elixir, Mana Potion, Fatigue Recovery Potion, Elixir of Life, Random Box
 - **BUY**: أغراض النظام، والأسلحة (بعضها يحتاج مستوى معيّن)، وأغراض عادية.
 - **SELL**: بيع الـ Drops والمعادن والجواهر مقابل Gold.
 
+## المرحلة 7 — الرسم والكرافتنق ورتب الظلال
+
+### ✨ هالة الأسلحة
+- **لمعة سحر متحركة** (Glint) على كل الأسلحة، وتنرسم على جهاز اللاعب نفسه.
+- **جزيئات حول اليد** وقت ما تمسك السلاح، بلون كل سلاح: سم أخضر، ضوء أبيض، ثلج، نَفَس تنين بنفسجي، نار حمراء.
+
+### ⚒️ مواد الكرافتنق
+| المادة | تسقط من |
+|---|---|
+| Goblin Fang | Goblin (50%) |
+| Orc Tusk | Orc (40%) |
+| Frost Essence | Ice Elf (35%)، Stray (15%) |
+| Venom Gland | Spider / Cave Spider (25%) |
+| Demon Horn | Blaze / Wither Skeleton / Piglin Brute (20%) |
+| Mana Crystal | أي وحش في الدانجن (12%)، والزعيم يسقط 3-6 |
+| Demon King's Core | زعيم دانجن A و S |
+
+### 🗡️ الوصفات (طاولة الكرافتنق)
+| الغرض | المكونات |
+|---|---|
+| Kasaka's Venom Fang | 3 Venom Gland + 2 Goblin Fang + Stick |
+| Knight Killer | 2 Iron + Orc Tusk + Mana Crystal + Stick |
+| Baruka's Dagger | 3 Frost Essence + 2 Mana Crystal + Diamond + Stick |
+| Demon King's Dagger | 3 Demon Horn + 2 Mana Crystal + Diamond + Stick |
+| Demon King's Longsword | Demon King's Core + 4 Demon Horn + 2 Mana Crystal + Netherite Scrap + Stick |
+| Healing Elixir | Glass Bottle + Glistering Melon + Goblin Fang |
+| Mana Potion | Glass Bottle + Lapis + Mana Crystal |
+| Fatigue Potion | Glass Bottle + Sugar + Frost Essence |
+| Elixir of Life | Glass Bottle + Golden Apple + 2 Mana Crystal + Demon Horn |
+
+### 📈 رتب الظلال (RANK UP)
+- الظل **يوقف عند كل 10 مستويات** لين ترقّيه من Shadow Profile ← **RANK UP**:
+  - F→E عند Lv10
+  - E→D عند Lv20
+  - D→C عند Lv30
+  - C→B عند Lv40
+  - B→A عند Lv50
+  - A→S عند Lv60
+- **المادة الخاصة بكل نوع**:
+  - Skeleton / Stray / Wither: عظام
+  - Zombie / Husk / Drowned: Rotten Flesh
+  - Spider: String
+  - Creeper: Gunpowder
+  - Enderman: Ender Pearl
+  - Vindicator: Emerald
+  - Iron Golem: Iron
+  - Ravager: Leather
+  - Warden: Echo Shard
+  - Wolf: لحم
+  - Goblin / Orc / Ice Elf: الأنياب والجوهر الخاص فيهم
+
+| الترقية | المادة الخاصة* | Mana Crystal | Diamond | Demon Horn | Core | Gold |
+|---|---|---|---|---|---|---|
+| F→E | 32 | - | - | - | - | 100 |
+| E→D | 48 | 2 | - | - | - | 300 |
+| D→C | 64 | 4 | 1 | - | - | 800 |
+| C→B | 96 | 8 | 2 | - | - | 2000 |
+| B→A | 128 | 12 | 4 | 2 | - | 5000 |
+| A→S | 192 | 20 | 8 | 4 | 1 | 12000 |
+
+\* المواد النادرة تنحسب بكمية أقل (Ender Pearl و Emerald و Goblin Fang ربع العدد، و Echo Shard عُشره).
+
 ### أوامر الأدمن (للـ OP فقط)
 ```
 /sl:setlevel <level> [player]
@@ -237,11 +299,11 @@ Healing Elixir, Mana Potion, Fatigue Recovery Potion, Elixir of Life, Random Box
 
 `world_behavior_packs.json`
 ```json
-[ { "pack_id": "c63f3ea1-b815-4c86-8d08-fa4f1f13d4e2", "version": [0, 7, 0] } ]
+[ { "pack_id": "c63f3ea1-b815-4c86-8d08-fa4f1f13d4e2", "version": [0, 7, 1] } ]
 ```
 `world_resource_packs.json`
 ```json
-[ { "pack_id": "74a1ff86-af96-45c3-8ccf-94d3550211ba", "version": [0, 7, 0] } ]
+[ { "pack_id": "74a1ff86-af96-45c3-8ccf-94d3550211ba", "version": [0, 7, 1] } ]
 ```
 4. في `server.properties` خلّ:
 ```

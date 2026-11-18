@@ -1,0 +1,38 @@
+{
+  "format_version": "1.20.10",
+  "minecraft:recipe_shaped": {
+    "description": {
+      "identifier": "sl:craft_demon_king_dagger"
+    },
+    "tags": [
+      "crafting_table"
+    ],
+    "pattern": [
+      " HH",
+      "MDH",
+      "SM "
+    ],
+    "key": {
+      "H": {
+        "item": "sl:demon_horn"
+      },
+      "M": {
+        "item": "sl:mana_crystal"
+      },
+      "D": {
+        "item": "minecraft:diamond"
+      },
+      "S": {
+        "item": "minecraft:stick"
+      }
+    },
+    "unlock": [
+      {
+        "item": "sl:demon_horn"
+      }
+    ],
+    "result": {
+      "item": "sl:demon_king_dagger"
+    }
+  }
+}

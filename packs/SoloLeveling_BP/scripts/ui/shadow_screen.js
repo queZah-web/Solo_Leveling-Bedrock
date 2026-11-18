@@ -1,13 +1,13 @@
 // Shadow Profile: one shadow's stats, equipment and actions.
 // Layout "sl:shadow|" (index map in tools/gen_ui.py).
 import { ItemLockMode, ItemStack } from "@minecraft/server";
-import { ModalFormData } from "@minecraft/server-ui";
+import { ActionFormData, ModalFormData } from "@minecraft/server-ui";
 import {
-  dismiss, entityOf, feed, findRecord, regenLeft, release, rename, saveActive, setOrder, summon, train,
+  dismiss, entityOf, feed, findRecord, rankUp, rankUpStatus, regenLeft, release, rename, saveActive, setOrder, summon, train,
 } from "../army/army.js";
 import { canWearGear, gearInfo, GEAR_SLOTS, isPlain, setGear, updateCombatMode } from "../army/gear.js";
 import {
-  creeperCharges, DIETS, FEED_MP, FOOD_MAX, GRADES, healValue, portraitOf, SHADOW_MAX_LEVEL, SHADOW_TYPES, shadowAtkMult, shadowDefMult, shadowXpToNext, TRAIN_MP,
+  canRankUp, creeperCharges, DIETS, FEED_MP, FOOD_MAX, GRADES, healValue, levelCap, portraitOf, SHADOW_MAX_LEVEL, SHADOW_TYPES, shadowAtkMult, shadowDefMult, shadowXpToNext, TRAIN_MP,
 } from "../army/types.js";
 import { markDirty } from "../data.js";
 import { iconOf, prettyId } from "../vault/items.js";
@@ -53,7 +53,7 @@ export async function shadowScreen(player) {
   form.body(
     [
       `§7${def.label}`,
-      `${g.color}${g.name} §8| §7Lv §f${s.level} §8| §7Kills §f${s.kills}`,
+      `${g.color}${g.name} §8| §7Lv §f${s.level}§8/${levelCap(s)} §8| §7Kills §f${s.kills}`,
       `§7ATK §cx${shadowAtkMult(s).toFixed(2)} §7DEF §a${Math.round((1 - shadowDefMult(s)) * 100)}%%`,
       `§7${status} §8| §9${g.cost} MP`,
       `§5${def.skill}§7: ${def.skillDesc}`,
@@ -167,6 +167,29 @@ export async function shadowScreen(player) {
       return again();
     }, `${gs.label}: ${curName}`);
   });
+
+  // Rank up (breakthrough every 10 levels).
+  const top = s.grade >= GRADES.length - 1;
+  const ready = canRankUp(s);
+  const nextG = GRADES[Math.min(GRADES.length - 1, s.grade + 1)];
+  form.slot(80, top ? "§6MAX RANK" : ready ? `§dRANK UP > ${nextG.color}${nextG.rank}` : `§8RANK UP at Lv ${(s.grade + 1) * 10}`, BLANK, async () => {
+    if (top) return toast("§6Already the highest rank"), again();
+    const stt = rankUpStatus(player, s);
+    const lines = stt.items.map((x) => `${x.have >= x.need ? "§a" : "§c"}${prettyId(x.id)}: ${x.have}/${x.need}`);
+    lines.push(`${stt.haveGold >= stt.gold ? "§a" : "§c"}Gold: ${stt.haveGold}/${stt.gold}`);
+    const ok = ready && stt.items.every((x) => x.have >= x.need) && stt.haveGold >= stt.gold;
+    const res = await showForm(
+      player,
+      new ActionFormData()
+        .title(`Rank up ${s.name}`)
+        .body([`${GRADES[s.grade].color}${GRADES[s.grade].name} §7> ${nextG.color}${nextG.name} [Rank ${nextG.rank}]`,
+          ready ? "§aLevel requirement met" : `§cReach level ${(s.grade + 1) * 10} first (now ${s.level})`, "", "§fRequired:", ...lines].join("\n"))
+        .button(ok ? "§dRANK UP" : "§8Not ready yet")
+        .button("Back"),
+    );
+    if (res && !res.canceled && res.selection === 0 && ok) report(rankUp(player, s.id), "");
+    return again();
+  }, top ? "§6Max rank" : `§dRank up (needs Lv ${(s.grade + 1) * 10})`);
 
   // Attack priority for this shadow only, and stay/follow order.
   form.slot(78, `§cATK: §f${shadowModeLabel(player, s)}`, BLANK, async () => {

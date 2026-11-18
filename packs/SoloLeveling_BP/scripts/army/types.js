@@ -61,8 +61,42 @@ export const shadowXpToNext = (level) => Math.floor(40 * Math.pow(level, 1.4));
 export const shadowAtkMult = (s) => 1 + (s.level - 1) * 0.05 + s.grade * 0.15;
 /** Damage taken multiplier (lower = tougher). */
 export const shadowDefMult = (s) => 1 / (1 + (s.level - 1) * 0.04 + s.grade * 0.12);
-/** Grade promotion every 20 levels (named shadows keep their minimum grade). */
-export const gradeForLevel = (base, level) => Math.min(GRADES.length - 1, base + Math.floor((level - 1) / 20));
+// ---------------------------------------------------------------- rank-up (breakthrough)
+/**
+ * A shadow stops leveling at (grade + 1) * 10 until it is ranked up with
+ * materials. F->E at Lv10, E->D at Lv20 ... A->S at Lv60. S keeps leveling to 100.
+ */
+export const levelCap = (s) => (s.grade >= GRADES.length - 1 ? SHADOW_MAX_LEVEL : Math.max(s.level, Math.min(SHADOW_MAX_LEVEL, (s.grade + 1) * 10)));
+export const canRankUp = (s) => s.grade < GRADES.length - 1 && s.level >= (s.grade + 1) * 10;
+
+/** Each type's own material, and how much of it counts (rare items need fewer). */
+const SIGNATURE = {
+  zombie: ["minecraft:rotten_flesh", 1], husk: ["minecraft:rotten_flesh", 1], drowned: ["minecraft:rotten_flesh", 1],
+  skeleton: ["minecraft:bone", 1], stray: ["minecraft:bone", 1], wither_skeleton: ["minecraft:bone", 1],
+  spider: ["minecraft:string", 1], wolf: ["minecraft:beef", 0.5], creeper: ["minecraft:gunpowder", 1],
+  enderman: ["minecraft:ender_pearl", 0.25], vindicator: ["minecraft:emerald", 0.25], iron_golem: ["minecraft:iron_ingot", 0.5],
+  ravager: ["minecraft:leather", 0.5], warden: ["minecraft:echo_shard", 0.1], goblin: ["sl:goblin_fang", 0.25],
+  orc: ["sl:orc_tusk", 0.25], ice_elf: ["sl:frost_essence", 0.25],
+};
+// by target grade 1..6 (E, D, C, B, A, S)
+const SIG_AMOUNT = [32, 48, 64, 96, 128, 192];
+const MANA = [0, 2, 4, 8, 12, 20];
+const DIAMOND = [0, 0, 1, 2, 4, 8];
+const HORN = [0, 0, 0, 0, 2, 4];
+const CORE = [0, 0, 0, 0, 0, 1];
+const GOLD = [100, 300, 800, 2000, 5000, 12000];
+
+/** Materials + gold needed to rank a shadow up to the next grade. */
+export function rankUpCost(s) {
+  const t = s.grade; // index into the tables above (target grade = s.grade + 1)
+  const [sig, k] = SIGNATURE[s.type] ?? ["minecraft:bone", 1];
+  const items = [[sig, Math.max(1, Math.round(SIG_AMOUNT[t] * k))]];
+  if (MANA[t]) items.push(["sl:mana_crystal", MANA[t]]);
+  if (DIAMOND[t]) items.push(["minecraft:diamond", DIAMOND[t]]);
+  if (HORN[t]) items.push(["sl:demon_horn", HORN[t]]);
+  if (CORE[t]) items.push(["sl:demon_core", CORE[t]]);
+  return { items, gold: GOLD[t] };
+}
 
 /** Seconds a fallen shadow needs to regenerate. */
 export const reviveSeconds = (s) => 30 + s.grade * 15;

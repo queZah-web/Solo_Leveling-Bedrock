@@ -1,0 +1,36 @@
+{
+  "format_version": "1.20.10",
+  "minecraft:recipe_shapeless": {
+    "description": {
+      "identifier": "sl:craft_elixir_of_life"
+    },
+    "tags": [
+      "crafting_table"
+    ],
+    "ingredients": [
+      {
+        "item": "minecraft:glass_bottle"
+      },
+      {
+        "item": "minecraft:golden_apple"
+      },
+      {
+        "item": "sl:mana_crystal"
+      },
+      {
+        "item": "sl:mana_crystal"
+      },
+      {
+        "item": "sl:demon_horn"
+      }
+    ],
+    "unlock": [
+      {
+        "item": "sl:mana_crystal"
+      }
+    ],
+    "result": {
+      "item": "sl:elixir_of_life"
+    }
+  }
+}

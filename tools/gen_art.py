@@ -576,9 +576,77 @@ def mobs():
     mob_clients()
 
 
+# ================================================================ crafting materials (32x32)
+def sprite(name, draw):
+    img = Image.new("RGBA", (32, 32), (0, 0, 0, 0))
+    draw(img.load())
+    img = outline(img)
+    img.save(os.path.join(ITEMS, f"{name}.png"))
+
+
+def blob(px, cx, cy, rx, ry, hi, mid, lo, cond=None):
+    for y in range(32):
+        for x in range(32):
+            dx, dy = (x + 0.5 - cx) / rx, (y + 0.5 - cy) / ry
+            d = dx * dx + dy * dy
+            if d <= 1 and (cond is None or cond(x, y)):
+                k = (dx + dy) * 0.5 + 0.5  # light from top-left
+                px[x, y] = (mix(hi, mid, k * 1.4) if k < 0.7 else mix(mid, lo, (k - 0.7) / 0.6)) + (255,)
+
+
+def horn(px, base, tip, hi, length=20, w0=4.5, curve=0.5):
+    for i in range(length * 4):
+        t = i / (length * 4)
+        x = 8 + t * (length - 2) + math.sin(t * math.pi) * 2
+        y = 26 - t * (length - 2) + (t ** 2) * curve * 10
+        w = w0 * (1 - t) + 0.6
+        for yy in range(int(y - w), int(y + w) + 1):
+            for xx in range(int(x - w), int(x + w) + 1):
+                if 0 <= xx < 32 and 0 <= yy < 32 and math.hypot(xx - x, yy - y) <= w:
+                    side = (xx - x) - (yy - y)
+                    c = mix(base, tip, t)
+                    px[xx, yy] = (mix(c, hi, 0.5) if side < -w * 0.4 else mul(c, 0.8) if side > w * 0.4 else c) + (255,)
+
+
+def crystal(px, hi, mid, lo, glow=None):
+    pts = [(16, 3), (24, 12), (21, 28), (11, 28), (8, 12)]
+    poly = Image.new("L", (32, 32), 0)
+    from PIL import ImageDraw
+    ImageDraw.Draw(poly).polygon(pts, fill=255)
+    m = poly.load()
+    for y in range(32):
+        for x in range(32):
+            if m[x, y]:
+                px[x, y] = (hi if x < 16 and y < 16 else mid if x < 16 else lo if y > 18 else mix(mid, lo, 0.5)) + (255,)
+    for y in range(5, 26):
+        px[16, y] = mul(hi, 1.1) + (255,)
+    for (x, y) in ((12, 10), (12, 11), (13, 9)):
+        px[x, y] = (255, 255, 255, 255)
+
+
+def materials():
+    sprite("goblin_fang", lambda px: horn(px, (230, 222, 190), (250, 248, 235), (255, 255, 255), length=18, w0=3.6, curve=0.8))
+    sprite("orc_tusk", lambda px: horn(px, (215, 200, 160), (250, 244, 225), (255, 255, 250), length=22, w0=5.0, curve=0.3))
+    sprite("demon_horn", lambda px: horn(px, (40, 20, 30), (200, 40, 40), (120, 70, 90), length=22, w0=5.0, curve=1.0))
+    sprite("frost_essence", lambda px: crystal(px, (235, 250, 255), (140, 210, 250), (60, 130, 210)))
+    sprite("mana_crystal", lambda px: crystal(px, (200, 230, 255), (80, 140, 255), (40, 60, 180)))
+    sprite("venom_gland", lambda px: blob(px, 16, 17, 10, 9, (190, 255, 120), (90, 190, 60), (30, 90, 30)))
+
+    def core(px):
+        blob(px, 16, 16, 11, 11, (255, 140, 120), (180, 20, 30), (40, 0, 10))
+        blob(px, 16, 16, 5, 5, (255, 240, 200), (255, 120, 60), (200, 30, 20))
+        for a in range(0, 360, 45):
+            x = int(16 + math.cos(math.radians(a)) * 13)
+            y = int(16 + math.sin(math.radians(a)) * 13)
+            if 0 <= x < 32 and 0 <= y < 32:
+                px[x, y] = (255, 80, 60, 255)
+    sprite("demon_core", core)
+
+
 def main():
     weapons()
     items()
+    materials()
     mobs()
     print("art generated: 5 weapons, 6 items, 3 mobs (+ shadows)")
 

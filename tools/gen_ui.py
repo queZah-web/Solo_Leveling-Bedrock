@@ -538,7 +538,7 @@ def army_content():
 #   7 back   9 title   16 summon/dismiss 17 feed 18 train 30 rename 31 release
 #   19 portrait  28 hp bar 29 xp bar  33..38 gear (head chest legs feet weapon offhand)
 #   39 selected item label   40..75 your inventory (9 x 4)   76 food pouch  77 totem
-#   78 attack mode (this shadow)   79 stay/follow order
+#   78 attack mode (this shadow)   79 stay/follow order   80 rank up
 GEAR_LABELS = ["HELMET", "CHEST", "LEGS", "BOOTS", "WEAPON", "OFFHAND"]
 
 
@@ -594,7 +594,9 @@ def shadow_content():
         {"g": gap("100%", 3)},
         row("orders", [{"a78": small_btn(78, ["58%", 15])}, {"g": gap(2, 15)}, {"a79": small_btn(79, ["fill", 15])}], 15),
         {"g2": gap("100%", 2)},
-        {"sel": plain_label(39, ["100%", 24], WHITE, 0.7, "left")},
+        {"a80": small_btn(80, ["100%", 15])},
+        {"g3": gap("100%", 1)},
+        {"sel": plain_label(39, ["100%", 12], WHITE, 0.65, "left")},
     ], pad=3)
     return {
         "type": "stack_panel",

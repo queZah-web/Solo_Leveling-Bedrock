@@ -302,6 +302,7 @@ function spawnRoom(inst, i) {
       b.addTag(tagAll(inst));
       b.addTag(tagRoom(inst, i));
       b.addTag("sl_boss");
+      b.addTag(`sl_rank_${inst.rank}`);
       buff(b, 4 + inst.rank * 4, inst.rank, Math.min(3, Math.floor(inst.rank / 2) + 1));
       inst.bossId = b.id;
       ow().playSound("mob.wither.spawn", c, { volume: 1, pitch: 0.7 });

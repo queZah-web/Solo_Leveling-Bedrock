@@ -20,6 +20,7 @@
         "value": 15
       },
       "minecraft:rarity": "epic",
+      "minecraft:glint": true,
       "minecraft:tags": {
         "tags": [
           "minecraft:is_sword",

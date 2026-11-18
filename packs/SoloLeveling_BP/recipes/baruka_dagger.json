@@ -1,0 +1,38 @@
+{
+  "format_version": "1.20.10",
+  "minecraft:recipe_shaped": {
+    "description": {
+      "identifier": "sl:craft_baruka_dagger"
+    },
+    "tags": [
+      "crafting_table"
+    ],
+    "pattern": [
+      " FF",
+      "MDF",
+      "SM "
+    ],
+    "key": {
+      "F": {
+        "item": "sl:frost_essence"
+      },
+      "M": {
+        "item": "sl:mana_crystal"
+      },
+      "D": {
+        "item": "minecraft:diamond"
+      },
+      "S": {
+        "item": "minecraft:stick"
+      }
+    },
+    "unlock": [
+      {
+        "item": "sl:frost_essence"
+      }
+    ],
+    "result": {
+      "item": "sl:baruka_dagger"
+    }
+  }
+}

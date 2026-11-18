@@ -1,5 +1,5 @@
 // Abilities of the Solo Leveling weapons (custom items sl:*).
-import { EntityDamageCause, EquipmentSlot, Player, world } from "@minecraft/server";
+import { EntityDamageCause, EquipmentSlot, Player, system, world } from "@minecraft/server";
 import { addDamageHook } from "../stats.js";
 
 export const WEAPON_INFO = {
@@ -64,6 +64,30 @@ world.afterEvents.entityHurt.subscribe(({ damageSource, hurtEntity, damage }) =>
     cleaving = false;
   }
 });
+
+// Aura: a few particles around the hand while a weapon is held (cheap: 1-2 per player every 6 ticks).
+const AURA = {
+  "sl:kasaka_fang": "minecraft:villager_happy",
+  "sl:knight_killer": "minecraft:end_rod",
+  "sl:baruka_dagger": "minecraft:snowflake_particle",
+  "sl:demon_king_dagger": "minecraft:dragon_breath_trail",
+  "sl:demon_king_longsword": "minecraft:basic_flame_particle",
+};
+system.runInterval(() => {
+  for (const p of world.getAllPlayers()) {
+    const fx = AURA[held(p)];
+    if (!fx) continue;
+    try {
+      const v = p.getViewDirection();
+      const head = p.getHeadLocation();
+      const len = Math.hypot(v.x, v.z) || 1;
+      const rx = -v.z / len;
+      const rz = v.x / len;
+      const hand = { x: head.x + v.x * 0.55 + rx * 0.38, y: head.y - 0.55, z: head.z + v.z * 0.55 + rz * 0.38 };
+      p.dimension.spawnParticle(fx, { x: hand.x + (Math.random() - 0.5) * 0.3, y: hand.y + Math.random() * 0.5, z: hand.z + (Math.random() - 0.5) * 0.3 });
+    } catch {}
+  }
+}, 6);
 
 // Ice Elves' arrows freeze.
 world.afterEvents.entityHurt.subscribe(({ damageSource, hurtEntity }) => {

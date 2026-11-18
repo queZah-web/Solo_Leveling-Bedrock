@@ -1,0 +1,38 @@
+{
+  "format_version": "1.20.10",
+  "minecraft:recipe_shaped": {
+    "description": {
+      "identifier": "sl:craft_knight_killer"
+    },
+    "tags": [
+      "crafting_table"
+    ],
+    "pattern": [
+      " IT",
+      "MI ",
+      "S  "
+    ],
+    "key": {
+      "I": {
+        "item": "minecraft:iron_ingot"
+      },
+      "T": {
+        "item": "sl:orc_tusk"
+      },
+      "M": {
+        "item": "sl:mana_crystal"
+      },
+      "S": {
+        "item": "minecraft:stick"
+      }
+    },
+    "unlock": [
+      {
+        "item": "sl:orc_tusk"
+      }
+    ],
+    "result": {
+      "item": "sl:knight_killer"
+    }
+  }
+}

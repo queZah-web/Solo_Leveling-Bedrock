@@ -1,0 +1,20 @@
+{
+  "format_version": "1.21.100",
+  "minecraft:item": {
+    "description": {
+      "identifier": "sl:mana_crystal",
+      "menu_category": {
+        "category": "items"
+      }
+    },
+    "components": {
+      "minecraft:icon": "sl_mana_crystal",
+      "minecraft:display_name": {
+        "value": "item.sl:mana_crystal.name"
+      },
+      "minecraft:max_stack_size": 64,
+      "minecraft:rarity": "uncommon",
+      "minecraft:glint": true
+    }
+  }
+}
