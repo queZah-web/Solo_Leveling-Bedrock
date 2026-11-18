@@ -2,6 +2,17 @@
   "format_version": "1.8.0",
   "render_controllers": {
     "controller.render.sl_gate": {
+      "arrays": {
+        "textures": {
+          "Array.colors": [
+            "Texture.blue",
+            "Texture.green",
+            "Texture.pink",
+            "Texture.red",
+            "Texture.crimson"
+          ]
+        }
+      },
       "geometry": "Geometry.default",
       "materials": [
         {
@@ -9,7 +20,7 @@
         }
       ],
       "textures": [
-        "Texture.default"
+        "Array.colors[query.variant]"
       ],
       "ignore_lighting": true
     }

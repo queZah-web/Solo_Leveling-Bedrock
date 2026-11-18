@@ -1,15 +1,33 @@
 {
   "format_version": "1.8.0",
   "animations": {
-    "animation.sl.gate.spin": {
+    "animation.sl.gate.idle": {
       "loop": true,
       "bones": {
-        "swirl": {
+        "root": {
+          "scale": "math.min(1.0, query.life_time / 3.0) * (1.0 + math.sin(query.life_time * 40.0) * 0.015)"
+        },
+        "outer": {
           "rotation": [
             0,
             0,
-            "query.life_time * 80.0"
+            "query.life_time * 35.0"
           ]
+        },
+        "mid": {
+          "rotation": [
+            0,
+            0,
+            "-query.life_time * 70.0"
+          ]
+        },
+        "core": {
+          "rotation": [
+            0,
+            0,
+            "query.life_time * 120.0"
+          ],
+          "scale": "0.9 + math.sin(query.life_time * 160.0) * 0.12"
         }
       }
     }

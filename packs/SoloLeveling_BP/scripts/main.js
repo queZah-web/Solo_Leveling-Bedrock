@@ -6,6 +6,7 @@ import "./skills/skills.js";
 import "./quests/daily.js";
 import "./gates/dungeon.js";
 import "./gates/gates.js";
+import "./gates/tracking.js";
 import "./commands.js";
 import "./gem.js";
 import "./ui/shortcuts.js";

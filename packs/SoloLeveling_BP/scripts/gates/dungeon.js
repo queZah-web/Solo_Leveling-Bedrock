@@ -149,7 +149,8 @@ function areaLoaded(inst) {
 function spawnExit(inst, center, hidden) {
   if (hidden) return;
   try {
-    const e = ow().spawnEntity("sl:gate_blue", { x: center.x - 5 + 0.5, y: center.y, z: center.z + 0.5 });
+    const e = ow().spawnEntity("sl:gate", { x: center.x - 5 + 0.5, y: center.y, z: center.z + 0.5 });
+    e.triggerEvent("sl:small"); // fits inside a room
     e.nameTag = "§b[ EXIT ]";
     e.addTag("sl_exit");
     e.addTag(tagAll(inst));

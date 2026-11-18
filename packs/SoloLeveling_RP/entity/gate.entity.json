@@ -2,22 +2,26 @@
   "format_version": "1.10.0",
   "minecraft:client_entity": {
     "description": {
-      "identifier": "sl:gate_red",
+      "identifier": "sl:gate",
       "materials": {
         "default": "entity_emissive_alpha"
       },
       "textures": {
-        "default": "textures/sl/entity/gate_red"
+        "blue": "textures/sl/entity/gate_blue",
+        "green": "textures/sl/entity/gate_green",
+        "pink": "textures/sl/entity/gate_pink",
+        "red": "textures/sl/entity/gate_red",
+        "crimson": "textures/sl/entity/gate_crimson"
       },
       "geometry": {
         "default": "geometry.sl.gate"
       },
       "animations": {
-        "spin": "animation.sl.gate.spin"
+        "idle": "animation.sl.gate.idle"
       },
       "scripts": {
         "animate": [
-          "spin"
+          "idle"
         ]
       },
       "render_controllers": [

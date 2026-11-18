@@ -54,11 +54,29 @@ export const RANK_INDEX = Object.fromEntries(GATE_RANKS.map((r, i) => [r.rank, i
 
 export const RED_CHANCE = 0.05;
 export const RED_REWARD = 1.5;
-export const GATE_LIFETIME_MIN = 60; // minutes before a Dungeon Break
-export const GATE_CHECK_MIN = 15; // natural spawn attempt interval
-export const GATE_SPAWN_CHANCE = 0.6;
-export const MAX_GATES = 6;
+export const MAX_GATES = 14;
 export const MAX_DUNGEONS = 4; // dungeons running at the same time
+
+/** Gate colour variant per rank (E blue, D pink, C green, B pink, A pink, S red). */
+export const RANK_COLOR = [0, 2, 1, 2, 2, 3];
+export const RED_GATE_COLOR = 4; // crimson
+export const COLOR_NAMES = ["blue", "green", "pink", "red", "crimson"];
+
+/** Minutes a gate stays open before its Dungeon Break. */
+export const lifetimeMin = (rank) => (rank >= 4 ? 120 : 30);
+
+/** Where gates appear: this far from the chosen hunter, and never closer than MIN to anyone. */
+export const GATE_DIST = { min: 500, max: 2000 };
+
+/**
+ * Spawn schedule. "early" = the first 72 real hours after the mod was added.
+ * every = minutes between gates of that kind.
+ */
+export const SCHEDULE = {
+  earlyHours: 72,
+  early: { any: 30, A: 12 * 60, S: 24 * 60, ranks: [0, 0, 1, 1, 2, 3] },
+  late: { any: 15, A: 6 * 60, S: 12 * 60, ranks: [0, 1, 1, 2, 2, 3, 3] },
+};
 
 /** Rank for a hunter level (mostly matching, sometimes harder or easier). */
 export function rollRank(level) {

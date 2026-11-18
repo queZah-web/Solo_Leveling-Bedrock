@@ -86,6 +86,21 @@ system.beforeEvents.startup.subscribe(({ customCommandRegistry: reg }) => {
     },
   );
 
+  reg.registerCommand(
+    {
+      name: "sl:gate",
+      description: "Open the Gates window (open gates, coordinates, tracking)",
+      permissionLevel: CommandPermissionLevel.Any,
+      cheatsRequired: false,
+    },
+    (origin) => {
+      const p = origin.sourceEntity ?? origin.initiator;
+      if (!(p instanceof Player)) return fail("Only players can view gates.");
+      system.run(() => openSystem(p, "gates"));
+      return ok();
+    },
+  );
+
   reg.registerEnum("sl:gaterank", ["E", "D", "C", "B", "A", "S"]);
   reg.registerCommand(
     {
