@@ -3,8 +3,8 @@
   "screen": {
     "type": "panel",
     "size": [
-      400,
-      236
+      392,
+      206
     ],
     "collection_name": "form_buttons",
     "controls": [

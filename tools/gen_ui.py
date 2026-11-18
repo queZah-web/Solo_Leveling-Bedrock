@@ -27,7 +27,7 @@ T = "textures/sl/ui/"
 LAYOUTS = ["sl:profile|", "sl:list|"]
 # The form factory gives long_form no size, so percentages at the top level
 # resolve to 0. The window therefore uses a fixed size that fits phones.
-SCREEN_SIZE = [400, 236]
+SCREEN_SIZE = [392, 206]
 COL = "form_buttons"
 
 CYAN = [0.45, 0.92, 1.0]
