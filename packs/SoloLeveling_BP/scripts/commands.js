@@ -7,7 +7,8 @@ import { BASE_STAT, maxMp, STATS } from "./config.js";
 import { getData, markDirty, resetData } from "./data.js";
 import { addXp, applyStatEffects, setLevel } from "./stats.js";
 import { arise } from "./army/army.js";
-import { endPenalty, setPenaltyEnabled, startPenalty } from "./quests/daily.js";
+import { setPenaltyEnabled } from "./quests/daily.js";
+import { endPenalty, startPenalty } from "./quests/penalty.js";
 import { openSystem } from "./ui/screens.js";
 import { castSlot, quickMenu } from "./ui/skills_screen.js";
 

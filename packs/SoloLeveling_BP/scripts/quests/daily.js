@@ -4,10 +4,11 @@
 // was online on a day and did not finish that day's quest, the next time
 // they are online they are sent to the Penalty Zone: survive for 3 minutes.
 // Server owners can turn the penalty off with /sl:penalty off.
-import { BlockVolume, Player, system, world } from "@minecraft/server";
+import { Player, system, world } from "@minecraft/server";
 import { maxMp } from "../config.js";
 import { getData, markDirty } from "../data.js";
-import { addXp, flash } from "../stats.js";
+import { addXp } from "../stats.js";
+import { startPenalty } from "./penalty.js";
 
 export const DAY_TZ_OFFSET = 3; // UTC+3
 export const DAILY_TASKS = [
@@ -17,9 +18,6 @@ export const DAILY_TASKS = [
   { key: "kills", name: "Hunt", how: "Defeat monsters", goal: 20 },
 ];
 export const DAILY_REWARD_POINTS = 3;
-const PENALTY_SECONDS = 180;
-const ZONE = { x: 60000, y: 200, z: 60000 };
-const ZONE_RADIUS = 18;
 
 export const today = () => {
   const d = new Date(Date.now() + DAY_TZ_OFFSET * 3600 * 1000);
@@ -137,112 +135,3 @@ world.afterEvents.entityDie.subscribe(({ deadEntity, damageSource }) => {
 });
 
 world.beforeEvents.playerLeave.subscribe(({ player }) => track.delete(player.id));
-
-// ---------------------------------------------------------------- penalty zone
-const ZONE_TAG = "sl_penalty";
-
-function buildZone(dim) {
-  const { x, y, z } = ZONE;
-  const r = ZONE_RADIUS;
-  // Sand arena with an invisible wall, open sky.
-  dim.fillBlocks(new BlockVolume({ x: x - r, y: y - 1, z: z - r }, { x: x + r, y: y - 1, z: z + r }), "minecraft:sandstone");
-  dim.fillBlocks(new BlockVolume({ x: x - r + 1, y, z: z - r + 1 }, { x: x + r - 1, y, z: z + r - 1 }), "minecraft:sand");
-  for (const [a, b] of [
-    [{ x: x - r, y, z: z - r }, { x: x + r, y: y + 6, z: z - r }],
-    [{ x: x - r, y, z: z + r }, { x: x + r, y: y + 6, z: z + r }],
-    [{ x: x - r, y, z: z - r }, { x: x - r, y: y + 6, z: z + r }],
-    [{ x: x + r, y, z: z - r }, { x: x + r, y: y + 6, z: z + r }],
-  ]) dim.fillBlocks(new BlockVolume(a, b), "minecraft:barrier");
-}
-
-export function startPenalty(player) {
-  const d = getData(player);
-  d.penaltyDue = false;
-  d.penalty = {
-    until: Date.now() + PENALTY_SECONDS * 1000,
-    ret: { ...player.location, dim: player.dimension.id },
-  };
-  markDirty(player);
-  const ow = world.getDimension("overworld");
-  player.onScreenDisplay.setTitle("§c§lPENALTY QUEST", {
-    subtitle: "§fYou failed yesterday's Daily Quest. §cSurvive!",
-    fadeInDuration: 5, stayDuration: 60, fadeOutDuration: 10,
-  });
-  player.sendMessage("§c[System] §fPenalty Quest: §cSurvive in the Penalty Zone for 3 minutes.");
-  player.addEffect("slow_falling", 200, { amplifier: 0, showParticles: false });
-  player.addEffect("resistance", 100, { amplifier: 4, showParticles: false });
-  player.teleport({ x: ZONE.x + 0.5, y: ZONE.y + 3, z: ZONE.z + 0.5 }, { dimension: ow });
-  // Build once the chunk is loaded around the player.
-  system.runTimeout(() => {
-    try {
-      buildZone(ow);
-    } catch (e) {
-      console.warn(`[SL] penalty zone build failed: ${e}`);
-    }
-  }, 30);
-}
-
-export function endPenalty(player, survived) {
-  const d = getData(player);
-  const ret = d.penalty?.ret;
-  d.penalty = null;
-  markDirty(player);
-  // Clear the monsters of this hunter's penalty.
-  try {
-    for (const e of world.getDimension("overworld").getEntities({ tags: [`${ZONE_TAG}_${player.id}`] })) e.remove();
-  } catch {}
-  if (survived) {
-    if (d.title === "None") d.title = "The One Who Overcame Adversity";
-    player.onScreenDisplay.setTitle("§aPENALTY CLEARED", {
-      subtitle: "§fYou survived the Penalty Zone.", fadeInDuration: 5, stayDuration: 50, fadeOutDuration: 10,
-    });
-    addXp(player, 100 + d.level * 10);
-    if (ret) {
-      try {
-        player.teleport(ret, { dimension: world.getDimension(ret.dim) });
-      } catch {}
-    }
-  } else {
-    player.sendMessage("§c[System] §7You fell in the Penalty Zone.");
-  }
-}
-
-const PENALTY_MOBS = ["minecraft:silverfish", "minecraft:silverfish", "minecraft:husk", "minecraft:spider"];
-
-let penaltyTick = 0;
-system.runInterval(() => {
-  const now = Date.now();
-  const wave = ++penaltyTick % 5 === 0; // every 5 seconds
-  for (const p of world.getAllPlayers()) {
-    const d = getData(p);
-    if (!d.penalty) continue;
-    const left = Math.ceil((d.penalty.until - now) / 1000);
-    if (left <= 0) {
-      endPenalty(p, true);
-      continue;
-    }
-    flash(p, `§c§lPENALTY ZONE §r§f${Math.floor(left / 60)}:${String(left % 60).padStart(2, "0")}`, 25);
-    // Keep the hunter inside the zone.
-    const l = p.location;
-    if (p.dimension.id !== "minecraft:overworld" || Math.abs(l.x - ZONE.x) > ZONE_RADIUS + 4 || Math.abs(l.z - ZONE.z) > ZONE_RADIUS + 4) {
-      p.teleport({ x: ZONE.x + 0.5, y: ZONE.y + 1, z: ZONE.z + 0.5 }, { dimension: world.getDimension("overworld") });
-      continue;
-    }
-    if (!wave) continue;
-    // Waves: more monsters the higher the level.
-    const n = 2 + Math.floor(d.level / 15);
-    for (let i = 0; i < n; i++) {
-      const a = Math.random() * Math.PI * 2;
-      const pos = { x: ZONE.x + 0.5 + Math.cos(a) * (ZONE_RADIUS - 3), y: ZONE.y + 0.5, z: ZONE.z + 0.5 + Math.sin(a) * (ZONE_RADIUS - 3) };
-      try {
-        const m = p.dimension.spawnEntity(PENALTY_MOBS[Math.floor(Math.random() * PENALTY_MOBS.length)], pos);
-        m.addTag(`${ZONE_TAG}_${p.id}`);
-      } catch {}
-    }
-  }
-}, 20);
-
-// Dying ends the penalty (failed).
-world.afterEvents.entityDie.subscribe(({ deadEntity }) => {
-  if (deadEntity instanceof Player && getData(deadEntity).penalty) endPenalty(deadEntity, false);
-});
