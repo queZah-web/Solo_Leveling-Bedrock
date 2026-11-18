@@ -987,6 +987,37 @@
               }
             },
             {
+              "doll": {
+                "type": "panel",
+                "size": [
+                  "100%",
+                  "100%"
+                ],
+                "layer": 2,
+                "controls": [
+                  {
+                    "player": {
+                      "type": "custom",
+                      "renderer": "live_player_renderer",
+                      "size": [
+                        46,
+                        80
+                      ],
+                      "offset": [
+                        0,
+                        -8
+                      ],
+                      "property_bag": {
+                        "#look_at_cursor": true
+                      },
+                      "layer": 1
+                    }
+                  }
+                ],
+                "collection_name": "form_buttons"
+              }
+            },
+            {
               "content": {
                 "type": "stack_panel",
                 "orientation": "vertical",
@@ -994,7 +1025,7 @@
                   "100% - 8px",
                   "100% - 8px"
                 ],
-                "layer": 2,
+                "layer": 3,
                 "controls": [
                   {
                     "t": {
@@ -1025,33 +1056,11 @@
                     }
                   },
                   {
-                    "doll": {
+                    "space": {
                       "type": "panel",
                       "size": [
                         "100%",
                         "fill"
-                      ],
-                      "clips_children": true,
-                      "layer": 1,
-                      "controls": [
-                        {
-                          "player": {
-                            "type": "custom",
-                            "renderer": "live_player_renderer",
-                            "size": [
-                              30,
-                              52
-                            ],
-                            "offset": [
-                              0,
-                              -2
-                            ],
-                            "property_bag": {
-                              "#look_at_cursor": true
-                            },
-                            "layer": 1
-                          }
-                        }
                       ],
                       "collection_name": "form_buttons"
                     }

@@ -245,19 +245,20 @@ def body_text():
 # ---------------------------------------------------------------- layouts
 def profile_content():
     """sl:profile| -- 7..11 stats, 12 hp, 13 mp, 14 fatigue, 15 allocate."""
+    # Player preview: an overlay behind the bars (not part of the stack), so it
+    # keeps its full size and the HP/MP/Fatigue bars are drawn on top of it.
     doll = {
         "type": "panel",
-        "size": ["100%", "fill"],
-        "clips_children": True,
-        "layer": 1,
+        "size": ["100%", "100%"],
+        "layer": 2,
         "controls": [
             {
                 # Renders the local player, so every hunter sees their own skin.
                 "player": {
                     "type": "custom",
                     "renderer": "live_player_renderer",
-                    "size": [30, 52],
-                    "offset": [0, -2],
+                    "size": [46, 80],
+                    "offset": [0, -8],
                     "property_bag": {"#look_at_cursor": True},
                     "layer": 1,
                 }
@@ -266,13 +267,16 @@ def profile_content():
     }
     left = inner_panel(["34%", "100%"], [
         {"t": section_title("HUNTER")},
-        {"doll": doll},
+        {"space": gap("100%", "fill")},
         {"hp": bar(12)},
         {"g1": gap("100%", 2)},
         {"mp": bar(13)},
         {"g2": gap("100%", 2)},
         {"fat": bar(14)},
     ])
+    # bg (layer 1) < doll (layer 2) < content with bars (layer 3)
+    left["controls"][1]["content"]["layer"] = 3
+    left["controls"].insert(1, {"doll": doll})
     mid_ctrls = [{"t": section_title("STATS")}]
     for n, idx in enumerate(range(7, 12)):
         mid_ctrls.append({f"s{idx}": stat_row(idx)})
