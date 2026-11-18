@@ -2,6 +2,41 @@
   "resource_pack_name": "solo_leveling",
   "texture_name": "atlas.items",
   "texture_data": {
-    "sl_system_gem": { "textures": "textures/items/sl/system_gem" }
+    "sl_system_gem": {
+      "textures": "textures/items/sl/system_gem"
+    },
+    "sl_kasaka_fang": {
+      "textures": "textures/items/sl/kasaka_fang"
+    },
+    "sl_knight_killer": {
+      "textures": "textures/items/sl/knight_killer"
+    },
+    "sl_baruka_dagger": {
+      "textures": "textures/items/sl/baruka_dagger"
+    },
+    "sl_demon_king_dagger": {
+      "textures": "textures/items/sl/demon_king_dagger"
+    },
+    "sl_demon_king_longsword": {
+      "textures": "textures/items/sl/demon_king_longsword"
+    },
+    "sl_healing_elixir": {
+      "textures": "textures/items/sl/healing_elixir"
+    },
+    "sl_mana_potion": {
+      "textures": "textures/items/sl/mana_potion"
+    },
+    "sl_fatigue_potion": {
+      "textures": "textures/items/sl/fatigue_potion"
+    },
+    "sl_elixir_of_life": {
+      "textures": "textures/items/sl/elixir_of_life"
+    },
+    "sl_random_box": {
+      "textures": "textures/items/sl/random_box"
+    },
+    "sl_dungeon_key": {
+      "textures": "textures/items/sl/dungeon_key"
+    }
   }
 }

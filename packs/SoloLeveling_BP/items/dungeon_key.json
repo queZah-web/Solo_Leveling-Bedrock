@@ -1,0 +1,20 @@
+{
+  "format_version": "1.21.100",
+  "minecraft:item": {
+    "description": {
+      "identifier": "sl:dungeon_key",
+      "menu_category": {
+        "category": "items"
+      }
+    },
+    "components": {
+      "minecraft:icon": "sl_dungeon_key",
+      "minecraft:display_name": {
+        "value": "item.sl:dungeon_key.name"
+      },
+      "minecraft:max_stack_size": 16,
+      "minecraft:glint": true,
+      "minecraft:rarity": "epic"
+    }
+  }
+}

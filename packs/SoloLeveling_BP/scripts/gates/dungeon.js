@@ -10,6 +10,9 @@
 import { BlockVolume, ItemStack, Player, system, world } from "@minecraft/server";
 import { getData, markDirty } from "../data.js";
 import { addXp, flash } from "../stats.js";
+import { addGold } from "../economy.js";
+
+const DUNGEON_GOLD = [60, 150, 350, 800, 1800, 4000];
 import { GATE_RANKS, MAX_DUNGEONS, RED_REWARD } from "./ranks.js";
 
 const ROOM = 24; // distance between room centers
@@ -334,6 +337,7 @@ function clearDungeon(inst) {
     d.gatesCleared = (d.gatesCleared ?? 0) + 1;
     markDirty(p);
     addXp(p, Math.floor(r.xp * mult));
+    addGold(p, Math.floor(DUNGEON_GOLD[inst.rank] * mult), "dungeon cleared");
     const inv = p.getComponent("minecraft:inventory").container;
     const got = [];
     for (const [id, min, max] of r.loot) {

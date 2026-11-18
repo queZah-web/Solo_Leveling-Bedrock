@@ -29,7 +29,12 @@ FACES = {
     "ravager": ("ravager", (16, 16, 16, 20), 128),
     "warden": ("warden", (10, 42, 16, 16), 128),
     "creeper": ("creeper", (8, 8, 8, 8), 64),
+    # our own mobs: texture files live in the resource pack
+    "goblin": ("@goblin", (8, 8, 8, 8), 64),
+    "orc": ("@orc", (8, 8, 8, 8), 64),
+    "ice_elf": ("@ice_elf", (8, 8, 8, 8), 64),
 }
+OWN = os.path.join(ROOT, "packs", "SoloLeveling_RP", "textures", "sl", "mobs")
 
 
 # Glowing eye pixels (in face-crop coordinates, before upscaling).
@@ -44,6 +49,9 @@ EYES = {
     "ravager": [(3, 8), (4, 8), (11, 8), (12, 8)],
     "warden": [(3, 6), (4, 6), (5, 6), (10, 6), (11, 6), (12, 6)],
     "creeper": [(1, 3), (2, 3), (5, 3), (6, 3)],
+    "goblin": [(1, 4), (2, 4), (5, 4), (6, 4)],
+    "orc": [(1, 4), (2, 4), (5, 4), (6, 4)],
+    "ice_elf": [(1, 4), (2, 4), (5, 4), (6, 4)],
 }
 EYE = (110, 230, 255, 255)
 
@@ -76,7 +84,10 @@ def shadowize(img, kind, scale):
 def main(src):
     os.makedirs(OUT, exist_ok=True)
     for kind, (name, (x, y, w, h), uv) in FACES.items():
-        path = next((os.path.join(src, name + e) for e in (".png", ".tga") if os.path.exists(os.path.join(src, name + e))), None)
+        if name.startswith("@"):
+            path = os.path.join(OWN, name[1:] + ".png")
+        else:
+            path = next((os.path.join(src, name + e) for e in (".png", ".tga") if os.path.exists(os.path.join(src, name + e))), None)
         tex = Image.open(path).convert("RGBA")
         s = tex.width / uv  # texture may be higher-res than its uv size
         face = tex.crop((int(x * s), int(y * s), int((x + w) * s), int((y + h) * s)))

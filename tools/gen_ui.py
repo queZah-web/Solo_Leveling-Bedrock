@@ -352,7 +352,7 @@ def list_content():
 
 # ---------------------------------------------------------------- vault layout
 # sl:vault| indices:
-#   7,8 sub-tabs (VAULT / BAG)   9 capacity label   10 prev  11 page label  12 next
+#   7,8 sub-tabs (VAULT / BAG), 65 SHOP   9 capacity label   10 prev  11 page label  12 next
 #   13 filter  14 sort  15 stack  16 primary action  17 secondary action  18 discard
 #   19 selected item icon        20..64 grid cells (9 x 5)
 GRID_START, GRID_COLS, GRID_ROWS, CELL = 20, 9, 5, 20
@@ -416,7 +416,8 @@ def vault_content():
         "orientation": "vertical",
         "size": [CELL * GRID_COLS, "100%"],
         "controls": [
-            row("subtabs", [{"t7": sub_tab(7, ["50% - 1px", 16])}, {"g": gap(2, 16)}, {"t8": sub_tab(8, ["fill", 16])}], 16),
+            row("subtabs", [{"t7": sub_tab(7, ["38%", 16])}, {"g": gap(2, 16)}, {"t8": sub_tab(8, ["34%", 16])},
+                            {"g2": gap(2, 16)}, {"t65": sub_tab(65, ["fill", 16])}], 16),
             {"g1": gap("100%", 3)},
             {"grid": {"type": "stack_panel", "orientation": "vertical", "size": [CELL * GRID_COLS, CELL * GRID_ROWS], "controls": grid_rows}},
             {"g2": gap("100%", 3)},

@@ -79,6 +79,7 @@ export async function vaultScreen(player) {
   };
   form.slot(7, "SHADOW VAULT", st.mode === "vault" ? TEX + "tab_active" : BLANK, setMode("vault"), "§5Shadow Vault");
   form.slot(8, "YOUR BAG", st.mode === "bag" ? TEX + "tab_active" : BLANK, setMode("bag"), "§bYour Inventory");
+  form.slot(65, "§6SHOP", BLANK, () => "shop", "§6System Shop");
 
   // 9: capacity
   let used = 0;

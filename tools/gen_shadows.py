@@ -32,7 +32,12 @@ SHADOWS = {
     "ravager": (100, 12, 0.3, (1.95, 2.2), False),
     "warden": (300, 30, 0.3, (0.9, 2.9), False),
     "creeper": (20, 1, 0.25, (0.6, 1.7), False),
+    "goblin": (18, 4, 0.33, (0.5, 1.4), False),
+    "orc": (42, 8, 0.26, (0.8, 2.3), False),
+    "ice_elf": (30, 4, 0.3, (0.6, 1.95), True),
 }
+# Shadows of our own mobs are drawn smaller/bigger like the originals.
+SHADOW_SCALE = {"goblin": 0.75, "orc": 1.2}
 
 
 # type -> (vanilla definition to copy, texture override). Empty: every shadow
@@ -40,7 +45,7 @@ SHADOWS = {
 CLIENT_BASE = {}
 # Shadows with fully custom models (tools/gen_custom_models.py): their vanilla
 # definitions don't render on custom entities in recent versions.
-CUSTOM_MODELS = {"zombie", "creeper", "husk", "drowned", "vindicator", "iron_golem"}
+CUSTOM_MODELS = {"zombie", "creeper", "husk", "drowned", "vindicator", "iron_golem", "goblin", "orc", "ice_elf"}
 
 
 def load(path):
@@ -75,6 +80,7 @@ def behavior(sid, hp, dmg, speed, size, ranged):
         "minecraft:tameable": {"probability": 0, "tame_items": "minecraft:barrier"},
         "minecraft:is_tamed": {},
         "minecraft:follow_range": {"value": 24, "max": 32},
+        **({"minecraft:scale": {"value": SHADOW_SCALE[sid]}} if sid in SHADOW_SCALE else {}),
         "minecraft:damage_sensor": {
             "triggers": [
                 {"cause": "fall", "deals_damage": "no"},

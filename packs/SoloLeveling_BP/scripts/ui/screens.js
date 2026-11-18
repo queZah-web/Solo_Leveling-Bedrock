@@ -13,6 +13,7 @@ import { armyScreen } from "./army_screen.js";
 import { questsScreen } from "./quests_screen.js";
 import { gateScreen, gatesScreen, registerGateUi } from "./gate_screen.js";
 import { skillsScreen } from "./skills_screen.js";
+import { shopScreen } from "./shop_screen.js";
 import { shadowScreen } from "./shadow_screen.js";
 import { endVault, vaultScreen } from "./vault_screen.js";
 
@@ -32,7 +33,7 @@ async function profileScreen(player) {
       `§7Rank: ${rank.color}${rank.name}`,
       `§7Job: §f${d.job}`,
       `§7Title: §f${d.title}`,
-      `§7Kills: §f${d.kills}`,
+      `§7Kills: §f${d.kills}  §6Gold: §f${d.gold ?? 0}`,
       "",
       "§bBONUSES",
       `§7Melee DMG: §c+${pct(strDamageMult(d.str) - 1)}%%`,
@@ -122,6 +123,7 @@ const SCREENS = {
   shadow: shadowScreen,
   skills: skillsScreen,
   gate: gateScreen,
+  shop: shopScreen,
   gates: gatesScreen,
   quests: questsScreen,
   settings: settingsScreen,
@@ -141,7 +143,7 @@ export async function openSystem(player, start = "profile") {
       if (!screen) break;
       const current = next;
       next = await screen(player);
-      if (current === "inventory" && next !== "inventory") endVault(player);
+      if (current === "inventory" && next !== "inventory" && next !== "shop") endVault(player);
     }
   } catch (e) {
     console.warn(`[SL] UI error: ${e}`);

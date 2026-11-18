@@ -9,22 +9,22 @@
 export const GATE_RANKS = [
   {
     rank: "E", color: "§7", level: 1, rooms: 2,
-    mobs: ["minecraft:zombie", "minecraft:skeleton", "minecraft:spider"],
-    boss: { id: "minecraft:zombie", name: "Goblin Chieftain" },
+    mobs: ["sl:goblin", "sl:goblin", "minecraft:zombie", "minecraft:skeleton", "minecraft:spider"],
+    boss: { id: "sl:goblin", name: "Goblin Chieftain" },
     theme: { floor: "minecraft:stone_bricks", wall: "minecraft:mossy_stone_bricks", accent: "minecraft:cracked_stone_bricks", light: "minecraft:glowstone" },
     xp: 250, loot: [["minecraft:iron_ingot", 4, 10], ["minecraft:bread", 4, 8], ["minecraft:arrow", 8, 16]],
   },
   {
     rank: "D", color: "§e", level: 10, rooms: 3,
-    mobs: ["minecraft:husk", "minecraft:zombie", "minecraft:pillager", "minecraft:skeleton"],
-    boss: { id: "minecraft:vindicator", name: "Hobgoblin Warlord" },
+    mobs: ["sl:goblin", "sl:orc", "minecraft:husk", "minecraft:pillager"],
+    boss: { id: "sl:orc", name: "Orc Warlord" },
     theme: { floor: "minecraft:smooth_sandstone", wall: "minecraft:cut_sandstone", accent: "minecraft:chiseled_sandstone", light: "minecraft:glowstone" },
     xp: 700, loot: [["minecraft:gold_ingot", 4, 10], ["minecraft:iron_ingot", 8, 16], ["minecraft:golden_apple", 1, 2]],
   },
   {
     rank: "C", color: "§a", level: 20, rooms: 3,
-    mobs: ["minecraft:stray", "minecraft:skeleton", "minecraft:vindicator", "minecraft:witch"],
-    boss: { id: "minecraft:stray", name: "Ice Elf Captain" },
+    mobs: ["sl:ice_elf", "sl:ice_elf", "sl:orc", "minecraft:stray"],
+    boss: { id: "sl:ice_elf", name: "Ice Elf Captain" },
     theme: { floor: "minecraft:packed_ice", wall: "minecraft:blue_ice", accent: "minecraft:snow_block", light: "minecraft:sea_lantern" },
     xp: 1800, loot: [["minecraft:diamond", 2, 5], ["minecraft:golden_apple", 2, 4], ["minecraft:experience_bottle", 8, 16]],
   },

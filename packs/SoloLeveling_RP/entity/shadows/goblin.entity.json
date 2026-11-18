@@ -1,0 +1,31 @@
+{
+  "format_version": "1.10.0",
+  "minecraft:client_entity": {
+    "description": {
+      "identifier": "sl:shadow_goblin",
+      "materials": {
+        "default": "entity_alphatest"
+      },
+      "textures": {
+        "default": "textures/sl/entity/shadow_goblin"
+      },
+      "geometry": {
+        "default": "geometry.sl.shadow_zombie"
+      },
+      "animations": {
+        "walk": "animation.sl.humanoid.walk",
+        "look": "animation.sl.look_at_target"
+      },
+      "scripts": {
+        "animate": [
+          "walk",
+          "look"
+        ]
+      },
+      "render_controllers": [
+        "controller.render.sl_shadow_custom"
+      ],
+      "enable_attachables": true
+    }
+  }
+}

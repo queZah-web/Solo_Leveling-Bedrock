@@ -41,6 +41,7 @@ def main():
     run("gen_ui.py")
     run("gen_skill_icons.py")
     run("gen_gate.py")
+    run("gen_mobs.py")
     check_json()
     os.makedirs(DIST, exist_ok=True)
     with zipfile.ZipFile(os.path.join(DIST, "SoloLeveling.mcaddon"), "w", zipfile.ZIP_DEFLATED) as zf:

@@ -11,6 +11,7 @@ export const UNKNOWN_ICON = "textures/sl/ui/unknown";
 /** Texture path for an item id (falls back to a "?" icon). */
 export function iconOf(typeId) {
   if (EXTRA_ICONS[typeId]) return EXTRA_ICONS[typeId];
+  if (typeId.startsWith("sl:")) return `textures/items/sl/${typeId.slice(3)}`; // System items & weapons
   if (typeId.startsWith("minecraft:")) {
     const p = ICONS[typeId.slice(10)];
     if (p) return p;

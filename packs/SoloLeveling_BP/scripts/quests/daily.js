@@ -8,6 +8,7 @@ import { Player, system, world } from "@minecraft/server";
 import { maxMp } from "../config.js";
 import { getData, markDirty } from "../data.js";
 import { addXp } from "../stats.js";
+import { addGold } from "../economy.js";
 import { startPenalty } from "./penalty.js";
 
 export const DAY_TZ_OFFSET = 3; // UTC+3
@@ -76,6 +77,7 @@ export function claimDaily(player) {
   const h = player.getComponent("minecraft:health");
   h?.setCurrentValue(h.effectiveMax);
   addXp(player, 50 + d.level * 20);
+  addGold(player, 100, "daily quest");
   player.onScreenDisplay.setTitle("§bQUEST COMPLETE", {
     subtitle: `§a+${DAILY_REWARD_POINTS} stat points §7| §fFull recovery`,
     fadeInDuration: 5, stayDuration: 50, fadeOutDuration: 10,

@@ -5,6 +5,7 @@
 // shadow entities are removed and the shadows simply return to the army.
 import { EntityDamageCause, ItemStack, Player, system, world } from "@minecraft/server";
 import { getData, markDirty } from "../data.js";
+import { addGold, goldForKill } from "../economy.js";
 import { addDamageHook, addXp, flash, xpFor } from "../stats.js";
 import { ARCHERS, gearInfo, setGear, GEAR_SLOTS, shadowBow, updateCombatMode } from "./gear.js";
 import { deleteShadowSave, placeShadow, placing, saveShadow, shadowTag } from "./persist.js";
@@ -469,6 +470,7 @@ world.afterEvents.entityDie.subscribe(({ deadEntity, damageSource }) => {
       const xp = xpFor(deadEntity);
       giveShadowXp(owner, k.s, xp);
       addXp(owner, Math.floor(xp * 0.5));
+      addGold(owner, Math.floor(goldForKill(deadEntity) * 0.5));
     }
   }
   if (!owner) return;
@@ -616,6 +618,9 @@ const SKILL_EFFECTS = {
   enderman: [["blindness", 60, 0]],
   ravager: [["slowness", 40, 1]],
   warden: [["darkness", 80, 0], ["weakness", 80, 0]],
+  goblin: [["weakness", 60, 0]],
+  orc: [["slowness", 40, 1], ["mining_fatigue", 60, 0]],
+  ice_elf: [["slowness", 60, 2]],
 };
 
 world.afterEvents.entityHurt.subscribe(({ damageSource, hurtEntity }) => {

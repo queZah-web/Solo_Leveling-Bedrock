@@ -1,0 +1,22 @@
+{
+  "format_version": "1.8.0",
+  "render_controllers": {
+    "controller.render.sl_mob": {
+      "geometry": "Geometry.default",
+      "materials": [
+        {
+          "*": "Material.default"
+        }
+      ],
+      "textures": [
+        "Texture.default"
+      ],
+      "is_hurt_color": {
+        "r": "1.0",
+        "g": "0.2",
+        "b": "0.2",
+        "a": "0.5"
+      }
+    }
+  }
+}

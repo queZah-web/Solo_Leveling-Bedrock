@@ -282,6 +282,11 @@ def main(tex_dir):
     for name, src in (("husk", "husk.png"), ("drowned", "drowned.tga"), ("vindicator", "vindicator.png"), ("iron_golem", "iron_golem.png")):
         shadow_texture(os.path.join(tex_dir, src), eyes=face_eyes).save(
             os.path.join(RP, "textures", "sl", "entity", f"shadow_{name}.png"))
+    # Our own mobs (textures from tools/gen_mobs.py)
+    mob_dir = os.path.join(RP, "textures", "sl", "mobs")
+    for name in ("goblin", "orc", "ice_elf"):
+        shadow_texture(os.path.join(mob_dir, f"{name}.png"), eyes=face_eyes).save(
+            os.path.join(RP, "textures", "sl", "entity", f"shadow_{name}.png"))
     write(os.path.join(RP, "models", "entity", "sl_shadow_husk.geo.json"), humanoid_geo("geometry.sl.shadow_husk"))
     write(os.path.join(RP, "models", "entity", "sl_shadow_drowned.geo.json"), humanoid64_geo("geometry.sl.shadow_drowned"))
     write(os.path.join(RP, "models", "entity", "sl_shadow_vindicator.geo.json"), illager_geo("geometry.sl.shadow_vindicator"))
@@ -292,6 +297,9 @@ def main(tex_dir):
         ("drowned", "geometry.sl.shadow_drowned", ("move", "animation.sl.zombie.move")),
         ("vindicator", "geometry.sl.shadow_vindicator", ("walk", "animation.sl.humanoid.walk")),
         ("iron_golem", "geometry.sl.shadow_iron_golem", ("walk", "animation.sl.golem.walk")),
+        ("goblin", "geometry.sl.shadow_zombie", ("walk", "animation.sl.humanoid.walk")),
+        ("orc", "geometry.sl.shadow_zombie", ("walk", "animation.sl.humanoid.walk")),
+        ("ice_elf", "geometry.sl.shadow_zombie", ("walk", "animation.sl.humanoid.walk")),
     ):
         write(os.path.join(RP, "entity", "shadows", f"{sid}.entity.json"), client(sid, geo, [anim, look]))
     write(os.path.join(RP, "models", "entity", "sl_shadow_zombie.geo.json"), humanoid_geo("geometry.sl.shadow_zombie"))

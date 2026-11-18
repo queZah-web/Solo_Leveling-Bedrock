@@ -2,23 +2,23 @@
   "format_version": 2,
   "header": {
     "name": "Solo Leveling - System BP",
-    "description": "Solo Leveling: The System (behavior). Phase 5",
+    "description": "Solo Leveling: The System (behavior). Phase 6",
     "uuid": "c63f3ea1-b815-4c86-8d08-fa4f1f13d4e2",
-    "version": [0, 5, 1],
+    "version": [0, 6, 0],
     "min_engine_version": [1, 21, 100]
   },
   "modules": [
-    { "type": "data", "uuid": "b97a7572-ea0e-4bdb-b16d-536c52a95148", "version": [0, 5, 1] },
+    { "type": "data", "uuid": "b97a7572-ea0e-4bdb-b16d-536c52a95148", "version": [0, 6, 0] },
     {
       "type": "script",
       "language": "javascript",
       "uuid": "f9276334-9c91-4416-ba2f-567409b412f1",
-      "version": [0, 5, 1],
+      "version": [0, 6, 0],
       "entry": "scripts/main.js"
     }
   ],
   "dependencies": [
-    { "uuid": "74a1ff86-af96-45c3-8ccf-94d3550211ba", "version": [0, 5, 1] },
+    { "uuid": "74a1ff86-af96-45c3-8ccf-94d3550211ba", "version": [0, 6, 0] },
     { "module_name": "@minecraft/server", "version": "2.10.0" },
     { "module_name": "@minecraft/server-ui", "version": "2.2.0" }
   ]
