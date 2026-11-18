@@ -25,6 +25,9 @@ UI_DIR = os.path.join(ROOT, "packs", "SoloLeveling_RP", "ui")
 T = "textures/sl/ui/"
 
 LAYOUTS = ["sl:profile|", "sl:list|"]
+# The form factory gives long_form no size, so percentages at the top level
+# resolve to 0. The window therefore uses a fixed size that fits phones.
+SCREEN_SIZE = [400, 236]
 COL = "form_buttons"
 
 CYAN = [0.45, 0.92, 1.0]
@@ -106,8 +109,12 @@ def button(tex, tex_hover, tex_pressed):
 
 
 def slot(idx, size, controls):
-    """Panel bound to form button #idx."""
-    return {"type": "panel", "size": size, "collection_index": idx, "controls": controls}
+    """Panel bound to form button #idx. The index is set on the wrapper and on
+    every child, so collection bindings resolve no matter how deep they are."""
+    for child in controls:
+        for d in child.values():
+            d["collection_index"] = idx
+    return {"type": "panel", "size": size, "collection_name": COL, "collection_index": idx, "controls": controls}
 
 
 def gap(w, h):
@@ -352,8 +359,7 @@ def screen():
     }
     return {
         "type": "panel",
-        "size": ["100% - 8px", "100% - 8px"],
-        "max_size": [440, 256],
+        "size": SCREEN_SIZE,
         "collection_name": COL,
         "controls": [
             {"bg": {"type": "image", "texture": T + "frame", "size": ["100%", "100%"], "layer": 1}},
@@ -384,7 +390,7 @@ def server_form_override():
         "namespace": "server_form",
         "long_form": {
             "type": "panel",
-            "size": ["100%", "100%"],
+            "size": SCREEN_SIZE,
             "controls": [
                 {
                     "vanilla": {
@@ -422,6 +428,20 @@ def server_form_override():
     }
 
 
+def add_collection_name(node):
+    """Recursively give every panel / stack_panel the form_buttons collection."""
+    if isinstance(node, dict):
+        if node.get("type") in ("panel", "stack_panel") and "factory" not in node:
+            node.setdefault("collection_name", COL)
+        if "factory" in node:
+            return
+        for v in node.values():
+            add_collection_name(v)
+    elif isinstance(node, list):
+        for v in node:
+            add_collection_name(v)
+
+
 def main():
     os.makedirs(UI_DIR, exist_ok=True)
     sl_ui = {
@@ -431,6 +451,8 @@ def main():
         "list_content": list_content(),
         "list_item": list_item(),
     }
+    for key in ("screen", "profile_content", "list_content"):
+        add_collection_name(sl_ui[key])
     with open(os.path.join(UI_DIR, "sl_ui.json"), "w") as f:
         json.dump(sl_ui, f, indent=2, ensure_ascii=False)
     with open(os.path.join(UI_DIR, "server_form.json"), "w") as f:

@@ -4,13 +4,13 @@
     "name": "Solo Leveling - System RP",
     "description": "Solo Leveling: The System (resources). Phase 1",
     "uuid": "74a1ff86-af96-45c3-8ccf-94d3550211ba",
-    "version": [0, 1, 0],
+    "version": [0, 1, 1],
     "min_engine_version": [1, 21, 100]
   },
   "modules": [
-    { "type": "resources", "uuid": "4222cba4-fc58-4d4e-9bd8-65a88041a720", "version": [0, 1, 0] }
+    { "type": "resources", "uuid": "4222cba4-fc58-4d4e-9bd8-65a88041a720", "version": [0, 1, 1] }
   ],
   "dependencies": [
-    { "uuid": "c63f3ea1-b815-4c86-8d08-fa4f1f13d4e2", "version": [0, 1, 0] }
+    { "uuid": "c63f3ea1-b815-4c86-8d08-fa4f1f13d4e2", "version": [0, 1, 1] }
   ]
 }
