@@ -6,6 +6,8 @@
 import { EntityDamageCause, Player, system, world } from "@minecraft/server";
 import { getData, markDirty } from "../data.js";
 import { addDamageHook, addXp, flash, xpFor } from "../stats.js";
+import { ARCHERS, setGear, GEAR_SLOTS, shadowBow, updateCombatMode } from "./gear.js";
+import { deleteShadowSave, placeShadow, placing, saveShadow, shadowTag } from "./persist.js";
 import {
   activeLimit, ARISE_ATTEMPTS, ARISE_MP, armyCapacity, CORPSE_SECONDS, entityIdOf, FEED_MP, GRADES,
   gradeForLevel, MOB_TO_TYPE, reviveSeconds, SHADOW_MAX_LEVEL, SHADOW_TYPES, shadowAtkMult, shadowDefMult,
@@ -27,7 +29,9 @@ const activeOf = (player) => {
   return m;
 };
 
-const findRecord = (player, sid) => getData(player).shadows.find((s) => s.id === sid);
+export const findRecord = (player, sid) => getData(player).shadows.find((s) => s.id === sid);
+/** Owner id + shadow id of a summoned shadow entity. */
+export const metaOf = (entity) => meta.get(entity.id);
 const playerById = (id) => world.getAllPlayers().find((p) => p.id === id);
 
 export function shadowName(s) {
@@ -52,8 +56,8 @@ function nearOwner(player, spread = 2.5) {
   return { x: l.x + Math.cos(a) * spread, y: l.y + 0.2, z: l.z + Math.sin(a) * spread };
 }
 
-function spawnShadow(player, s, location, dimension = player.dimension) {
-  const e = dimension.spawnEntity(entityIdOf(s.type), location);
+/** Links a shadow entity to its owner and record. */
+function register(player, s, e) {
   e.nameTag = shadowName(s);
   const tame = () => {
     try {
@@ -65,34 +69,74 @@ function spawnShadow(player, s, location, dimension = player.dimension) {
   activeOf(player).set(s.id, e);
   meta.set(e.id, { playerId: player.id, sid: s.id });
   try {
-    dimension.spawnParticle("minecraft:soul_particle", { ...location, y: location.y + 1 });
-    dimension.spawnParticle("minecraft:large_explosion", location);
+    e.dimension.spawnParticle("minecraft:soul_particle", { ...e.location, y: e.location.y + 1 });
+    e.dimension.spawnParticle("minecraft:large_explosion", e.location);
   } catch {}
   return e;
 }
 
+/** A brand new shadow entity (first summon, or a shadow without a save). */
+function spawnFresh(player, s, location, dimension = player.dimension) {
+  const e = dimension.spawnEntity(entityIdOf(s.type), location);
+  e.addTag(shadowTag(s.id));
+  if (ARCHERS.has(s.type)) {
+    try {
+      // Archers always rise holding a (System-made) bow.
+      if (!setGear(e, GEAR_SLOTS[4], shadowBow())) e.runCommand("replaceitem entity @s slot.weapon.mainhand 0 bow 1");
+    } catch {}
+    updateCombatMode(e, s.type);
+  }
+  return register(player, s, e);
+}
+
+/** Shadows currently being summoned (async), to avoid double summons. */
+const summoning = new Set();
+
 /**
- * Summons one shadow. Returns an error message, or undefined on success.
+ * Summons one shadow. Resolves to an error message, or undefined on success.
  * @param {Player} player
  * @param {ShadowRecord} s
  */
-export function summon(player, s, { free = false, location = undefined } = {}) {
+export async function summon(player, s, { free = false, location = undefined } = {}) {
+  if (summoning.has(s.id)) return "Already being summoned.";
   const d = getData(player);
   if (isSummoned(player, s.id)) return "Already summoned.";
   if (regenLeft(s) > 0) return `${s.name} is regenerating (${regenLeft(s)}s).`;
-  if (activeCount(player) >= activeLimit(d.level, d.int)) return "Active shadow limit reached.";
+  if (activeCount(player) + summoning.size >= activeLimit(d.level, d.int)) return "Active shadow limit reached.";
   const cost = GRADES[s.grade].cost;
-  if (!free) {
-    if (d.mp < cost) return `Not enough MP (${cost} needed).`;
-    d.mp -= cost;
-    markDirty(player);
+  if (!free && d.mp < cost) return `Not enough MP (${cost} needed).`;
+  summoning.add(s.id);
+  try {
+    const target = location ?? nearOwner(player);
+    // Restore the saved shadow (equipment, health...) if there is one.
+    const saved = await placeShadow(player, s);
+    if (!player.isValid) {
+      saved?.remove();
+      return "Owner left.";
+    }
+    if (saved) {
+      saved.teleport(target, { dimension: player.dimension });
+      register(player, s, saved);
+    } else {
+      spawnFresh(player, s, target);
+    }
+    if (!free) {
+      d.mp -= cost;
+      markDirty(player);
+    }
+    return undefined;
+  } catch (e) {
+    return `Summon failed: ${e}`;
+  } finally {
+    summoning.delete(s.id);
   }
-  spawnShadow(player, s, location ?? nearOwner(player));
-  return undefined;
 }
 
-export function dismiss(player, sid) {
+/** Saves the shadow (equipment included) and returns it to the owner's shadow. */
+export async function dismiss(player, sid) {
   const e = activeOf(player).get(sid);
+  const s = findRecord(player, sid);
+  if (e?.isValid && s) await saveShadow(player, s, e);
   activeOf(player).delete(sid);
   if (e?.isValid) {
     meta.delete(e.id);
@@ -103,18 +147,26 @@ export function dismiss(player, sid) {
   }
 }
 
-export function dismissAll(player) {
-  for (const sid of [...activeOf(player).keys()]) dismiss(player, sid);
+export async function dismissAll(player) {
+  for (const sid of [...activeOf(player).keys()]) await dismiss(player, sid);
+}
+
+/** Saves a summoned shadow's current state (after an equipment change). */
+export async function saveActive(player, sid) {
+  const e = entityOf(player, sid);
+  const s = findRecord(player, sid);
+  return e && s ? saveShadow(player, s, e) : false;
 }
 
 /** Summons the strongest available shadows until MP or the limit runs out. */
-export function summonAll(player) {
+export async function summonAll(player) {
   const d = getData(player);
   const list = [...d.shadows].sort((a, b) => b.grade - a.grade || b.level - a.level);
   let n = 0;
   for (const s of list) {
     if (isSummoned(player, s.id) || regenLeft(s) > 0) continue;
-    if (summon(player, s) === undefined) n++;
+    if (d.mp < GRADES[s.grade].cost) continue;
+    if ((await summon(player, s)) === undefined) n++;
     if (activeCount(player) >= activeLimit(d.level, d.int)) break;
   }
   return n;
@@ -132,7 +184,14 @@ export function callAll(player) {
 }
 
 export function release(player, sid) {
-  dismiss(player, sid);
+  const e = activeOf(player).get(sid);
+  activeOf(player).delete(sid);
+  if (e?.isValid) {
+    meta.delete(e.id);
+    e.remove();
+  }
+  const rec = findRecord(player, sid);
+  if (rec) deleteShadowSave(player, rec);
   const d = getData(player);
   d.shadows = d.shadows.filter((s) => s.id !== sid);
   markDirty(player);
@@ -280,7 +339,7 @@ export function arise(player) {
       for (let i = 0; i < 6; i++) dim.spawnParticle("minecraft:soul_particle", { x: c.loc.x, y: c.loc.y + i * 0.3, z: c.loc.z });
     } catch {}
     // The new shadow rises right away if there is room.
-    if (activeCount(player) < activeLimit(d.level, d.int)) spawnShadow(player, s, c.loc, dim);
+    if (activeCount(player) < activeLimit(d.level, d.int)) spawnFresh(player, s, c.loc, dim);
   } else {
     const left = ARISE_ATTEMPTS - c.attempts;
     markDirty(player);
@@ -476,7 +535,8 @@ system.runInterval(() => {
   for (const id of DIMENSIONS) {
     try {
       for (const e of world.getDimension(id).getEntities({ families: ["sl_shadow"] })) {
-        if (!meta.has(e.id)) e.remove();
+        if (meta.has(e.id) || e.getTags().some((t) => placing.has(t))) continue;
+        e.remove();
       }
     } catch {}
   }

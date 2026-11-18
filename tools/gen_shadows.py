@@ -102,18 +102,39 @@ def behavior(sid, hp, dmg, speed, size, ranged):
         c["minecraft:navigation.climb"] = {"can_path_over_water": True, "avoid_damage_blocks": True}
     else:
         c["minecraft:navigation.walk"] = {"can_path_over_water": True, "avoid_damage_blocks": True, "can_open_doors": True, "can_float": True}
-    if ranged:
-        c["minecraft:shooter"] = {"def": "minecraft:arrow"}
-        c["minecraft:behavior.ranged_attack"] = {"priority": 3, "attack_interval_min": 1.0, "attack_interval_max": 2.0, "attack_radius": 15.0}
-    else:
-        c["minecraft:behavior.melee_attack"] = {"priority": 3, "speed_multiplier": 1.3, "track_target": True}
-    return {
-        "format_version": "1.21.100",
-        "minecraft:entity": {
-            "description": {"identifier": f"sl:shadow_{sid}", "is_spawnable": False, "is_summonable": True},
-            "components": c,
-        },
+    # Equipment is managed by the System: it must never drop (no duplication).
+    c["minecraft:equipment"] = {
+        "table": "loot_tables/sl/empty.json",
+        "slot_drop_chance": [
+            {"slot": s, "drop_chance": 0.0}
+            for s in ("slot.weapon.mainhand", "slot.weapon.offhand", "slot.armor.head",
+                      "slot.armor.chest", "slot.armor.legs", "slot.armor.feet")
+        ],
     }
+    melee = {"minecraft:behavior.melee_attack": {"priority": 3, "speed_multiplier": 1.3, "track_target": True}}
+    groups, events = {}, {}
+    if ranged:
+        # Archers: ranged with a bow/crossbow, melee with anything else.
+        groups["sl:ranged"] = {
+            "minecraft:shooter": {"def": "minecraft:arrow"},
+            "minecraft:behavior.ranged_attack": {"priority": 3, "attack_interval_min": 1.0, "attack_interval_max": 2.0, "attack_radius": 15.0},
+        }
+        groups["sl:melee"] = melee
+        events = {
+            "minecraft:entity_spawned": {"add": {"component_groups": ["sl:ranged"]}},
+            "sl:mode_ranged": {"add": {"component_groups": ["sl:ranged"]}, "remove": {"component_groups": ["sl:melee"]}},
+            "sl:mode_melee": {"add": {"component_groups": ["sl:melee"]}, "remove": {"component_groups": ["sl:ranged"]}},
+        }
+    else:
+        c.update(melee)
+    ent = {
+        "description": {"identifier": f"sl:shadow_{sid}", "is_spawnable": False, "is_summonable": True},
+        "components": c,
+    }
+    if groups:
+        ent["component_groups"] = groups
+        ent["events"] = events
+    return {"format_version": "1.21.100", "minecraft:entity": ent}
 
 
 def client(sid, vanilla_dir):
@@ -144,6 +165,9 @@ def main(vanilla_dir):
             json.dump(behavior(sid, hp, dmg, speed, size, ranged), f, indent=2)
         with open(os.path.join(RP, "entity", "shadows", f"{sid}.entity.json"), "w") as f:
             json.dump(client(sid, vanilla_dir), f, indent=2)
+    os.makedirs(os.path.join(BP, "loot_tables", "sl"), exist_ok=True)
+    with open(os.path.join(BP, "loot_tables", "sl", "empty.json"), "w") as f:
+        json.dump({"pools": []}, f, indent=2)
     rc = {
         "format_version": "1.8.0",
         "render_controllers": {

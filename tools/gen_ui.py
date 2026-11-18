@@ -24,7 +24,7 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 UI_DIR = os.path.join(ROOT, "packs", "SoloLeveling_RP", "ui")
 T = "textures/sl/ui/"
 
-LAYOUTS = ["sl:profile|", "sl:list|", "sl:vault|", "sl:army|"]
+LAYOUTS = ["sl:profile|", "sl:list|", "sl:vault|", "sl:army|", "sl:shadow|"]
 # The form factory gives long_form no size, so percentages at the top level
 # resolve to 0. The window therefore uses a fixed size that fits phones.
 SCREEN_SIZE = [392, 206]
@@ -379,14 +379,15 @@ def sub_tab(idx, size):
     ])
 
 
-def grid_cell(idx):
+def grid_cell(idx, size=None):
     """Item slot: '*' in the text marks the selected slot, the rest is the count."""
     sel_vis = {"binding_type": "view", "source_property_name": contains("#form_button_text", "*"), "target_property_name": "#visible"}
-    return slot(idx, [CELL, CELL], [
+    size = size or CELL
+    return slot(idx, [size, size], [
         {"btn": button("slot", "slot_hover", "slot_sel")},
         {"sel": {"type": "image", "texture": T + "slot_sel", "size": ["100%", "100%"], "layer": 2,
                  "bindings": [btn_text_binding(), sel_vis]}},
-        {"icon": bound_image(size=[15, 15], layer=3)},
+        {"icon": bound_image(size=[size - 5, size - 5], layer=3)},
         {"count": {
             **label("#sl_count", WHITE, layer=4, font_scale_factor=0.65,
                     anchor_from="bottom_right", anchor_to="bottom_right", offset=[0, 1]),
@@ -517,17 +518,73 @@ def army_content():
         {"body": {"type": "panel", "size": ["100%", "fill"], "controls": [
             {"txt": {**body_text(), "anchor_from": "top_left", "anchor_to": "top_left", "font_scale_factor": 0.75}}]}},
         {"g2": gap("100%", 2)},
-        row("b1", [{"a16": small_btn(16, ["36%", 16])}, {"g": gap(2, 16)}, {"a17": small_btn(17, ["30%", 16])},
-                   {"g2": gap(2, 16)}, {"a18": small_btn(18, ["fill", 16])}], 16),
-        {"g3": gap("100%", 2)},
-        row("b2", [{"a30": small_btn(30, ["32%", 16])}, {"g": gap(2, 16)}, {"a31": small_btn(31, ["32%", 16], red=True)},
-                   {"g2": gap(2, 16)}, {"a32": small_btn(32, ["fill", 16])}], 16),
+        {"a32": small_btn(32, ["100%", 16])},
     ])
     return {
         "type": "stack_panel",
         "orientation": "horizontal",
         "size": ["100%", "100%"],
         "controls": [{"left": left}, {"g": gap(5, "100%")}, {"right": right}],
+    }
+
+
+# ---------------------------------------------------------------- shadow profile layout
+# sl:shadow| indices:
+#   7 back   9 title   16 summon/dismiss 17 feed 18 train 30 rename 31 release
+#   19 portrait  28 hp bar 29 xp bar  33..38 gear (head chest legs feet weapon offhand)
+#   39 selected item label   40..75 your inventory (9 x 4)
+GEAR_LABELS = ["HELMET", "CHEST", "LEGS", "BOOTS", "WEAPON", "OFFHAND"]
+
+
+def gear_cell(idx, name):
+    return {"type": "stack_panel", "orientation": "vertical", "size": [28, 33], "controls": [
+        {"cell": {"type": "panel", "size": [28, 24], "controls": [{"c": grid_cell(idx, 24)}]}},
+        {"lbl": {"type": "panel", "size": [28, 9], "controls": [{"t": label(name, GREY, font_scale_factor=0.5)}]}},
+    ]}
+
+
+def shadow_content():
+    portrait = slot(19, [40, 40], [
+        {"bg": {"type": "image", "texture": T + "slot", "size": ["100%", "100%"], "layer": 1}},
+        {"img": bound_image(size=[36, 36], layer=2)},
+    ])
+    bars = {"type": "stack_panel", "orientation": "vertical", "size": ["fill", 40],
+            "controls": [{"g": gap("100%", 3)}, {"hp": bar(28)}, {"g2": gap("100%", 2)}, {"xp": bar(29)}]}
+    left = inner_panel([118, "100%"], [
+        {"title": plain_label(9, ["100%", 12], WHITE, 0.8, "left")},
+        {"g0": gap("100%", 2)},
+        row("top", [{"p": portrait}, {"g": gap(3, 40)}, {"bars": bars}], 40),
+        {"g1": gap("100%", 2)},
+        {"body": {"type": "panel", "size": ["100%", "fill"], "controls": [
+            {"txt": {**body_text(), "anchor_from": "top_left", "anchor_to": "top_left", "font_scale_factor": 0.7}}]}},
+        {"g2": gap("100%", 2)},
+        row("b1", [{"a16": small_btn(16, ["36%", 15])}, {"g": gap(2, 15)}, {"a17": small_btn(17, ["30%", 15])},
+                   {"g2": gap(2, 15)}, {"a18": small_btn(18, ["fill", 15])}], 15),
+        {"g3": gap("100%", 2)},
+        row("b2", [{"a7": small_btn(7, ["30%", 15])}, {"g": gap(2, 15)}, {"a30": small_btn(30, ["34%", 15])},
+                   {"g2": gap(2, 15)}, {"a31": small_btn(31, ["fill", 15], red=True)}], 15),
+    ], pad=3)
+    gear_rows = []
+    for r in range(3):
+        cells = [{f"gc{33 + r * 2 + c}": gear_cell(33 + r * 2 + c, GEAR_LABELS[r * 2 + c])} for c in range(2)]
+        gear_rows.append({f"gr{r}": {"type": "stack_panel", "orientation": "horizontal", "size": [58, 33],
+                                      "controls": [cells[0], {"g": gap(2, 33)}, cells[1]]}})
+    mid = inner_panel([66, "100%"], [{"t": section_title("GEAR", PURPLE)}, *gear_rows], pad=3)
+    bag_rows = []
+    for r in range(4):
+        cells = [{f"b{40 + r * 9 + c}": grid_cell(40 + r * 9 + c)} for c in range(9)]
+        bag_rows.append({f"br{r}": {"type": "stack_panel", "orientation": "horizontal", "size": [CELL * 9, CELL], "controls": cells}})
+    right = inner_panel(["fill", "100%"], [
+        {"t": section_title("YOUR ITEMS")},
+        {"grid": {"type": "stack_panel", "orientation": "vertical", "size": [CELL * 9, CELL * 4], "controls": bag_rows}},
+        {"g": gap("100%", 3)},
+        {"sel": plain_label(39, ["100%", 30], WHITE, 0.7, "left")},
+    ], pad=3)
+    return {
+        "type": "stack_panel",
+        "orientation": "horizontal",
+        "size": ["100%", "100%"],
+        "controls": [{"left": left}, {"g": gap(3, "100%")}, {"mid": mid}, {"g2": gap(3, "100%")}, {"right": right}],
     }
 
 
@@ -548,6 +605,7 @@ def screen():
             {"list@sl_ui.list_content": {"bindings": visible_if_title("sl:list|")}},
             {"vault@sl_ui.vault_content": {"bindings": visible_if_title("sl:vault|")}},
             {"army@sl_ui.army_content": {"bindings": visible_if_title("sl:army|")}},
+            {"shadow@sl_ui.shadow_content": {"bindings": visible_if_title("sl:shadow|")}},
         ],
     }
     return {
@@ -644,9 +702,10 @@ def main():
         "list_content": list_content(),
         "vault_content": vault_content(),
         "army_content": army_content(),
+        "shadow_content": shadow_content(),
         "list_item": list_item(),
     }
-    for key in ("screen", "profile_content", "list_content", "vault_content", "army_content"):
+    for key in ("screen", "profile_content", "list_content", "vault_content", "army_content", "shadow_content"):
         add_collection_name(sl_ui[key])
     with open(os.path.join(UI_DIR, "sl_ui.json"), "w") as f:
         json.dump(sl_ui, f, indent=2, ensure_ascii=False)

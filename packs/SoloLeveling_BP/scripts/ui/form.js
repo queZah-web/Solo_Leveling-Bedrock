@@ -20,7 +20,7 @@ export function barTex(kind, cur, max) {
  */
 export class SystemForm {
   /**
-   * @param {"profile"|"list"|"vault"|"army"} layout
+   * @param {"profile"|"list"|"vault"|"army"|"shadow"} layout
    * @param {string} title
    */
   constructor(layout, title) {

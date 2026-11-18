@@ -26,7 +26,7 @@ const sessions = new Map();
 /** Tags of vault entities that are being opened right now. */
 const pending = new Set();
 
-function vaultKey(player) {
+export function vaultKey(player) {
   let k = player.getDynamicProperty("sl:vault_key");
   if (typeof k !== "string") {
     k = (Date.now().toString(36) + Math.floor(Math.random() * 1e9).toString(36)).replace(/[^a-z0-9]/g, "");
@@ -42,7 +42,7 @@ const vaultsAt = (dim, block) =>
   dim.getEntities({ type: ENTITY, location: { x: block.x + 0.5, y: block.y, z: block.z + 0.5 }, maxDistance: 1.5 });
 
 /** A block high above the player with no other vault entity in it. */
-function pickBlock(player, dim) {
+export function pickBlock(player, dim) {
   const x = Math.floor(player.location.x);
   const z = Math.floor(player.location.z);
   const top = dim.heightRange.max - 1;

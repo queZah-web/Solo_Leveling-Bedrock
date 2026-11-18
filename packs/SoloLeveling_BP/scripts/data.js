@@ -8,7 +8,7 @@ import { BASE_STAT, DATA_KEY, DATA_VERSION, maxMp } from "./config.js";
  *  mp:number, fatigue:number, kills:number, job:string, title:string,
  *  customUi:boolean, hud:boolean, shadows:ShadowRecord[], namedTaken:string[]}} HunterData */
 /** @typedef {{id:string, type:string, name:string, grade:number, base:number,
- *  level:number, xp:number, kills:number, deadUntil:number}} ShadowRecord */
+ *  level:number, xp:number, kills:number, deadUntil:number, ptr?:string}} ShadowRecord */
 
 /** @returns {HunterData} */
 export function defaultData() {

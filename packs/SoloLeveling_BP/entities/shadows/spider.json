@@ -169,6 +169,35 @@
         "can_path_over_water": true,
         "avoid_damage_blocks": true
       },
+      "minecraft:equipment": {
+        "table": "loot_tables/sl/empty.json",
+        "slot_drop_chance": [
+          {
+            "slot": "slot.weapon.mainhand",
+            "drop_chance": 0.0
+          },
+          {
+            "slot": "slot.weapon.offhand",
+            "drop_chance": 0.0
+          },
+          {
+            "slot": "slot.armor.head",
+            "drop_chance": 0.0
+          },
+          {
+            "slot": "slot.armor.chest",
+            "drop_chance": 0.0
+          },
+          {
+            "slot": "slot.armor.legs",
+            "drop_chance": 0.0
+          },
+          {
+            "slot": "slot.armor.feet",
+            "drop_chance": 0.0
+          }
+        ]
+      },
       "minecraft:behavior.melee_attack": {
         "priority": 3,
         "speed_multiplier": 1.3,

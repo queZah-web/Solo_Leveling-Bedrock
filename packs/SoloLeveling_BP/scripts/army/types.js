@@ -64,8 +64,32 @@ export const gradeForLevel = (base, level) => Math.min(GRADES.length - 1, base +
 export const reviveSeconds = (s) => 30 + s.grade * 15;
 
 // ---------------------------------------------------------------- army limits
-export const armyCapacity = (level) => Math.min(100, 5 + Math.floor(level / 2));
-export const activeLimit = (level, int) => Math.min(30, 2 + Math.floor(level / 5) + Math.floor(Math.max(0, int - 10) / 10));
+/**
+ * Army limits unlocked by hunter rank (same levels as the rank table).
+ * army = how many shadows you can own, active = how many can be summoned.
+ */
+export const RANK_LIMITS = [
+  { min: 90, rank: "National Level", army: 100, active: 24 },
+  { min: 70, rank: "S-Rank", army: 80, active: 18 },
+  { min: 50, rank: "A-Rank", army: 60, active: 14 },
+  { min: 35, rank: "B-Rank", army: 45, active: 10 },
+  { min: 20, rank: "C-Rank", army: 30, active: 7 },
+  { min: 10, rank: "D-Rank", army: 18, active: 5 },
+  { min: 0, rank: "E-Rank", army: 10, active: 3 },
+];
+const limitsFor = (level) => RANK_LIMITS.find((r) => level >= r.min) ?? RANK_LIMITS[RANK_LIMITS.length - 1];
+/** The next rank's limits, or undefined at the top rank. */
+export const nextRankLimits = (level) => [...RANK_LIMITS].reverse().find((r) => r.min > level);
+
+/** Owned shadows: rank base + 1 per 2 levels inside the rank. */
+export const armyCapacity = (level) => {
+  const r = limitsFor(level);
+  const next = nextRankLimits(level);
+  const extra = Math.floor((level - r.min) / 2);
+  return Math.min(next ? next.army - 1 : 100, r.army + extra);
+};
+/** Summoned at once: rank base + 1 per 10 INT above 10 (max 30). */
+export const activeLimit = (level, int) => Math.min(30, limitsFor(level).active + Math.floor(Math.max(0, int - 10) / 10));
 
 export const ARISE_MP = 10;
 export const ARISE_ATTEMPTS = 3;

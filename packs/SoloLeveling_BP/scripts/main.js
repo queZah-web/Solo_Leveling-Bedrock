@@ -4,5 +4,6 @@ import "./stats.js";
 import "./army/army.js";
 import "./commands.js";
 import "./gem.js";
+import "./ui/shortcuts.js";
 
 console.log("[SL] Solo Leveling System loaded");

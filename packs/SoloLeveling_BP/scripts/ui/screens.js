@@ -10,6 +10,7 @@ import { allocate, getHealth, rankOf } from "../stats.js";
 import { barTex, BLANK, showForm, SystemForm, TEX } from "./form.js";
 import { frame } from "./frame.js";
 import { armyScreen } from "./army_screen.js";
+import { shadowScreen } from "./shadow_screen.js";
 import { endVault, vaultScreen } from "./vault_screen.js";
 
 // ---------------------------------------------------------------- STATUS
@@ -124,6 +125,7 @@ const SCREENS = {
   profile: profileScreen,
   inventory: vaultScreen,
   shadows: armyScreen,
+  shadow: shadowScreen,
   quests: lockedScreen("quests", "QUESTS", 4, [
     "§eDaily Quest: Preparation to Become Powerful",
     "§7Push-ups, sit-ups, squats and running.",
