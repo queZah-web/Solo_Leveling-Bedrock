@@ -62,10 +62,7 @@
 - **الأوامر**:
   - **STAY HERE**: الظل يحرس مكانه ويقتل اللي يقرب منه (مفيد للفارمات).
   - **FOLLOW ME**: يرجع يتبعك.
-  - الأمر يكون لظل واحد (من الـ Profile) أو للجيش كله (من تبويب SHADOWS)، أو بالأمر:
-    ```
-    /shadows stay | follow | summon | dismiss | call
-    ```
+  - من **الجوهرة ← SHADOWS**: زر **STAY HERE (ALL)** / **FOLLOW ME (ALL)** للجيش كله، أو من Shadow Profile لظل واحد.
 - **ظلال بأسماء**: أول استخراج من Wither Skeleton يطلع لك **Igris**، ومن Iron Golem يطلع **Iron**، ومن Ravager يطلع **Tank**، ومن Warden يطلع **Beru**.
 - **الرتب**: Normal ← Elite ← Knight ← Elite Knight ← Commander ← Marshal ← Grand Marshal. الظل يترقّى كل 20 مستوى.
 - **شكل الظلال**: طبقة بنفسجية داكنة تنرسم بإضاءتها الخاصة (تبان بالليل وداخل الكهوف)، وحولها هالة أرواح خفيفة.
@@ -175,11 +172,11 @@
 
 `world_behavior_packs.json`
 ```json
-[ { "pack_id": "c63f3ea1-b815-4c86-8d08-fa4f1f13d4e2", "version": [0, 4, 4] } ]
+[ { "pack_id": "c63f3ea1-b815-4c86-8d08-fa4f1f13d4e2", "version": [0, 4, 5] } ]
 ```
 `world_resource_packs.json`
 ```json
-[ { "pack_id": "74a1ff86-af96-45c3-8ccf-94d3550211ba", "version": [0, 4, 4] } ]
+[ { "pack_id": "74a1ff86-af96-45c3-8ccf-94d3550211ba", "version": [0, 4, 5] } ]
 ```
 4. في `server.properties` خلّ:
 ```
