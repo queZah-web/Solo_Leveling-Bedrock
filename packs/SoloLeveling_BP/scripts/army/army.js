@@ -9,6 +9,7 @@ import { addDamageHook, addXp, flash, xpFor } from "../stats.js";
 import { ARCHERS, gearInfo, setGear, GEAR_SLOTS, shadowBow, updateCombatMode } from "./gear.js";
 import { deleteShadowSave, placeShadow, placing, saveShadow, shadowTag } from "./persist.js";
 import { applyMode, driveTargets, modeOf, provoking } from "./targeting.js";
+import { domainUntil } from "../state.js";
 import {
   creeperCharges, creeperPower, healValue,
   activeLimit, ARISE_ATTEMPTS, ARISE_MP, armyCapacity, CORPSE_SECONDS, entityIdOf, FEED_MP, GRADES,
@@ -509,6 +510,7 @@ addDamageHook((ev) => {
         }
       }
       let mult = shadowAtkMult(s);
+      if ((domainUntil.get(a.playerId) ?? 0) > system.currentTick) mult *= 1.5; // Monarch's Domain
       if (s.type === "wolf") mult *= 1.25;
       if (s.type === "vindicator") {
         const h = victim.getComponent("minecraft:health");

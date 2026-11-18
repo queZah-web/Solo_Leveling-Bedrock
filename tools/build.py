@@ -38,6 +38,7 @@ def add_pack(zf, pack, prefix):
 def main():
     run("gen_textures.py")
     run("gen_ui.py")
+    run("gen_skill_icons.py")
     check_json()
     os.makedirs(DIST, exist_ok=True)
     with zipfile.ZipFile(os.path.join(DIST, "SoloLeveling.mcaddon"), "w", zipfile.ZIP_DEFLATED) as zf:

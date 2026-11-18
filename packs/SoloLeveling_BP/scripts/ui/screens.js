@@ -10,6 +10,8 @@ import { allocate, getHealth, rankOf } from "../stats.js";
 import { barTex, BLANK, showForm, SystemForm, TEX } from "./form.js";
 import { frame } from "./frame.js";
 import { armyScreen } from "./army_screen.js";
+import { questsScreen } from "./quests_screen.js";
+import { skillsScreen } from "./skills_screen.js";
 import { shadowScreen } from "./shadow_screen.js";
 import { endVault, vaultScreen } from "./vault_screen.js";
 
@@ -56,6 +58,7 @@ async function profileScreen(player) {
   const fc = d.fatigue >= FATIGUE_HEAVY ? "§c" : "§6";
   form.display(14, `${fc}FATIGUE §f${Math.floor(d.fatigue)}`, barTex("fatigue", d.fatigue, 100));
 
+  form.slot(16, "SETTINGS", BLANK, () => "settings", "Settings");
   form.slot(15, d.points > 0 ? `§aDISTRIBUTE (${d.points})` : "§7NO POINTS", BLANK, async () => {
     if (d.points > 0) await allocateDialog(player);
     return "profile";
@@ -81,22 +84,12 @@ async function allocateDialog(player) {
   }
 }
 
-// ---------------------------------------------------------------- placeholders
-function lockedScreen(id, title, phase, lines) {
-  return async (player) => {
-    const form = new SystemForm("list", title);
-    frame(form, player, id);
-    form.body([...lines, "", `§8[ Unlocks in Phase ${phase} ]`].join("\n"));
-    form.button("§bBack to Status", BLANK, () => "profile");
-    return form.show(player);
-  };
-}
-
 // ---------------------------------------------------------------- SETTINGS
 async function settingsScreen(player) {
   const d = getData(player);
   const form = new SystemForm("list", "SETTINGS");
   frame(form, player, "settings");
+  form.screenId = "settings";
   form.body(
     [
       "§bCustom UI§7: the System skin. Turn it off if the window looks broken on your device.",
@@ -126,11 +119,8 @@ const SCREENS = {
   inventory: vaultScreen,
   shadows: armyScreen,
   shadow: shadowScreen,
-  quests: lockedScreen("quests", "QUESTS", 4, [
-    "§eDaily Quest: Preparation to Become Powerful",
-    "§7Push-ups, sit-ups, squats and running.",
-    "§cFailing a daily quest sends you to the Penalty Zone.",
-  ]),
+  skills: skillsScreen,
+  quests: questsScreen,
   settings: settingsScreen,
 };
 

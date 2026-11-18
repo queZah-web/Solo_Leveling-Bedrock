@@ -7,7 +7,9 @@ import { BASE_STAT, maxMp, STATS } from "./config.js";
 import { getData, markDirty, resetData } from "./data.js";
 import { addXp, applyStatEffects, setLevel } from "./stats.js";
 import { arise } from "./army/army.js";
+import { setPenaltyEnabled } from "./quests/daily.js";
 import { openSystem } from "./ui/screens.js";
+import { castSlot, quickMenu } from "./ui/skills_screen.js";
 
 const ok = (message) => ({ status: CustomCommandStatus.Success, message });
 const fail = (message) => ({ status: CustomCommandStatus.Failure, message });
@@ -47,6 +49,37 @@ system.beforeEvents.startup.subscribe(({ customCommandRegistry: reg }) => {
       if (!(p instanceof Player)) return fail("Only players can use ARISE.");
       system.run(() => arise(p));
       return ok();
+    },
+  );
+
+  reg.registerCommand(
+    {
+      name: "sl:skill",
+      description: "Cast a quick skill (1-4), or open the Quick Skill menu",
+      permissionLevel: CommandPermissionLevel.Any,
+      cheatsRequired: false,
+      optionalParameters: [{ name: "slot", type: CustomCommandParamType.Integer }],
+    },
+    (origin, slot) => {
+      const p = origin.sourceEntity ?? origin.initiator;
+      if (!(p instanceof Player)) return fail("Only players can cast skills.");
+      if (slot !== undefined && (slot < 1 || slot > 4)) return fail("Slot must be 1-4.");
+      system.run(() => (slot ? castSlot(p, slot) : quickMenu(p)));
+      return ok();
+    },
+  );
+
+  reg.registerCommand(
+    {
+      name: "sl:penalty",
+      description: "[Admin] Turn the daily quest Penalty Zone on or off",
+      permissionLevel: CommandPermissionLevel.GameDirectors,
+      cheatsRequired: false,
+      mandatoryParameters: [{ name: "enabled", type: CustomCommandParamType.Boolean }],
+    },
+    (origin, enabled) => {
+      system.run(() => setPenaltyEnabled(!!enabled));
+      return ok(`Penalty Zone ${enabled ? "enabled" : "disabled"}.`);
     },
   );
 

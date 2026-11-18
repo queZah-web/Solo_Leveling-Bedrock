@@ -2026,92 +2026,205 @@
                     }
                   },
                   {
-                    "alloc": {
-                      "type": "panel",
+                    "alloc_row": {
+                      "type": "stack_panel",
+                      "orientation": "horizontal",
                       "size": [
                         "100%",
                         18
                       ],
-                      "collection_name": "form_buttons",
-                      "collection_index": 15,
                       "controls": [
                         {
-                          "btn": {
-                            "type": "button",
+                          "alloc": {
+                            "type": "panel",
                             "size": [
-                              "100%",
-                              "100%"
+                              "fill",
+                              18
                             ],
-                            "layer": 1,
-                            "sound_name": "random.click",
-                            "sound_volume": 1.0,
-                            "default_control": "default",
-                            "hover_control": "hover",
-                            "pressed_control": "pressed",
-                            "$pressed_button_name": "button.form_button_click",
-                            "button_mappings": [
-                              {
-                                "from_button_id": "button.menu_select",
-                                "to_button_id": "$pressed_button_name",
-                                "mapping_type": "pressed"
-                              },
-                              {
-                                "from_button_id": "button.menu_ok",
-                                "to_button_id": "$pressed_button_name",
-                                "mapping_type": "focused"
-                              }
-                            ],
-                            "bindings": [
-                              {
-                                "binding_type": "collection_details",
-                                "binding_collection_name": "form_buttons"
-                              }
-                            ],
+                            "collection_name": "form_buttons",
+                            "collection_index": 15,
                             "controls": [
                               {
-                                "default": {
-                                  "type": "image",
-                                  "texture": "textures/sl/ui/btn"
+                                "btn": {
+                                  "type": "button",
+                                  "size": [
+                                    "100%",
+                                    "100%"
+                                  ],
+                                  "layer": 1,
+                                  "sound_name": "random.click",
+                                  "sound_volume": 1.0,
+                                  "default_control": "default",
+                                  "hover_control": "hover",
+                                  "pressed_control": "pressed",
+                                  "$pressed_button_name": "button.form_button_click",
+                                  "button_mappings": [
+                                    {
+                                      "from_button_id": "button.menu_select",
+                                      "to_button_id": "$pressed_button_name",
+                                      "mapping_type": "pressed"
+                                    },
+                                    {
+                                      "from_button_id": "button.menu_ok",
+                                      "to_button_id": "$pressed_button_name",
+                                      "mapping_type": "focused"
+                                    }
+                                  ],
+                                  "bindings": [
+                                    {
+                                      "binding_type": "collection_details",
+                                      "binding_collection_name": "form_buttons"
+                                    }
+                                  ],
+                                  "controls": [
+                                    {
+                                      "default": {
+                                        "type": "image",
+                                        "texture": "textures/sl/ui/btn"
+                                      }
+                                    },
+                                    {
+                                      "hover": {
+                                        "type": "image",
+                                        "texture": "textures/sl/ui/btn_hover"
+                                      }
+                                    },
+                                    {
+                                      "pressed": {
+                                        "type": "image",
+                                        "texture": "textures/sl/ui/btn_pressed"
+                                      }
+                                    }
+                                  ],
+                                  "collection_index": 15
                                 }
                               },
                               {
-                                "hover": {
-                                  "type": "image",
-                                  "texture": "textures/sl/ui/btn_hover"
-                                }
-                              },
-                              {
-                                "pressed": {
-                                  "type": "image",
-                                  "texture": "textures/sl/ui/btn_pressed"
+                                "txt": {
+                                  "type": "label",
+                                  "text": "#form_button_text",
+                                  "color": [
+                                    1.0,
+                                    1.0,
+                                    1.0
+                                  ],
+                                  "shadow": true,
+                                  "layer": 3,
+                                  "bindings": [
+                                    {
+                                      "binding_name": "#form_button_text",
+                                      "binding_type": "collection",
+                                      "binding_collection_name": "form_buttons"
+                                    }
+                                  ],
+                                  "collection_index": 15
                                 }
                               }
-                            ],
-                            "collection_index": 15
+                            ]
                           }
                         },
                         {
-                          "txt": {
-                            "type": "label",
-                            "text": "#form_button_text",
-                            "color": [
-                              1.0,
-                              1.0,
-                              1.0
+                          "g": {
+                            "type": "panel",
+                            "size": [
+                              2,
+                              18
                             ],
-                            "shadow": true,
-                            "layer": 3,
-                            "bindings": [
+                            "collection_name": "form_buttons"
+                          }
+                        },
+                        {
+                          "opts": {
+                            "type": "panel",
+                            "size": [
+                              46,
+                              18
+                            ],
+                            "collection_name": "form_buttons",
+                            "collection_index": 16,
+                            "controls": [
                               {
-                                "binding_name": "#form_button_text",
-                                "binding_type": "collection",
-                                "binding_collection_name": "form_buttons"
+                                "btn": {
+                                  "type": "button",
+                                  "size": [
+                                    "100%",
+                                    "100%"
+                                  ],
+                                  "layer": 1,
+                                  "sound_name": "random.click",
+                                  "sound_volume": 1.0,
+                                  "default_control": "default",
+                                  "hover_control": "hover",
+                                  "pressed_control": "pressed",
+                                  "$pressed_button_name": "button.form_button_click",
+                                  "button_mappings": [
+                                    {
+                                      "from_button_id": "button.menu_select",
+                                      "to_button_id": "$pressed_button_name",
+                                      "mapping_type": "pressed"
+                                    },
+                                    {
+                                      "from_button_id": "button.menu_ok",
+                                      "to_button_id": "$pressed_button_name",
+                                      "mapping_type": "focused"
+                                    }
+                                  ],
+                                  "bindings": [
+                                    {
+                                      "binding_type": "collection_details",
+                                      "binding_collection_name": "form_buttons"
+                                    }
+                                  ],
+                                  "controls": [
+                                    {
+                                      "default": {
+                                        "type": "image",
+                                        "texture": "textures/sl/ui/btn"
+                                      }
+                                    },
+                                    {
+                                      "hover": {
+                                        "type": "image",
+                                        "texture": "textures/sl/ui/btn_hover"
+                                      }
+                                    },
+                                    {
+                                      "pressed": {
+                                        "type": "image",
+                                        "texture": "textures/sl/ui/btn_pressed"
+                                      }
+                                    }
+                                  ],
+                                  "collection_index": 16
+                                }
+                              },
+                              {
+                                "txt": {
+                                  "type": "label",
+                                  "text": "#form_button_text",
+                                  "color": [
+                                    1.0,
+                                    1.0,
+                                    1.0
+                                  ],
+                                  "shadow": true,
+                                  "layer": 3,
+                                  "font_scale_factor": 0.8,
+                                  "bindings": [
+                                    {
+                                      "binding_name": "#form_button_text",
+                                      "binding_type": "collection",
+                                      "binding_collection_name": "form_buttons"
+                                    }
+                                  ],
+                                  "collection_index": 16
+                                }
                               }
-                            ],
-                            "collection_index": 15
+                            ]
                           }
                         }
-                      ]
+                      ],
+                      "collection_name": "form_buttons"
                     }
                   }
                 ],

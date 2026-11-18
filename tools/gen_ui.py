@@ -164,8 +164,8 @@ def close_btn(idx):
     ])
 
 
-def action_btn(idx, height=18):
-    return slot(idx, ["100%", height], [
+def action_btn(idx, height=18, width="100%"):
+    return slot(idx, [width, height], [
         {"btn": button("btn", "btn_hover", "btn_pressed")},
         {"txt": bound_label(WHITE, layer=3)},
     ])
@@ -244,7 +244,7 @@ def body_text():
 
 # ---------------------------------------------------------------- layouts
 def profile_content():
-    """sl:profile| -- 7..11 stats, 12 hp, 13 mp, 14 fatigue, 15 allocate."""
+    """sl:profile| -- 7..11 stats, 12 hp, 13 mp, 14 fatigue, 15 allocate, 16 settings."""
     # Player preview: an overlay behind the bars (not part of the stack), so it
     # keeps its full size and the HP/MP/Fatigue bars are drawn on top of it.
     doll = {
@@ -282,7 +282,7 @@ def profile_content():
         mid_ctrls.append({f"s{idx}": stat_row(idx)})
         mid_ctrls.append({f"g{idx}": gap("100%", 3)})
     mid_ctrls.append({"fill": gap("100%", "fill")})
-    mid_ctrls.append({"alloc": action_btn(15)})
+    mid_ctrls.append(row("alloc_row", [{"alloc": action_btn(15, width="fill")}, {"g": gap(2, 18)}, {"opts": small_btn(16, [46, 18])}], 18))
     mid = inner_panel(["33%", "100%"], mid_ctrls)
     right = inner_panel(["fill", "100%"], [
         {"t": section_title("STATUS", PURPLE)},

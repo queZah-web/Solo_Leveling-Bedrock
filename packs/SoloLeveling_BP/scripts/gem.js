@@ -4,6 +4,7 @@ import { ItemLockMode, ItemStack, system, world } from "@minecraft/server";
 import { GEM_ID } from "./config.js";
 import { arise, corpsesNear } from "./army/army.js";
 import { openSystem } from "./ui/screens.js";
+import { quickMenu } from "./ui/skills_screen.js";
 
 function makeGem() {
   const gem = new ItemStack(GEM_ID, 1);
@@ -43,9 +44,11 @@ export function ensureGem(player) {
 
 world.afterEvents.itemUse.subscribe(({ source, itemStack }) => {
   if (itemStack?.typeId !== GEM_ID) return;
-  // Sneak + use near a fresh kill = ARISE. Otherwise open the System.
-  if (source.isSneaking && corpsesNear(source).length > 0) arise(source);
-  else openSystem(source);
+  // Sneak + use: ARISE near a fresh kill, otherwise the Quick Skill menu.
+  if (source.isSneaking) {
+    if (corpsesNear(source).length > 0) arise(source);
+    else quickMenu(source);
+  } else openSystem(source);
 });
 
 world.afterEvents.playerSpawn.subscribe(({ player, initialSpawn }) => {

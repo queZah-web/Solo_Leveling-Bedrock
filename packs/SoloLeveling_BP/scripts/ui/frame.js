@@ -7,8 +7,8 @@ const TABS = [
   ["profile", "STATUS"],
   ["inventory", "INVENTORY"],
   ["shadows", "SHADOWS"],
+  ["skills", "SKILLS"],
   ["quests", "QUESTS"],
-  ["settings", "SETTINGS"],
 ];
 
 /** Common frame: 0 close, 1..5 tabs, 6 header. */
