@@ -8,42 +8,42 @@
 /** @type {GateRank[]} */
 export const GATE_RANKS = [
   {
-    rank: "E", color: "§7", level: 1, rooms: 2,
+    rank: "E", color: "§7", level: 1, rooms: 10,
     mobs: ["sl:goblin", "sl:goblin", "sl:dg_soldier", "sl:dg_spider"],
     boss: { id: "sl:goblin", name: "Goblin Chieftain" },
     theme: { floor: "minecraft:stone_bricks", wall: "minecraft:mossy_stone_bricks", accent: "minecraft:cracked_stone_bricks", light: "minecraft:glowstone" },
     xp: 250, loot: [["minecraft:iron_ingot", 4, 10], ["minecraft:bread", 4, 8], ["minecraft:arrow", 8, 16]],
   },
   {
-    rank: "D", color: "§e", level: 10, rooms: 3,
+    rank: "D", color: "§e", level: 10, rooms: 12,
     mobs: ["sl:goblin", "sl:orc", "sl:dg_soldier", "sl:dg_archer"],
     boss: { id: "sl:orc", name: "Orc Warlord" },
     theme: { floor: "minecraft:smooth_sandstone", wall: "minecraft:cut_sandstone", accent: "minecraft:chiseled_sandstone", light: "minecraft:glowstone" },
     xp: 700, loot: [["minecraft:gold_ingot", 4, 10], ["minecraft:iron_ingot", 8, 16], ["minecraft:golden_apple", 1, 2]],
   },
   {
-    rank: "C", color: "§a", level: 20, rooms: 3,
+    rank: "C", color: "§a", level: 20, rooms: 15,
     mobs: ["sl:ice_elf", "sl:ice_elf", "sl:dg_ice_bear", "sl:orc"],
     boss: { id: "sl:ice_elf", name: "Ice Elf Captain" },
     theme: { floor: "minecraft:packed_ice", wall: "minecraft:blue_ice", accent: "minecraft:snow_block", light: "minecraft:sea_lantern" },
     xp: 1800, loot: [["minecraft:diamond", 2, 5], ["minecraft:golden_apple", 2, 4], ["minecraft:experience_bottle", 8, 16]],
   },
   {
-    rank: "B", color: "§9", level: 35, rooms: 4,
+    rank: "B", color: "§9", level: 35, rooms: 18,
     mobs: ["sl:dg_hound", "sl:dg_knight", "sl:dg_spider", "sl:dg_archer"],
     boss: { id: "sl:boss_tank", name: "Tank, the Ice Bear" },
     theme: { floor: "minecraft:nether_bricks", wall: "minecraft:red_nether_bricks", accent: "minecraft:chiseled_nether_bricks", light: "minecraft:shroomlight" },
     xp: 4500, loot: [["minecraft:diamond", 4, 8], ["minecraft:emerald", 6, 12], ["minecraft:netherite_scrap", 1, 2]],
   },
   {
-    rank: "A", color: "§d", level: 50, rooms: 4,
+    rank: "A", color: "§d", level: 50, rooms: 21,
     mobs: ["sl:dg_knight", "sl:dg_knight", "sl:dg_mage", "sl:dg_hound"],
     boss: { id: "sl:boss_igris", name: "Igris the Bloodred" },
     theme: { floor: "minecraft:deepslate_tiles", wall: "minecraft:polished_blackstone_bricks", accent: "minecraft:gilded_blackstone", light: "minecraft:pearlescent_froglight" },
     xp: 10000, loot: [["minecraft:diamond", 8, 16], ["minecraft:netherite_scrap", 2, 4], ["minecraft:totem_of_undying", 1, 1]],
   },
   {
-    rank: "S", color: "§c", level: 70, rooms: 5,
+    rank: "S", color: "§c", level: 70, rooms: 24,
     mobs: ["sl:dg_ant", "sl:dg_ant", "sl:dg_knight", "sl:dg_mage"],
     boss: { id: "sl:boss_beru", name: "Beru, the Ant King" },
     theme: { floor: "minecraft:obsidian", wall: "minecraft:crying_obsidian", accent: "minecraft:purpur_pillar", light: "minecraft:verdant_froglight" },

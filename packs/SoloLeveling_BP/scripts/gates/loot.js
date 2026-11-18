@@ -85,12 +85,73 @@ function gear(rnd, rank) {
   return item;
 }
 
+const BOOK_POOL = ["sharpness", "protection", "efficiency", "unbreaking", "power", "feather_falling", "looting", "fortune", "fire_aspect",
+  "smite", "respiration", "thorns", "mending", "knockback", "punch", "flame", "infinity", "depth_strider"];
+function book(rnd, rank) {
+  try {
+    const item = new ItemStack("minecraft:enchanted_book", 1);
+    const ench = item.getComponent("minecraft:enchantable");
+    const id = pick(rnd, BOOK_POOL);
+    const type = EnchantmentTypes.get(id);
+    if (ench && type) {
+      const level = Math.max(1, Math.min(type.maxLevel, 1 + Math.floor(rnd() * (rank + 2) * type.maxLevel / 7)));
+      ench.addEnchantment({ type, level });
+      return item;
+    }
+  } catch {}
+  return new ItemStack("minecraft:experience_bottle", 2 + rank);
+}
+const SHRINE = [
+  [["sl:healing_elixir", 1, 2], ["minecraft:golden_apple", 1, 1], ["minecraft:cooked_beef", 4, 8]],
+  [["sl:healing_elixir", 1, 2], ["sl:mana_potion", 1, 2], ["minecraft:golden_apple", 1, 2]],
+  [["sl:healing_elixir", 2, 3], ["sl:mana_potion", 1, 2], ["minecraft:golden_apple", 1, 2], ["sl:fatigue_potion", 1, 1]],
+  [["sl:healing_elixir", 2, 3], ["sl:mana_potion", 2, 3], ["minecraft:golden_apple", 2, 3], ["sl:fatigue_potion", 1, 2]],
+  [["sl:healing_elixir", 2, 4], ["sl:mana_potion", 2, 3], ["sl:elixir_of_life", 1, 1], ["minecraft:enchanted_golden_apple", 1, 1]],
+  [["sl:healing_elixir", 3, 4], ["sl:mana_potion", 3, 4], ["sl:elixir_of_life", 1, 1], ["minecraft:enchanted_golden_apple", 1, 1]],
+];
+
 /**
- * Items for one chest.
- * @param {number} rank 0..5  @param {"treasure"|"boss"} kind
+ * Items for one chest. Kinds, from small to big: cache (a few bits in a
+ * monster room), shrine (potions), library (enchanted books), armory (gear),
+ * treasure (gear + resources), boss (the best, with Solo Leveling weapons).
+ * @param {number} rank 0..5  @param {string} kind
  */
 export function rollLoot(rank, kind, rnd = Math.random) {
   const out = [];
+  const add = (id, a, b) => {
+    try {
+      out.push(new ItemStack(id, a + Math.floor(rnd() * (b - a + 1))));
+    } catch {}
+  };
+  if (kind === "cache") {
+    if (rnd() < 0.5) out.push(gear(rnd, Math.max(0, rank - 1)));
+    for (let i = 0; i < 2 + Math.floor(rnd() * 2); i++) {
+      const [id, a, b] = weighted(rnd, GOODS[rank]);
+      add(id, a, Math.max(a, Math.ceil(b / 2)));
+    }
+    return out;
+  }
+  if (kind === "shrine") {
+    for (const [id, a, b] of SHRINE[rank]) if (rnd() < 0.8) add(id, a, b);
+    return out;
+  }
+  if (kind === "library") {
+    for (let i = 0; i < 2 + Math.floor(rnd() * (1 + rank / 2)); i++) out.push(book(rnd, rank));
+    add("minecraft:experience_bottle", 3 + rank * 2, 6 + rank * 3);
+    add("minecraft:lapis_lazuli", 4, 12);
+    if (rnd() < 0.5) add("minecraft:book", 2, 6);
+    return out;
+  }
+  if (kind === "armory") {
+    for (let i = 0; i < 3 + (rnd() < 0.4 ? 1 : 0); i++) {
+      try {
+        out.push(gear(rnd, rank));
+      } catch {}
+    }
+    add("minecraft:arrow", 16, 32);
+    if (rank >= 1) add("minecraft:iron_ingot", 3, 8);
+    return out;
+  }
   const gearCount = kind === "boss" ? 3 : 1 + (rnd() < 0.4 ? 1 : 0);
   for (let i = 0; i < gearCount; i++) {
     try {

@@ -1,39 +1,48 @@
 // Dungeon instances behind gates.
 //
-// Each running dungeon gets a slot far away in the sky. It is built when the
-// first hunter enters (players are held in place until it's ready) and torn
-// down when the last hunter leaves.
+// Each running dungeon gets a slot far away in the sky. Its layout (plan.js)
+// is a branching jungle-ruins cavern: many rooms, loops, dead ends with
+// different rewards and a boss at the farthest end.
 //
-// Layout (along +x): start room, N monster rooms, boss room. Every room is
-// 15x15 inside, rooms are joined by corridors. The exit of a room is sealed
-// with barriers until its monsters are dead.
+// Building: room by room, start first. Each room's area is loaded with a
+// temporary ticking area, cleared, then built. Hunters go in as soon as the
+// start and its neighbours are ready; the rest keeps building ahead of them.
+//
+// Rooms: entering a monster room seals its doorways and starts waves of
+// monsters; clearing the last wave opens them. Dead ends hold treasure
+// (guarded by an elite), armories, libraries and healing shrines. The boss
+// gate opens once enough of the dungeon is cleared.
 import { BlockPermutation, BlockVolume, ItemStack, Player, system, world } from "@minecraft/server";
-import { boundsOf, design, doorsOf, fallenZ, hallHalf, layout, vaultBars } from "./architecture.js";
+import { bossSpot, CELL, cellBox, designRoom, exitSpot, isCombat, makePlan, sealOf, vaultBarsOf, Y_HI } from "./plan.js";
 import { fillChest } from "./loot.js";
 import { getData, markDirty } from "../data.js";
 import { addXp, flash } from "../stats.js";
 import { addGold } from "../economy.js";
+import { GATE_RANKS, MAX_DUNGEONS, RED_REWARD } from "./ranks.js";
 
 const DUNGEON_GOLD = [60, 150, 350, 800, 1800, 4000];
-import { GATE_RANKS, MAX_DUNGEONS, RED_REWARD } from "./ranks.js";
+/** share of the fight rooms that must be cleared before the boss gate opens */
+const BOSS_UNLOCK = 0.6;
 
 const base = (slot) => ({ x: 80000 + slot * 600, y: 100, z: 80000 });
 const ow = () => world.getDimension("overworld");
 
 /**
- * @typedef {{gateId:string, slot:number, rank:number, red:boolean, members:Set<string>,
- *  state:"building"|"ready"|"cleared", next:number, fighting:number, bossId?:string, clearedAt?:number,
- *  rooms:number, startedAt:number, n:number}} Instance
+ * @typedef {{st:number, wave:number, waves:number, elite:boolean}} RoomState  st: 0 new, 1 fighting, 2 done
+ * @typedef {{gateId:string, slot:number, uid:number, rank:number, red:boolean, members:Set<string>,
+ *  state:"building"|"ready"|"cleared", plan:import("./plan.js").Plan, rs:RoomState[], built:boolean[], cleared:boolean[],
+ *  done:number, need:number, bossOpen:boolean, bossId?:string, clearedAt?:number, startedAt:number,
+ *  dead?:boolean, last:Map<string, number>}} Instance
  */
 /** @type {Map<string, Instance>} gateId -> instance */
 export const instances = new Map();
-const slotsInUse = () => new Set([...instances.values()].map((i) => i.slot));
+/** slots still being torn down */
+const busySlots = new Set();
+const slotsInUse = () => new Set([...[...instances.values()].map((i) => i.slot), ...busySlots]);
 
-export const roomCount = (inst) => GATE_RANKS[inst.rank].rooms + 2; // start + monsters + boss
-const roomCenter = (inst, i) => layout(base(inst.slot), inst.n).halls[i];
 const tagAll = (inst) => `sl_dg${inst.slot}`;
-const tagRoom = (inst, i) => `sl_dg${inst.slot}_r${i}`;
-const areaName = (inst) => `sl_dungeon${inst.slot}`;
+const tagRoom = (inst, i) => `sl_dg${inst.slot}_${inst.uid}_r${i}`;
+const areaName = (slot) => `sl_dungeon${slot}`;
 
 /** Instance the player is in (by their saved dungeon record). */
 export function instanceOf(player) {
@@ -42,66 +51,69 @@ export function instanceOf(player) {
   return inst && inst.members.has(player.id) ? inst : undefined;
 }
 
-// ---------------------------------------------------------------- building
-const bounds = (inst) => boundsOf(base(inst.slot), inst.n);
-
-function* clearJob(inst, done) {
-  const { from, to } = bounds(inst);
-  for (let x = from.x; x <= to.x; x += 20) {
+// ---------------------------------------------------------------- blocks
+const FALLBACK = {
+  cobweb: "web", short_grass: "tallgrass", fern: "tallgrass", azalea_leaves_flowered: "azalea_leaves", jungle_leaves: "azalea_leaves",
+  poppy: "red_flower", blue_orchid: "red_flower", allium: "red_flower", azure_bluet: "red_flower", oxeye_daisy: "red_flower",
+  cornflower: "red_flower", lily_of_the_valley: "red_flower", dandelion: "yellow_flower", skeleton_skull: "skull",
+  tuff_bricks: "stone_bricks", polished_tuff: "polished_andesite", chiseled_tuff_bricks: "chiseled_stone_bricks",
+  jungle_fence: "oak_fence", spruce_fence: "oak_fence", dark_oak_fence: "oak_fence", crimson_fence: "oak_fence",
+  cyan_stained_glass: "glass", red_wool: "wool", mossy_stone_bricks: "stonebrick", stone_bricks: "stonebrick",
+};
+/** @type {Map<string, BlockPermutation|null>} */
+const perms = new Map();
+function permOf(b) {
+  const id = typeof b === "string" ? (b.includes(":") ? b : `minecraft:${b}`) : b.id;
+  const states = typeof b === "string" ? undefined : b.states;
+  const key = states ? id + JSON.stringify(states) : id;
+  if (perms.has(key)) return perms.get(key);
+  let perm = null;
+  for (const [i, s] of [[id, states], [id, undefined], [`minecraft:${FALLBACK[id.slice(10)] ?? "-"}`, undefined]]) {
     try {
-      ow().fillBlocks(new BlockVolume({ x, y: from.y, z: from.z }, { x: Math.min(x + 19, to.x), y: to.y, z: to.z }), "minecraft:air");
-    } catch (e) {
-      console.warn(`[SL] dungeon clear: ${e}`);
-    }
-    yield;
+      perm = BlockPermutation.resolve(i, s);
+      break;
+    } catch {}
   }
-  done?.();
+  if (!perm) console.warn(`[SL] dungeon: unknown block ${key}`);
+  perms.set(key, perm);
+  return perm;
 }
 
-function* buildJob(inst, resolve) {
-  let cleared = false;
-  const gen = clearJob(inst, () => (cleared = true));
-  while (!cleared) {
-    gen.next();
-    yield;
-  }
-  let n = 0;
-  const dim = ow();
-  const chests = [];
-  const perms = new Map();
-  for (const [x, y, z, b] of design(inst, base(inst.slot), chests)) {
-    try {
-      const block = dim.getBlock({ x, y, z });
-      if (typeof b === "string") block?.setType(b);
-      else {
-        const key = b.id + JSON.stringify(b.states);
-        if (!perms.has(key)) perms.set(key, BlockPermutation.resolve(b.id, b.states));
-        block?.setPermutation(perms.get(key));
+/** fillBlocks in pieces small enough for the engine. */
+function fillBox(dim, x1, y1, z1, x2, y2, z2, perm) {
+  const dy = y2 - y1 + 1;
+  const dz = z2 - z1 + 1;
+  const step = Math.max(1, Math.floor(30000 / (dy * dz)));
+  for (let x = x1; x <= x2; x += step) {
+    if (dy * dz > 30000) {
+      const zs = Math.max(1, Math.floor(30000 / dy));
+      for (let z = z1; z <= z2; z += zs) {
+        try {
+          dim.fillBlocks(new BlockVolume({ x, y: y1, z }, { x, y: y2, z: Math.min(z + zs - 1, z2) }), perm);
+        } catch {}
       }
-    } catch {}
-    if (++n % 300 === 0) yield;
-  }
-  // Loot chests (treasure rooms and the boss vault)
-  for (const c of chests) {
+      continue;
+    }
     try {
-      const block = dim.getBlock(c);
-      block?.setType("minecraft:chest");
-      fillChest(dim.getBlock(c), inst.rank, c.kind);
+      dim.fillBlocks(new BlockVolume({ x, y: y1, z: z1 }, { x: Math.min(x + step - 1, x2), y: y2, z: z2 }), perm);
     } catch {}
-    yield;
   }
-  inst.state = "ready";
-  spawnExit(inst, roomCenter(inst, 0), inst.red);
-  resolve();
 }
 
-function areaLoaded(inst) {
-  const { from, to } = bounds(inst);
+/** Area (3x3 cells) around a room: kept loaded while it is built or cleared. */
+function areaAround(plan, r) {
+  const b = cellBox(plan, r);
+  return {
+    from: { x: Math.max(plan.from.x, b.from.x - CELL), y: b.from.y, z: Math.max(plan.from.z, b.from.z - CELL) },
+    to: { x: Math.min(plan.to.x, b.to.x + CELL), y: b.to.y, z: Math.min(plan.to.z, b.to.z + CELL) },
+  };
+}
+function loaded(box) {
   const dim = ow();
-  for (let x = from.x; x <= to.x; x += 16) {
-    for (const z of [from.z, to.z]) {
+  for (let x = box.from.x; x <= box.to.x + 15; x += 16) {
+    for (let z = box.from.z; z <= box.to.z + 15; z += 16) {
       try {
-        if (!dim.getBlock({ x, y: from.y + 2, z })) return false;
+        if (!dim.getBlock({ x: Math.min(x, box.to.x), y: box.from.y + 1, z: Math.min(z, box.to.z) })) return false;
       } catch {
         return false;
       }
@@ -109,17 +121,101 @@ function areaLoaded(inst) {
   }
   return true;
 }
+/** Generator: holds a ticking area over the box until it is loaded. */
+function* loadBox(slot, box) {
+  try {
+    ow().runCommand(`tickingarea remove ${areaName(slot)}`);
+  } catch {}
+  try {
+    ow().runCommand(`tickingarea add ${box.from.x} ${box.from.y} ${box.from.z} ${box.to.x} ${box.to.y} ${box.to.z} ${areaName(slot)} true`);
+  } catch (e) {
+    console.warn(`[SL] dungeon ticking area: ${e}`);
+  }
+  const until = system.currentTick + 400;
+  while (!loaded(box) && system.currentTick < until) yield;
+}
+function dropArea(slot) {
+  try {
+    ow().runCommand(`tickingarea remove ${areaName(slot)}`);
+  } catch {}
+}
 
-/** Exit portal in a room (hidden in red gates until the boss falls). */
-function spawnExit(inst, center, hidden) {
+/** Empties one cell (blocks and leftover entities). */
+function* clearCell(plan, r) {
+  const { from, to } = cellBox(plan, r);
+  const dim = ow();
+  try {
+    for (const e of dim.getEntities({ location: from, volume: { x: CELL, y: to.y - from.y + 1, z: CELL } })) {
+      if (!(e instanceof Player)) e.remove();
+    }
+  } catch {}
+  const air = permOf("air");
+  for (let x = from.x; x <= to.x; x += 9) {
+    fillBox(dim, x, from.y, from.z, Math.min(x + 8, to.x), to.y, to.z, air);
+    yield;
+  }
+}
+
+function* buildJob(inst) {
+  const { plan } = inst;
+  const dim = ow();
+  const cleared = plan.rooms.map(() => false);
+  for (const id of plan.order) {
+    if (inst.dead) return;
+    const r = plan.rooms[id];
+    yield* loadBox(inst.slot, areaAround(plan, r));
+    for (const n of [id, ...r.doors.map((d) => d.to)]) {
+      if (cleared[n]) continue;
+      cleared[n] = true;
+      yield* clearCell(plan, plan.rooms[n]);
+    }
+    const { ops, chests } = designRoom(plan, r);
+    let work = 0;
+    for (const op of ops) {
+      if (inst.dead) return;
+      try {
+        if (op[0] === "F") {
+          const [, x1, y1, z1, x2, y2, z2, b] = op;
+          const perm = permOf(b);
+          if (perm) fillBox(dim, x1, y1, z1, x2, y2, z2, perm);
+          work += 4;
+        } else {
+          const perm = permOf(op[3]);
+          if (perm) dim.getBlock({ x: op[0], y: op[1], z: op[2] })?.setPermutation(perm);
+          work++;
+        }
+      } catch {}
+      if (work >= 220) {
+        work = 0;
+        yield;
+      }
+    }
+    for (const c of chests) {
+      try {
+        const block = dim.getBlock(c);
+        block?.setType("minecraft:chest");
+        fillChest(dim.getBlock(c), inst.rank, c.kind);
+      } catch {}
+      yield;
+    }
+    inst.built[id] = true;
+    if (id === 0) spawnExit(inst, exitSpot(r), inst.red);
+    // Ready once the start and every room next to it stand.
+    if (inst.state === "building" && plan.rooms[0].doors.every((d) => inst.built[d.to])) inst.state = "ready";
+  }
+  inst.state = inst.state === "building" ? "ready" : inst.state;
+  dropArea(inst.slot);
+}
+
+/** Exit portal (hidden in red gates until the boss falls). */
+function spawnExit(inst, at, hidden) {
   if (hidden) return;
   try {
-    const e = ow().spawnEntity("sl:gate", { x: center.x - 7 + 0.5, y: center.y, z: center.z + 0.5 });
+    const e = ow().spawnEntity("sl:gate", { x: at.x, y: at.y, z: at.z });
     e.triggerEvent("sl:small"); // fits inside a room
     e.nameTag = "§b[ EXIT ]";
     e.addTag("sl_exit");
     e.addTag(tagAll(inst));
-    e.setRotation({ x: 0, y: 90 });
   } catch {}
 }
 
@@ -140,22 +236,17 @@ export function enterDungeon(player, gate) {
       }
     }
     if (slot < 0) return "All dungeon spaces are busy. Try again soon.";
+    const seed = (Math.random() * 2 ** 31) | 0;
+    const plan = makePlan(seed, gate.rank, base(slot));
+    const fights = plan.rooms.filter((r) => isCombat(r.kind) || ["treasure", "armory", "library"].includes(r.kind)).length;
     inst = {
-      n: GATE_RANKS[gate.rank].rooms + 2,
-      gateId: gate.id, slot, rank: gate.rank, red: gate.red, members: new Set(), state: "building",
-      next: 1, fighting: -1, rooms: GATE_RANKS[gate.rank].rooms, startedAt: Date.now(),
+      gateId: gate.id, slot, uid: seed & 0xffff, rank: gate.rank, red: gate.red, members: new Set(), state: "building",
+      plan, rs: plan.rooms.map((r) => ({ st: r.kind === "start" ? 2 : 0, wave: 0, waves: 0, elite: false })),
+      built: plan.rooms.map(() => false), cleared: plan.rooms.map(() => false),
+      done: 0, need: Math.max(1, Math.ceil(fights * BOSS_UNLOCK)), bossOpen: false, startedAt: Date.now(), last: new Map(),
     };
     instances.set(gate.id, inst);
-    const { from, to } = bounds(inst);
-    try {
-      ow().runCommand(`tickingarea add ${from.x} ${from.y} ${from.z} ${to.x} ${to.y} ${to.z} ${areaName(inst)} true`);
-    } catch {}
-    const it = inst;
-    const wait = system.runInterval(() => {
-      if (!areaLoaded(it)) return;
-      system.clearRun(wait);
-      system.runJob(buildJob(it, () => {}));
-    }, 5);
+    system.runJob(buildJob(inst));
   } else if (inst.state === "cleared") {
     return "This dungeon has already been cleared.";
   }
@@ -173,20 +264,21 @@ export function enterDungeon(player, gate) {
   return undefined;
 }
 
+const startRoom = (inst) => inst.plan.rooms[0];
 const holdSpot = (inst) => {
-  const c = roomCenter(inst, 0);
-  return { x: c.x + 0.5, y: c.y + 3, z: c.z + 0.5 };
+  const c = startRoom(inst);
+  return { x: c.cx + 0.5, y: inst.plan.base.y + Y_HI + 4, z: c.cz + 0.5 };
 };
-const startSpot = (inst) => {
-  const c = roomCenter(inst, 0);
-  return { x: c.x + 0.5, y: c.y + 0.1, z: c.z + 0.5 };
-};
+const centerOf = (r) => ({ x: r.cx + 0.5, y: r.cy + 0.1, z: r.cz + 0.5 });
+const startSpot = (inst) => centerOf(startRoom(inst));
 
 function holdOrPlace(player, inst) {
   if (inst.state === "building") {
     player.teleport(holdSpot(inst), { dimension: ow() });
     player.addEffect("slow_falling", 40, { amplifier: 0, showParticles: false });
-    flash(player, "§bThe dungeon is forming...", 25);
+    const total = inst.plan.rooms.length;
+    const n = inst.built.filter(Boolean).length;
+    flash(player, `§bThe dungeon is forming... §7${n}/${total}`, 25);
   } else {
     player.teleport(startSpot(inst), { dimension: ow() });
   }
@@ -209,17 +301,28 @@ export function leaveDungeon(player, reason) {
   if (inst && inst.members.size === 0) teardown(inst);
 }
 
-/** Removes an instance (blocks, monsters, ticking area). */
+/** Removes an instance: monsters now, blocks room by room in the background. */
 function teardown(inst) {
   instances.delete(inst.gateId);
+  inst.dead = true;
+  busySlots.add(inst.slot);
   try {
     for (const e of ow().getEntities({ tags: [tagAll(inst)] })) e.remove();
   } catch {}
-  system.runJob(clearJob(inst, () => {
-    try {
-      ow().runCommand(`tickingarea remove ${areaName(inst)}`);
-    } catch {}
-  }));
+  const { plan } = inst;
+  system.runJob(
+    (function* () {
+      for (const id of plan.order) {
+        if (!inst.built[id]) continue;
+        const r = plan.rooms[id];
+        yield* loadBox(inst.slot, areaAround(plan, r));
+        yield* clearCell(plan, r);
+        for (const d of r.doors) yield* clearCell(plan, plan.rooms[d.to]);
+      }
+      dropArea(inst.slot);
+      busySlots.delete(inst.slot);
+    })(),
+  );
   onTeardown?.(inst);
 }
 
@@ -227,7 +330,7 @@ function teardown(inst) {
 let onTeardown;
 export const setTeardownHandler = (fn) => (onTeardown = fn);
 
-// ---------------------------------------------------------------- rooms & monsters
+// ---------------------------------------------------------------- monsters
 const LONG = 20000000;
 
 function buff(e, healthAmp, strength, resistance) {
@@ -244,57 +347,176 @@ function buff(e, healthAmp, strength, resistance) {
   } catch {}
 }
 
-function spawnRoom(inst, i) {
-  const r = GATE_RANKS[inst.rank];
-  const c = roomCenter(inst, i);
-  const boss = i === roomCount(inst) - 1;
-  const count = Math.min(14, 3 + inst.rank + (inst.members.size - 1) * 2) - (boss ? 2 : 0);
+const WALK_THROUGH = /:(air|short_grass|tallgrass|tall_grass|fern|.*flower|poppy|blue_orchid|allium|azure_bluet|oxeye_daisy|cornflower|lily_of_the_valley|dandelion|moss_carpet|cave_vines.*|azalea|flowering_azalea)$/;
+/** A random spot a monster can stand on inside a room. */
+function spawnSpot(r) {
+  const dim = ow();
+  for (let i = 0; i < 25; i++) {
+    const a = Math.random() * Math.PI * 2;
+    const d = 2 + Math.random() * (r.R * 0.75);
+    const x = Math.floor(r.cx + Math.cos(a) * d);
+    const z = Math.floor(r.cz + Math.sin(a) * d);
+    for (let y = r.cy + 3; y >= r.cy - 7; y--) {
+      try {
+        const b = dim.getBlock({ x, y, z });
+        if (!b || !WALK_THROUGH.test(b.typeId)) continue;
+        const up = b.above();
+        const below = b.below();
+        if (!up || !WALK_THROUGH.test(up.typeId) || !below || below.isAir || below.isLiquid || WALK_THROUGH.test(below.typeId)) continue;
+        if (/leaves|fence|bars|lava/.test(below.typeId)) break;
+        return { x: x + 0.5, y: y + 0.05, z: z + 0.5 };
+      } catch {
+        break;
+      }
+    }
+  }
+  return undefined;
+}
+
+const prettyMob = (id) => id.replace(/^sl:(dg_)?/, "").replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
+
+function spawnWave(inst, i) {
+  const gr = GATE_RANKS[inst.rank];
+  const r = inst.plan.rooms[i];
+  const s = inst.rs[i];
+  s.wave++;
+  const count = Math.min(12, 3 + inst.rank + (inst.members.size - 1) * 2) + (s.wave - 1);
   for (let k = 0; k < count; k++) {
-    let px = Math.random() * 16 - 8;
-    let pz = Math.random() * 16 - 8;
-    if (Math.abs(Math.abs(px) - 6) < 1.2 && Math.abs(Math.abs(pz) - 6) < 1.2) px *= 0.6; // not inside a pillar
-    if (!boss && fallenZ(i) && Math.abs(pz - fallenZ(i)) < 2.2 && px > -7 && px < 4) pz -= Math.sign(fallenZ(i)) * 3; // not in the fallen column
-    const pos = { x: c.x + 0.5 + px, y: c.y + 0.1, z: c.z + 0.5 + pz };
+    const pos = spawnSpot(r);
+    if (!pos) continue;
     try {
-      const m = ow().spawnEntity(r.mobs[Math.floor(Math.random() * r.mobs.length)], pos);
+      const m = ow().spawnEntity(gr.mobs[Math.floor(Math.random() * gr.mobs.length)], pos);
       m.addTag(tagAll(inst));
       m.addTag(tagRoom(inst, i));
       buff(m, inst.rank * 2 - 1, Math.floor(inst.rank / 2) - 1, Math.floor(inst.rank / 3) - 1);
+      ow().spawnParticle("minecraft:soul_particle", { x: pos.x, y: pos.y + 0.5, z: pos.z });
     } catch {}
   }
-  if (boss) {
-    try {
-      const b = ow().spawnEntity(r.boss.id, { x: c.x + 5.5, y: c.y + 0.1, z: c.z + 0.5 });
-      b.nameTag = `§c[BOSS] ${r.boss.name}`;
-      b.addTag(tagAll(inst));
-      b.addTag(tagRoom(inst, i));
-      b.addTag("sl_boss");
-      b.addTag(`sl_rank_${inst.rank}`);
-      buff(b, 4 + inst.rank * 4, inst.rank, Math.min(3, Math.floor(inst.rank / 2) + 1));
-      inst.bossId = b.id;
-      ow().playSound("mob.wither.spawn", c, { volume: 1, pitch: 0.7 });
-    } catch {}
+  if (s.elite && s.wave === s.waves) {
+    const pos = spawnSpot(r);
+    if (pos) {
+      try {
+        const id = gr.mobs[Math.floor(Math.random() * gr.mobs.length)];
+        const m = ow().spawnEntity(id, pos);
+        m.nameTag = `§6[Elite] ${prettyMob(id)}`;
+        m.addTag(tagAll(inst));
+        m.addTag(tagRoom(inst, i));
+        buff(m, 3 + inst.rank * 3, Math.floor(inst.rank / 2), Math.min(2, Math.floor(inst.rank / 2)));
+      } catch {}
+    }
   }
-  inst.fighting = i;
-  forMembers(inst, (p) =>
-    p.onScreenDisplay.setTitle(boss ? "§c§lBOSS" : `§fROOM ${i}`, {
-      subtitle: boss ? `§c${r.boss.name}` : "§7Defeat every monster",
-      fadeInDuration: 3, stayDuration: 30, fadeOutDuration: 8,
+  forMembersNear(inst, r, (p) =>
+    p.onScreenDisplay.setTitle(" ", {
+      subtitle: s.waves > 1 ? `§cWAVE ${s.wave}/${s.waves}${s.elite && s.wave === s.waves ? " §6- ELITE" : ""}` : "§cAMBUSH!",
+      fadeInDuration: 2, stayDuration: 25, fadeOutDuration: 6,
     }),
   );
 }
 
-function openDoor(inst, i) {
+function spawnBoss(inst, i) {
+  const gr = GATE_RANKS[inst.rank];
+  const r = inst.plan.rooms[i];
+  const at = bossSpot(r);
+  try {
+    const b = ow().spawnEntity(gr.boss.id, at);
+    b.nameTag = `§c[BOSS] ${gr.boss.name}`;
+    b.addTag(tagAll(inst));
+    b.addTag(tagRoom(inst, i));
+    b.addTag("sl_boss");
+    b.addTag(`sl_rank_${inst.rank}`);
+    buff(b, 4 + inst.rank * 4, inst.rank, Math.min(3, Math.floor(inst.rank / 2) + 1));
+    inst.bossId = b.id;
+    ow().playSound("mob.wither.spawn", at, { volume: 1, pitch: 0.7 });
+  } catch {}
+  forMembers(inst, (p) =>
+    p.onScreenDisplay.setTitle("§c§lBOSS", { subtitle: `§c${gr.boss.name}`, fadeInDuration: 3, stayDuration: 40, fadeOutDuration: 8 }),
+  );
+}
+
+// ---------------------------------------------------------------- rooms
+function setSeals(inst, i, block) {
+  const r = inst.plan.rooms[i];
   const dim = ow();
-  for (const p of doorsOf(inst, base(inst.slot), i)) {
-    try {
-      dim.getBlock(p)?.setType("minecraft:air");
-    } catch {}
+  for (const d of r.doors) {
+    for (const p of sealOf(r, d)) {
+      try {
+        dim.getBlock(p)?.setType(block);
+      } catch {}
+    }
   }
 }
 
 function forMembers(inst, fn) {
   for (const p of world.getAllPlayers()) if (inst.members.has(p.id)) fn(p);
+}
+function forMembersNear(inst, r, fn) {
+  forMembers(inst, (p) => {
+    if (Math.hypot(p.location.x - r.cx, p.location.z - r.cz) < r.R + 24) fn(p);
+  });
+}
+
+const FIGHT_ENDS = ["treasure", "armory", "library"];
+
+/** A hunter stepped into room i for the first time. */
+function enterRoom(inst, i, player) {
+  const r = inst.plan.rooms[i];
+  const s = inst.rs[i];
+  if (r.kind === "boss") {
+    if (!inst.bossOpen) return;
+    s.st = 1;
+    setSeals(inst, i, "minecraft:iron_bars");
+    spawnBoss(inst, i);
+    s.waves = inst.rank >= 2 ? 1 : 0; // guards
+    if (s.waves) spawnWave(inst, i);
+    return;
+  }
+  if (r.kind === "shrine") {
+    s.st = 2;
+    markCleared(inst, i, false);
+    forMembersNear(inst, r, (p) => {
+      try {
+        const h = p.getComponent("minecraft:health");
+        h?.setCurrentValue(h.effectiveMax);
+        p.addEffect("regeneration", 600, { amplifier: 1 });
+        p.addEffect("absorption", 1200, { amplifier: 1 });
+      } catch {}
+      p.onScreenDisplay.setTitle("§b§lSHRINE", { subtitle: "§7The spring restores your strength", fadeInDuration: 3, stayDuration: 40, fadeOutDuration: 8 });
+      p.playSound("beacon.activate", { pitch: 1.2 });
+    });
+    return;
+  }
+  s.st = 1;
+  s.waves = FIGHT_ENDS.includes(r.kind) ? 1 + (inst.rank >= 3 ? 1 : 0) : 2 + (inst.rank >= 3 ? 1 : 0);
+  s.elite = FIGHT_ENDS.includes(r.kind) || i % 3 === 0;
+  setSeals(inst, i, "minecraft:iron_bars");
+  ow().playSound("random.door_close", { x: r.cx, y: r.cy, z: r.cz }, { volume: 1, pitch: 0.5 });
+  spawnWave(inst, i);
+  void player;
+}
+
+function markCleared(inst, i, fight) {
+  if (inst.cleared[i]) return;
+  inst.cleared[i] = true;
+  if (!fight) return;
+  inst.done++;
+  const gr = GATE_RANKS[inst.rank];
+  const r = inst.plan.rooms[i];
+  forMembers(inst, (p) => {
+    addXp(p, Math.floor(gr.xp * 0.03));
+    flash(p, `§aRoom cleared! §7(${inst.done}/${inst.need} for the boss gate)`, 60);
+    p.playSound("random.door_open", { pitch: 0.6 });
+  });
+  if (!inst.bossOpen && inst.done >= inst.need) {
+    inst.bossOpen = true;
+    const b = inst.plan.rooms[inst.plan.boss];
+    setSeals(inst, inst.plan.boss, "minecraft:air");
+    forMembers(inst, (p) => {
+      p.onScreenDisplay.setTitle("§c§lTHE BOSS GATE IS OPEN", { subtitle: `§7${gr.boss.name} awaits in the deepest hall`, fadeInDuration: 5, stayDuration: 50, fadeOutDuration: 10 });
+      p.playSound("mob.wither.ambient", { volume: 0.6, pitch: 0.5 });
+    });
+    void b;
+  }
+  void r;
 }
 
 function clearDungeon(inst) {
@@ -322,30 +544,44 @@ function clearDungeon(inst) {
       subtitle: `§e+${Math.floor(r.xp * mult)} XP`, fadeInDuration: 5, stayDuration: 60, fadeOutDuration: 10,
     });
     p.sendMessage(`§b[System] §fRewards: §e${got.join(", ")}`);
-    p.sendMessage("§b[System] §7The gate will close in 60 seconds. Use the §bEXIT §7gate or the QUESTS tab to leave.");
+    p.sendMessage("§b[System] §7The gate will close in 3 minutes. Loot the vaults, then use the §bEXIT §7gate or the QUESTS tab.");
+    p.sendMessage("§6[System] §fThe treasure vaults beside the throne are open!");
     p.playSound("random.levelup", { pitch: 0.8 });
   });
-  // Open the boss vault and the exit.
-  for (const p of vaultBars(inst, base(inst.slot))) {
+  const boss = inst.plan.rooms[inst.plan.boss];
+  setSeals(inst, inst.plan.boss, "minecraft:air");
+  for (const p of vaultBarsOf(boss)) {
     try {
       ow().getBlock(p)?.setType("minecraft:air");
     } catch {}
   }
-  forMembers(inst, (p) => p.sendMessage("§6[System] §fThe treasure vault beside the throne is open!"));
-  spawnExit(inst, roomCenter(inst, roomCount(inst) - 1), false);
+  spawnExit(inst, centerOf(boss), false);
 }
 
-const inRoom = (inst, i, l) => {
-  const c = roomCenter(inst, i);
-  const R = hallHalf(inst, i);
-  return Math.abs(l.x - (c.x + 0.5)) <= R + 0.5 && Math.abs(l.z - (c.z + 0.5)) <= R + 0.5 && Math.abs(l.y - c.y) < 8;
-};
+/** Room the location is in (only rooms already built). */
+function roomAt(inst, l) {
+  for (const r of inst.plan.rooms) {
+    if (!inst.built[r.id]) continue;
+    const dx = l.x - (r.cx + 0.5);
+    const dz = l.z - (r.cz + 0.5);
+    const R = r.R - 1.5;
+    if (dx * dx + dz * dz <= R * R && l.y >= r.cy - 8 && l.y <= r.cy + r.H) return r.id;
+  }
+  return -1;
+}
+/** Room whose cell holds the location (built or not). */
+function cellAt(inst, l) {
+  const { plan } = inst;
+  const gx = Math.floor((l.x - plan.base.x) / CELL);
+  const gz = Math.floor((l.z - plan.base.z) / CELL);
+  return plan.rooms.find((r) => r.gx === gx && r.gz === gz);
+}
 const inDungeon = (inst, l) => {
-  const { from, to } = bounds(inst);
-  return l.x >= from.x && l.x <= to.x + 1 && l.z >= from.z && l.z <= to.z + 1 && l.y >= from.y - 1 && l.y <= to.y + 2;
+  const { from, to } = inst.plan;
+  return l.x >= from.x && l.x <= to.x + 1 && l.z >= from.z && l.z <= to.z + 1 && l.y >= from.y - 1 && l.y <= to.y + 8;
 };
 
-/** playerId -> startedAt of the instance they were placed in */
+/** playerId -> uid of the instance they were placed in */
 const placed = new Map();
 
 system.runInterval(() => {
@@ -362,45 +598,65 @@ system.runInterval(() => {
         holdOrPlace(p, inst);
         continue;
       }
-      // Pulled back if they somehow got out.
-      if (p.dimension.id !== "minecraft:overworld" || !inDungeon(inst, p.location)) p.teleport(startSpot(inst), { dimension: ow() });
       // First tick after the dungeon is ready: put held hunters on the floor.
-      if (placed.get(p.id) !== inst.startedAt) {
-        placed.set(p.id, inst.startedAt);
+      if (placed.get(p.id) !== inst.uid) {
+        placed.set(p.id, inst.uid);
         p.teleport(startSpot(inst), { dimension: ow() });
+        p.sendMessage("§b[System] §fFind your way through the ruins. Clear rooms to open the §cboss gate§f; dead ends hide treasure.");
+        continue;
       }
+      // Pulled back if they somehow got out, or ran ahead of the builder.
+      if (p.dimension.id !== "minecraft:overworld" || !inDungeon(inst, p.location)) {
+        p.teleport(startSpot(inst), { dimension: ow() });
+        continue;
+      }
+      const cell = cellAt(inst, p.location);
+      if (cell && !inst.built[cell.id]) {
+        const back = inst.plan.rooms[inst.last.get(p.id) ?? 0];
+        p.teleport(centerOf(back), { dimension: ow() });
+        flash(p, "§7The path ahead is still forming...", 40);
+        continue;
+      }
+      if (inst.state === "cleared") continue;
+      const i = roomAt(inst, p.location);
+      if (i < 0) continue;
+      inst.last.set(p.id, i);
+      if (inst.rs[i].st === 0) enterRoom(inst, i, p);
+      else if (inst.plan.rooms[i].kind === "boss" && !inst.bossOpen) flash(p, `§cThe boss gate is sealed §7(${inst.done}/${inst.need} rooms)`, 40);
     }
-    if (inst.state === "building") continue;
-    if (inst.state === "cleared") {
-      if (Date.now() - (inst.clearedAt ?? 0) > 60000) {
+    if (inst.state !== "ready") {
+      if (inst.state === "cleared" && Date.now() - (inst.clearedAt ?? 0) > 180000) {
         for (const p of online) leaveDungeon(p, "§b[System] §7The gate has closed.");
       }
       continue;
     }
-    // Room progress
-    const n = roomCount(inst);
-    if (inst.fighting < 0 && inst.next < n && online.some((p) => inRoom(inst, inst.next, p.location))) spawnRoom(inst, inst.next);
-    if (inst.fighting >= 0) {
-      const alive = ow().getEntities({ tags: [tagRoom(inst, inst.fighting)] }).filter((e) => e.isValid);
-      const boss = inst.fighting === n - 1;
+    // Fights in progress
+    inst.rs.forEach((s, i) => {
+      if (s.st !== 1) return;
+      const r = inst.plan.rooms[i];
+      // only judge a room while a hunter is close (its chunks are loaded)
+      if (!online.some((p) => Math.hypot(p.location.x - r.cx, p.location.z - r.cz) < r.R + 30)) return;
+      const alive = ow().getEntities({ tags: [tagRoom(inst, i)] }).filter((e) => e.isValid);
+      const boss = r.kind === "boss";
       if (boss && inst.bossId) {
         const b = world.getEntity(inst.bossId);
         const h = b?.getComponent("minecraft:health");
-        if (h) forMembers(inst, (p) => flash(p, `§c[BOSS] ${GATE_RANKS[inst.rank].boss.name} §f${Math.ceil(h.currentValue)}/${Math.round(h.effectiveMax)}`, 25));
+        if (h) forMembersNear(inst, r, (p) => flash(p, `§c[BOSS] ${GATE_RANKS[inst.rank].boss.name} §f${Math.ceil(h.currentValue)}/${Math.round(h.effectiveMax)}`, 25));
       }
-      if (alive.length === 0) {
-        if (boss) clearDungeon(inst);
-        else {
-          openDoor(inst, inst.fighting);
-          forMembers(inst, (p) => {
-            flash(p, `§aRoom ${inst.fighting} cleared! §7The way forward is open.`, 60);
-            p.playSound("random.door_open", { pitch: 0.6 });
-          });
-          inst.fighting = -1;
-          inst.next++;
-        }
+      if (s.wave < s.waves && alive.length <= 1) {
+        spawnWave(inst, i);
+        return;
       }
-    }
+      if (alive.length > 0) return;
+      s.st = 2;
+      if (boss) {
+        clearDungeon(inst);
+        return;
+      }
+      setSeals(inst, i, "minecraft:air");
+      markCleared(inst, i, true);
+      if (FIGHT_ENDS.includes(r.kind)) forMembersNear(inst, r, (p) => flash(p, "§6The guardians fell. §fThe treasure is yours!", 60));
+    });
   }
 }, 20);
 
@@ -432,7 +688,7 @@ world.afterEvents.playerSpawn.subscribe(({ player, initialSpawn }) => {
   }, 40);
 });
 
-// Dungeons can't be broken.
+// Dungeons can't be broken (chests can still be opened).
 const protectedAt = (loc, dimId) =>
   dimId === "minecraft:overworld" && [...instances.values()].some((inst) => inDungeon(inst, loc));
 world.beforeEvents.playerBreakBlock.subscribe((ev) => {
