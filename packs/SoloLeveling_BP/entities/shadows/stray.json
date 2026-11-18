@@ -112,12 +112,6 @@
           }
         }
       },
-      "minecraft:behavior.follow_owner": {
-        "priority": 4,
-        "speed_multiplier": 1.25,
-        "start_distance": 7,
-        "stop_distance": 3
-      },
       "minecraft:behavior.random_stroll": {
         "priority": 7,
         "speed_multiplier": 0.8
@@ -199,6 +193,14 @@
           "priority": 1
         }
       },
+      "sl:follow": {
+        "minecraft:behavior.follow_owner": {
+          "priority": 4,
+          "speed_multiplier": 1.25,
+          "start_distance": 7,
+          "stop_distance": 3
+        }
+      },
       "sl:ranged": {
         "minecraft:shooter": {
           "def": "minecraft:arrow"
@@ -223,7 +225,22 @@
         "add": {
           "component_groups": [
             "sl:auto_target",
+            "sl:follow",
             "sl:ranged"
+          ]
+        }
+      },
+      "sl:follow_on": {
+        "add": {
+          "component_groups": [
+            "sl:follow"
+          ]
+        }
+      },
+      "sl:follow_off": {
+        "remove": {
+          "component_groups": [
+            "sl:follow"
           ]
         }
       },

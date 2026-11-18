@@ -8,7 +8,7 @@ import { getData, markDirty } from "../data.js";
 import { addDamageHook, addXp, flash, xpFor } from "../stats.js";
 import { ARCHERS, gearInfo, setGear, GEAR_SLOTS, shadowBow, updateCombatMode } from "./gear.js";
 import { deleteShadowSave, placeShadow, placing, saveShadow, shadowTag } from "./persist.js";
-import { applyMode, driveTargets, modeOf, provoking } from "./targeting.js";
+import { applyMode, applyOrder, driveTargets, effectiveMode, modeOf, provoking } from "./targeting.js";
 import { domainUntil } from "../state.js";
 import {
   creeperCharges, creeperPower, healValue,
@@ -52,7 +52,8 @@ export function entityOf(player, sid) {
   return e?.isValid ? e : undefined;
 }
 
-export const isSummoned = (player, sid) => !!entityOf(player, sid);
+/** Summoned = has a live entity, or guards a spot that is currently unloaded. */
+export const isSummoned = (player, sid) => !!entityOf(player, sid) || (!!active.get(player.id)?.get(sid) && !!findRecord(player, sid)?.guard);
 export const activeCount = (player) => [...activeOf(player).values()].filter((e) => e.isValid).length;
 export const regenLeft = (s) => Math.max(0, Math.ceil((s.deadUntil - Date.now()) / 1000));
 
@@ -76,7 +77,9 @@ function register(player, s, e) {
   activeOf(player).set(s.id, e);
   meta.set(e.id, { playerId: player.id, sid: s.id });
   if (s.type === "creeper") charges.set(e.id, creeperCharges(s));
-  applyMode(e, modeOf(player));
+  delete s.guard; // a (re)summoned shadow comes back to its owner
+  applyMode(e, effectiveMode(player, s));
+  applyOrder(e, s);
   try {
     e.dimension.spawnParticle("minecraft:soul_particle", { ...e.location, y: e.location.y + 1 });
     e.dimension.spawnParticle("minecraft:large_explosion", e.location);
@@ -142,6 +145,31 @@ export async function summon(player, s, { free = false, location = undefined } =
   }
 }
 
+/**
+ * Orders: "STAY" (guard the shadow's current spot, kill what comes near) or
+ * "FOLLOW" (back to the owner).
+ */
+export function setOrder(player, sid, order) {
+  const s = findRecord(player, sid);
+  const e = entityOf(player, sid);
+  if (!s || !e) return false;
+  if (order === "STAY") s.guard = { x: e.location.x, y: e.location.y, z: e.location.z, dim: e.dimension.id };
+  else {
+    delete s.guard;
+    e.teleport(nearOwner(player), { dimension: player.dimension });
+  }
+  applyOrder(e, s);
+  markDirty(player);
+  return true;
+}
+
+/** Order for every summoned shadow. Returns how many obeyed. */
+export function orderAll(player, order) {
+  let n = 0;
+  for (const sid of activeOf(player).keys()) if (setOrder(player, sid, order)) n++;
+  return n;
+}
+
 /** Saves the shadow (equipment included) and returns it to the owner's shadow. */
 export async function dismiss(player, sid) {
   const e = activeOf(player).get(sid);
@@ -185,8 +213,14 @@ export async function summonAll(player) {
 /** Teleports every summoned shadow to the owner. */
 export function callAll(player) {
   let n = 0;
-  for (const e of activeOf(player).values()) {
+  for (const [sid, e] of activeOf(player)) {
     if (!e.isValid) continue;
+    const rec = findRecord(player, sid);
+    if (rec?.guard) {
+      delete rec.guard; // CALL also cancels a STAY order
+      applyOrder(e, rec);
+      markDirty(player);
+    }
     e.teleport(nearOwner(player), { dimension: player.dimension });
     n++;
   }
@@ -486,17 +520,19 @@ addDamageHook((ev) => {
       return;
     }
     const owner = playerById(a.playerId);
+    const s = owner && findRecord(owner, a.sid);
     // Other players and their shadows: only when PvP was chosen, by this
-    // shadow's owner or by the other side (then fighting back is fair).
+    // shadow (or its army) or by the other side (then fighting back is fair).
     if (victim instanceof Player || v) {
       const other = victim instanceof Player ? victim : playerById(v.playerId);
-      const pvp = (owner && modeOf(owner) === "PVP") || (other && modeOf(other) === "PVP");
+      const otherShadow = v && other ? findRecord(other, v.sid) : undefined;
+      const pvp = (owner && s && effectiveMode(owner, s) === "PVP") ||
+        (other && (modeOf(other) === "PVP" || (otherShadow && effectiveMode(other, otherShadow) === "PVP")));
       if (!pvp) {
         ev.cancel = true;
         return;
       }
     }
-    const s = owner && findRecord(owner, a.sid);
     if (s) {
       // Creeper blasts only hurt monsters (no griefing players, pets or villagers).
       if (s.type === "creeper" && ev.damageSource.cause === EntityDamageCause.entityExplosion) {
@@ -688,13 +724,21 @@ system.runInterval(() => {
     const map = active.get(player.id);
     if (!map) continue;
     for (const [sid, e] of map) {
+      const rec = findRecord(player, sid);
       if (!e.isValid) {
-        map.delete(sid);
+        // A guard whose spot is unloaded comes back when the area loads again.
+        if (!rec?.guard) map.delete(sid);
         continue;
       }
       try {
-        const far = e.dimension.id !== player.dimension.id || dist2(e.location, player.location) > 24 * 24;
-        if (far) e.teleport(nearOwner(player), { dimension: player.dimension });
+        if (rec?.guard) {
+          // STAY order: keep near the guarded spot.
+          const g = rec.guard;
+          if (e.dimension.id === g.dim && dist2(e.location, g) > 10 * 10) e.teleport({ x: g.x, y: g.y, z: g.z });
+        } else {
+          const far = e.dimension.id !== player.dimension.id || dist2(e.location, player.location) > 24 * 24;
+          if (far) e.teleport(nearOwner(player), { dimension: player.dimension });
+        }
         const h = e.getComponent("minecraft:health");
         if (h && h.currentValue < h.effectiveMax) h.setCurrentValue(Math.min(h.effectiveMax, h.currentValue + h.effectiveMax * 0.02));
         if (h) autoEat(player, sid, e, h);

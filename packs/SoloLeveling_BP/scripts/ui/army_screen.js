@@ -1,9 +1,10 @@
 // SHADOWS tab: Army Management. Layout "sl:army|" (index map in tools/gen_ui.py).
 // Tapping a shadow card opens its Shadow Profile (ui/shadow_screen.js).
-import { activeCount, arise, callAll, corpsesNear, dismissAll, entityOf, regenLeft, summonAll, summonedList } from "../army/army.js";
-import { MODE_INFO, modeLabel, modeOf, MODES, setMode, SPECIFIC_TYPES } from "../army/targeting.js";
-import { ModalFormData } from "@minecraft/server-ui";
-import { showForm } from "./form.js";
+import {
+  activeCount, arise, callAll, corpsesNear, dismissAll, entityOf, orderAll, regenLeft, summonAll, summonedList,
+} from "../army/army.js";
+import { armyTargets, MODE_INFO, modeLabel, modeOf, setArmyMode } from "../army/targeting.js";
+import { pickMode } from "./mode_picker.js";
 import {
   activeLimit, ARISE_MP, armyCapacity, GRADES, nextRankLimits, portraitOf, RANK_LIMITS,
 } from "../army/types.js";
@@ -87,29 +88,20 @@ export async function armyScreen(player) {
     ].join("\n"),
   );
   form.slot(33, `§cATTACK: §f${modeLabel(player)}`, BLANK, async () => {
-    const shadows = () => summonedList(player).map(([, e]) => e);
-    const next = MODES[(MODES.indexOf(mode) + 1) % MODES.length];
-    if (next === "SPECIFIC") {
-      const names = SPECIFIC_TYPES.map((t) => t.replace("minecraft:", "").replace(/_/g, " "));
-      const d2 = getData(player);
-      const res = await showForm(
-        player,
-        new ModalFormData()
-          .title("Attack only...")
-          .dropdown("Your army will hunt only this mob type", names, { defaultValueIndex: Math.max(0, SPECIFIC_TYPES.indexOf(d2.armyTarget)) })
-          .submitButton("Hunt"),
-      );
-      if (!res || res.canceled || !res.formValues) {
-        setMode(player, "PVP", shadows); // skipped SPECIFIC
-      } else {
-        setMode(player, "SPECIFIC", shadows, SPECIFIC_TYPES[Number(res.formValues[0])]);
-      }
-    } else {
-      setMode(player, next, shadows);
+    const r = await pickMode(player, { title: "Army attack priority", mode, targets: armyTargets(player) });
+    if (r) {
+      setArmyMode(player, r.mode, summonedList(player), r.targets);
+      toast(`§cArmy attack: §f${modeLabel(player)}`);
     }
-    toast(`§cAttack mode: §f${modeLabel(player)}`);
     return again();
-  }, `§cAttack mode: §f${modeLabel(player)} §7(tap to change)`);
+  }, `§cAttack priority: §f${modeLabel(player)} §7(tap to change)`);
+
+  const guarding = summonedList(player).some(([s]) => s.guard);
+  form.slot(34, guarding ? "§aFOLLOW ME (ALL)" : "§eSTAY HERE (ALL)", BLANK, () => {
+    const n = orderAll(player, guarding ? "FOLLOW" : "STAY");
+    toast(n ? (guarding ? `§a${n} shadows follow you` : `§e${n} shadows guard their spot`) : "§7No summoned shadows");
+    return again();
+  }, guarding ? "§aOrder: Follow me (all)" : "§eOrder: Stay here (all)");
 
   const souls = corpsesNear(player).length;
   form.slot(32, souls ? `§5ARISE (${souls} soul${souls > 1 ? "s" : ""} nearby)` : "§8ARISE - no soul nearby", BLANK, () => {

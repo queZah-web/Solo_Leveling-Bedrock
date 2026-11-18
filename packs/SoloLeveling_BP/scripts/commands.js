@@ -6,7 +6,7 @@ import {
 import { BASE_STAT, maxMp, STATS } from "./config.js";
 import { getData, markDirty, resetData } from "./data.js";
 import { addXp, applyStatEffects, setLevel } from "./stats.js";
-import { arise } from "./army/army.js";
+import { arise, callAll, dismissAll, orderAll, summonAll } from "./army/army.js";
 import { setPenaltyEnabled } from "./quests/daily.js";
 import { endPenalty, startPenalty } from "./quests/penalty.js";
 import { openSystem } from "./ui/screens.js";
@@ -81,6 +81,32 @@ system.beforeEvents.startup.subscribe(({ customCommandRegistry: reg }) => {
     (origin, enabled) => {
       system.run(() => setPenaltyEnabled(!!enabled));
       return ok(`Penalty Zone ${enabled ? "enabled" : "disabled"}.`);
+    },
+  );
+
+  reg.registerEnum("sl:order", ["stay", "follow", "summon", "dismiss", "call"]);
+  reg.registerCommand(
+    {
+      name: "sl:shadows",
+      description: "Order your shadow army: stay | follow | summon | dismiss | call",
+      permissionLevel: CommandPermissionLevel.Any,
+      cheatsRequired: false,
+      mandatoryParameters: [{ name: "sl:order", type: CustomCommandParamType.Enum }],
+    },
+    (origin, order) => {
+      const p = origin.sourceEntity ?? origin.initiator;
+      if (!(p instanceof Player)) return fail("Only players can command shadows.");
+      system.run(async () => {
+        const bar = (m) => p.onScreenDisplay.setActionBar(m);
+        if (order === "stay") bar(`§e${orderAll(p, "STAY")} shadows guard their spot`);
+        else if (order === "follow") bar(`§a${orderAll(p, "FOLLOW")} shadows follow you`);
+        else if (order === "summon") bar(`§5${await summonAll(p)} shadows answered your call`);
+        else if (order === "dismiss") {
+          await dismissAll(p);
+          bar("§7All shadows returned to your shadow");
+        } else if (order === "call") bar(`§b${callAll(p)} shadows returned to you`);
+      });
+      return ok();
     },
   );
 

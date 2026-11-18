@@ -40,12 +40,24 @@ export const SPECIFIC_TYPES = [
 
 const SMART = new Set(["enderman", "vindicator", "wither_skeleton", "warden"]);
 
+/** The army-wide mode. */
 export const modeOf = (player) => {
   const m = getData(player).armyMode;
   return MODES.includes(m) ? m : "MONSTERS";
 };
 
-/** Puts a shadow entity's behavior in line with its owner's mode. */
+/** Mob types hunted by the army in SPECIFIC mode. */
+export function armyTargets(player) {
+  const d = getData(player);
+  if (!Array.isArray(d.armyTargets)) d.armyTargets = d.armyTarget ? [d.armyTarget] : ["minecraft:zombie"];
+  return d.armyTargets;
+}
+
+/** A shadow's own mode ("ARMY" or unset = follow the army mode). */
+export const effectiveMode = (player, s) => (s.mode && s.mode !== "ARMY" && MODES.includes(s.mode) ? s.mode : modeOf(player));
+const targetsOf = (player, s) => (s.mode === "SPECIFIC" ? s.targets ?? [] : armyTargets(player));
+
+/** Puts a shadow entity's behavior in line with its mode. */
 export function applyMode(e, mode) {
   try {
     e.triggerEvent(mode === "MONSTERS" || mode === "ALL" || mode === "PVP" ? "sl:auto_on" : "sl:auto_off");
@@ -53,19 +65,47 @@ export function applyMode(e, mode) {
   } catch {}
 }
 
+/** Follow the owner, or guard a spot (STAY order). */
+export function applyOrder(e, s) {
+  try {
+    e.triggerEvent(s.guard ? "sl:follow_off" : "sl:follow_on");
+  } catch {}
+}
+
 /**
+ * Army-wide mode. Shadows with their own mode keep it.
  * @param {Player} player
  * @param {string} mode
- * @param {() => Iterable<import("@minecraft/server").Entity>} shadows
+ * @param {[import("../data.js").ShadowRecord, import("@minecraft/server").Entity][]} list summoned shadows
+ * @param {string[]} [targets] SPECIFIC mob types
  */
-export function setMode(player, mode, shadows, target = undefined) {
+export function setArmyMode(player, mode, list, targets) {
   const d = getData(player);
   d.armyMode = mode;
-  if (target) d.armyTarget = target;
+  if (targets) d.armyTargets = targets;
   markDirty(player);
-  for (const e of shadows()) applyMode(e, mode);
+  for (const [s, e] of list) applyMode(e, effectiveMode(player, s));
   provoked.clear();
 }
+
+/** One shadow's own mode ("ARMY" = follow the army). */
+export function setShadowMode(player, s, e, mode, targets) {
+  s.mode = mode;
+  if (targets) s.targets = targets;
+  markDirty(player);
+  if (e) applyMode(e, effectiveMode(player, s));
+  if (e) provoked.delete(e.id);
+}
+
+const typeName = (t) => t.replace("minecraft:", "").replace(/_/g, " ").toUpperCase();
+/** Short label like "MONSTERS" or "ONLY ZOMBIE +2". */
+export function modeText(mode, targets) {
+  if (mode !== "SPECIFIC") return mode;
+  if (!targets?.length) return "ONLY ?";
+  return `ONLY ${typeName(targets[0])}${targets.length > 1 ? ` +${targets.length - 1}` : ""}`;
+}
+export const shadowModeLabel = (player, s) =>
+  !s.mode || s.mode === "ARMY" ? `ARMY (${modeText(modeOf(player), armyTargets(player))})` : modeText(s.mode, s.targets);
 
 /** shadow entity id -> target entity id */
 const provoked = new Map();
@@ -111,11 +151,11 @@ function provoke(shadow, target) {
  * @param {(e: import("@minecraft/server").Entity) => ({playerId:string}|undefined)} metaOf
  */
 export function driveTargets(owner, list, metaOf) {
-  const mode = modeOf(owner);
-  if (mode === "MONSTERS" || mode === "DEFEND") return;
-  const d = getData(owner);
   for (const [s, e] of list) {
     if (!e.isValid) continue;
+    const mode = effectiveMode(owner, s);
+    if (mode === "MONSTERS" || mode === "DEFEND") continue;
+    const wanted = targetsOf(owner, s);
     const cur = provoked.get(e.id);
     if (cur) {
       const t = world.getEntity(cur);
@@ -127,7 +167,7 @@ export function driveTargets(owner, list, metaOf) {
     if (mode === "ANIMALS" || mode === "ALL") {
       target = nearest(around.filter((x) => ANIMALS.has(x.typeId) && !isTamed(x)), e.location);
     } else if (mode === "SPECIFIC") {
-      target = nearest(around.filter((x) => x.typeId === d.armyTarget && !isTamed(x)), e.location);
+      target = nearest(around.filter((x) => wanted.includes(x.typeId) && !isTamed(x)), e.location);
     } else if (mode === "PVP") {
       const enemies = owner.dimension
         .getPlayers({ location: owner.location, maxDistance: 24 })
@@ -149,10 +189,5 @@ export function driveTargets(owner, list, metaOf) {
   }
 }
 
-export const modeLabel = (player) => {
-  const m = modeOf(player);
-  if (m !== "SPECIFIC") return m;
-  const t = getData(player).armyTarget;
-  return `ONLY ${t ? t.replace("minecraft:", "").replace(/_/g, " ").toUpperCase() : "?"}`;
-};
+export const modeLabel = (player) => modeText(modeOf(player), armyTargets(player));
 

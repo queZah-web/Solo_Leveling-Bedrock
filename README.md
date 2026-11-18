@@ -57,6 +57,15 @@
   - **SPECIFIC**: تختار نوع واحد من الوحوش أو الحيوانات
   - **PVP**: يهاجم اللاعبين الأعداء، **ظلالهم أول** وبعدها اللاعب نفسه. الظلال الذكية من رتبة Knight وفوق (Enderman, Vindicator, Wither Skeleton, Warden، والظلال اللي لها أسماء) تقدر تهاجم اللاعب مباشرة. ولو ما اخترت PVP، ظلالك ما تأذي أي لاعب ولا ظلاله.
   - **DEFEND**: يحميك بس، ويهاجم اللي تضربه أنت
+- **أولوية لكل ظل**: من Shadow Profile زر **ATK** تختار لهذا الظل بس وضع هجوم خاص فيه، أو **ARMY** عشان يمشي مع الجيش.
+- **SPECIFIC** تقدر تختار فيه **أكثر من نوع** (مثلًا Zombie + Skeleton + Creeper).
+- **الأوامر**:
+  - **STAY HERE**: الظل يحرس مكانه ويقتل اللي يقرب منه (مفيد للفارمات).
+  - **FOLLOW ME**: يرجع يتبعك.
+  - الأمر يكون لظل واحد (من الـ Profile) أو للجيش كله (من تبويب SHADOWS)، أو بالأمر:
+    ```
+    /shadows stay | follow | summon | dismiss | call
+    ```
 - **ظلال بأسماء**: أول استخراج من Wither Skeleton يطلع لك **Igris**، ومن Iron Golem يطلع **Iron**، ومن Ravager يطلع **Tank**، ومن Warden يطلع **Beru**.
 - **الرتب**: Normal ← Elite ← Knight ← Elite Knight ← Commander ← Marshal ← Grand Marshal. الظل يترقّى كل 20 مستوى.
 - **شكل الظلال**: طبقة بنفسجية داكنة تنرسم بإضاءتها الخاصة (تبان بالليل وداخل الكهوف)، وحولها هالة أرواح خفيفة.
@@ -166,11 +175,11 @@
 
 `world_behavior_packs.json`
 ```json
-[ { "pack_id": "c63f3ea1-b815-4c86-8d08-fa4f1f13d4e2", "version": [0, 4, 3] } ]
+[ { "pack_id": "c63f3ea1-b815-4c86-8d08-fa4f1f13d4e2", "version": [0, 4, 4] } ]
 ```
 `world_resource_packs.json`
 ```json
-[ { "pack_id": "74a1ff86-af96-45c3-8ccf-94d3550211ba", "version": [0, 4, 3] } ]
+[ { "pack_id": "74a1ff86-af96-45c3-8ccf-94d3550211ba", "version": [0, 4, 4] } ]
 ```
 4. في `server.properties` خلّ:
 ```

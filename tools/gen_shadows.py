@@ -94,7 +94,6 @@ def behavior(sid, hp, dmg, speed, size, ranged):
                 {"test": "is_family", "subject": "other", "operator": "!=", "value": "sl_shadow"},
             ]}},
         },
-        "minecraft:behavior.follow_owner": {"priority": 4, "speed_multiplier": 1.25, "start_distance": 7, "stop_distance": 3},
         "minecraft:behavior.random_stroll": {"priority": 7, "speed_multiplier": 0.8},
         "minecraft:behavior.look_at_player": {"priority": 8, "look_distance": 8},
         "minecraft:behavior.random_look_around": {"priority": 9},
@@ -127,9 +126,15 @@ def behavior(sid, hp, dmg, speed, size, ranged):
             }
         },
         "sl:pvp": {"minecraft:behavior.hurt_by_target": {"priority": 1}},
+        # Removed while the shadow guards a spot ("STAY HERE" order).
+        "sl:follow": {
+            "minecraft:behavior.follow_owner": {"priority": 4, "speed_multiplier": 1.25, "start_distance": 7, "stop_distance": 3}
+        },
     }
     events = {
-        "minecraft:entity_spawned": {"add": {"component_groups": ["sl:auto_target"]}},
+        "minecraft:entity_spawned": {"add": {"component_groups": ["sl:auto_target", "sl:follow"]}},
+        "sl:follow_on": {"add": {"component_groups": ["sl:follow"]}},
+        "sl:follow_off": {"remove": {"component_groups": ["sl:follow"]}},
         "sl:auto_on": {"add": {"component_groups": ["sl:auto_target"]}},
         "sl:auto_off": {"remove": {"component_groups": ["sl:auto_target"]}},
         "sl:pvp_on": {"add": {"component_groups": ["sl:pvp"]}},
@@ -142,7 +147,7 @@ def behavior(sid, hp, dmg, speed, size, ranged):
             "minecraft:behavior.ranged_attack": {"priority": 3, "attack_interval_min": 1.0, "attack_interval_max": 2.0, "attack_radius": 15.0},
         }
         groups["sl:melee"] = melee
-        events["minecraft:entity_spawned"] = {"add": {"component_groups": ["sl:auto_target", "sl:ranged"]}}
+        events["minecraft:entity_spawned"] = {"add": {"component_groups": ["sl:auto_target", "sl:follow", "sl:ranged"]}}
         events["sl:mode_ranged"] = {"add": {"component_groups": ["sl:ranged"]}, "remove": {"component_groups": ["sl:melee"]}}
         events["sl:mode_melee"] = {"add": {"component_groups": ["sl:melee"]}, "remove": {"component_groups": ["sl:ranged"]}}
     else:

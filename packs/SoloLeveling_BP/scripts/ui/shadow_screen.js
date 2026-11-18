@@ -3,7 +3,7 @@
 import { ItemLockMode, ItemStack } from "@minecraft/server";
 import { ModalFormData } from "@minecraft/server-ui";
 import {
-  dismiss, entityOf, feed, findRecord, regenLeft, release, rename, saveActive, summon, train,
+  dismiss, entityOf, feed, findRecord, regenLeft, release, rename, saveActive, setOrder, summon, train,
 } from "../army/army.js";
 import { canWearGear, gearInfo, GEAR_SLOTS, isPlain, setGear, updateCombatMode } from "../army/gear.js";
 import {
@@ -12,6 +12,8 @@ import {
 import { markDirty } from "../data.js";
 import { iconOf, prettyId } from "../vault/items.js";
 import { stateOf } from "./army_screen.js";
+import { pickMode } from "./mode_picker.js";
+import { setShadowMode, shadowModeLabel } from "../army/targeting.js";
 import { barTex, BLANK, showForm, SystemForm, TEX } from "./form.js";
 import { frame } from "./frame.js";
 
@@ -47,7 +49,7 @@ export async function shadowScreen(player) {
   form.display(19, "", portraitOf(s.type));
   form.display(28, h ? `§cHP §f${hpCur}/${hpMax}` : regen > 0 ? `§cREGEN §f${regen}s` : "§7HP §fFULL", barTex("hp", hpCur, hpMax));
   form.display(29, maxed ? "§eXP §fMAX" : `§eXP §f${s.xp}/${nextXp}`, barTex("xp", maxed ? 1 : s.xp, maxed ? 1 : nextXp));
-  const status = e ? "§aSUMMONED" : regen > 0 ? `§cREGENERATING ${regen}s` : "§7IN SHADOW";
+  const status = e ? (s.guard ? "§eGUARDING" : "§aSUMMONED") : regen > 0 ? `§cREGENERATING ${regen}s` : "§7IN SHADOW";
   form.body(
     [
       `§7${def.label}`,
@@ -165,6 +167,23 @@ export async function shadowScreen(player) {
       return again();
     }, `${gs.label}: ${curName}`);
   });
+
+  // Attack priority for this shadow only, and stay/follow order.
+  form.slot(78, `§cATK: §f${shadowModeLabel(player, s)}`, BLANK, async () => {
+    const r = await pickMode(player, { title: `${s.name}: attack priority`, allowArmy: true, mode: s.mode ?? "ARMY", targets: s.targets ?? [] });
+    if (r) {
+      setShadowMode(player, s, e, r.mode, r.targets);
+      toast(`§c${s.name}: §f${shadowModeLabel(player, s)}`);
+    }
+    return again();
+  }, `§cAttack priority: §f${shadowModeLabel(player, s)}`);
+  form.slot(79, !e ? "§8STAY HERE" : s.guard ? "§aFOLLOW ME" : "§eSTAY HERE", BLANK, () => {
+    if (!e) return toast("§7Summon the shadow first"), again();
+    const order = s.guard ? "FOLLOW" : "STAY";
+    setOrder(player, s.id, order);
+    toast(order === "STAY" ? `§e${s.name} guards this spot` : `§a${s.name} follows you`);
+    return again();
+  }, s.guard ? "§aOrder: Follow me" : "§eOrder: Stay here (guard)");
 
   // Food pouch (all shadow types): up to 64 of one food, eaten when hurt.
   const giveBack = (id, count) => {
