@@ -10,7 +10,7 @@
         "default": "textures/sl/entity/shadow_orc"
       },
       "geometry": {
-        "default": "geometry.sl.shadow_zombie"
+        "default": "geometry.sl.orc"
       },
       "animations": {
         "walk": "animation.sl.humanoid.walk",

@@ -13,7 +13,7 @@
 | 4 | المهارات + المهام اليومية + منطقة العقوبة | ✅ |
 | 5 | البوابات والدانجن والزعماء | ✅ |
 | 6 | الوحوش والأسلحة والمتجر | ✅ |
-| 7 | تحسين الموديلات والتكستشرات | ⏳ |
+| 7 | تحسين الموديلات والتكستشرات | 🟡 جاري (الأسلحة والأغراض والوحوش) |
 
 ## المرحلة 1 — المحتوى
 
@@ -237,11 +237,11 @@ Healing Elixir, Mana Potion, Fatigue Recovery Potion, Elixir of Life, Random Box
 
 `world_behavior_packs.json`
 ```json
-[ { "pack_id": "c63f3ea1-b815-4c86-8d08-fa4f1f13d4e2", "version": [0, 6, 0] } ]
+[ { "pack_id": "c63f3ea1-b815-4c86-8d08-fa4f1f13d4e2", "version": [0, 7, 0] } ]
 ```
 `world_resource_packs.json`
 ```json
-[ { "pack_id": "74a1ff86-af96-45c3-8ccf-94d3550211ba", "version": [0, 6, 0] } ]
+[ { "pack_id": "74a1ff86-af96-45c3-8ccf-94d3550211ba", "version": [0, 7, 0] } ]
 ```
 4. في `server.properties` خلّ:
 ```
@@ -261,5 +261,6 @@ python3 tools/build.py     # يولّد التكستشرات والواجهة و
 - `tools/gen_shadows.py` / `tools/gen_shadow_art.py`: كيانات الظلال وصورها
 - `tools/gen_custom_models.py`: موديلات وتكستشرات خاصة بالزومبي والكريبر
 - `tools/gen_gate.py`: كيان البوابة (موديل وتكستشر الدوامة)
+- `tools/gen_art.py`: الرسم المفصل (أسلحة 32×32، وجلود وحوش 64×64 مع أجزاء 3D)
 - `tools/gen_icons.py`: خريطة أيقونات الأغراض (من Mojang/bedrock-samples و @minecraft/vanilla-data)
 - `packs/SoloLeveling_BP/scripts/`: منطق اللعبة (Script API `@minecraft/server` 2.10.0)

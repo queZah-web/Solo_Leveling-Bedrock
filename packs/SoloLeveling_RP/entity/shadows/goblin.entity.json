@@ -10,7 +10,7 @@
         "default": "textures/sl/entity/shadow_goblin"
       },
       "geometry": {
-        "default": "geometry.sl.shadow_zombie"
+        "default": "geometry.sl.goblin"
       },
       "animations": {
         "walk": "animation.sl.humanoid.walk",
