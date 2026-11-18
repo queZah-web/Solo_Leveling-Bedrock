@@ -1031,19 +1031,25 @@
                         "100%",
                         "fill"
                       ],
+                      "clips_children": true,
+                      "layer": 1,
                       "controls": [
                         {
                           "player": {
                             "type": "custom",
                             "renderer": "live_player_renderer",
                             "size": [
-                              46,
-                              80
+                              30,
+                              52
+                            ],
+                            "offset": [
+                              0,
+                              -2
                             ],
                             "property_bag": {
                               "#look_at_cursor": true
                             },
-                            "layer": 3
+                            "layer": 1
                           }
                         }
                       ],
@@ -1073,6 +1079,7 @@
                             "font_scale_factor": 0.8,
                             "anchor_from": "top_left",
                             "anchor_to": "top_left",
+                            "layer": 6,
                             "bindings": [
                               {
                                 "binding_name": "#form_button_text",
@@ -1100,10 +1107,12 @@
                             ],
                             "anchor_from": "bottom_left",
                             "anchor_to": "bottom_left",
+                            "layer": 6,
                             "collection_index": 12
                           }
                         }
-                      ]
+                      ],
+                      "layer": 5
                     }
                   },
                   {
@@ -1139,6 +1148,7 @@
                             "font_scale_factor": 0.8,
                             "anchor_from": "top_left",
                             "anchor_to": "top_left",
+                            "layer": 6,
                             "bindings": [
                               {
                                 "binding_name": "#form_button_text",
@@ -1166,10 +1176,12 @@
                             ],
                             "anchor_from": "bottom_left",
                             "anchor_to": "bottom_left",
+                            "layer": 6,
                             "collection_index": 13
                           }
                         }
-                      ]
+                      ],
+                      "layer": 5
                     }
                   },
                   {
@@ -1205,6 +1217,7 @@
                             "font_scale_factor": 0.8,
                             "anchor_from": "top_left",
                             "anchor_to": "top_left",
+                            "layer": 6,
                             "bindings": [
                               {
                                 "binding_name": "#form_button_text",
@@ -1232,10 +1245,12 @@
                             ],
                             "anchor_from": "bottom_left",
                             "anchor_to": "bottom_left",
+                            "layer": 6,
                             "collection_index": 14
                           }
                         }
-                      ]
+                      ],
+                      "layer": 5
                     }
                   }
                 ],

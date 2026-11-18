@@ -181,10 +181,12 @@ def stat_row(idx):
 
 def bar(idx, height=17):
     """Display only: label on top, progress bar texture below."""
-    return slot(idx, ["100%", height], [
-        {"txt": bound_label(WHITE, font_scale_factor=0.8, anchor_from="top_left", anchor_to="top_left")},
-        {"bar": bound_image(size=["100%", 5], anchor_from="bottom_left", anchor_to="bottom_left")},
+    s = slot(idx, ["100%", height], [
+        {"txt": bound_label(WHITE, font_scale_factor=0.8, anchor_from="top_left", anchor_to="top_left", layer=6)},
+        {"bar": bound_image(size=["100%", 5], anchor_from="bottom_left", anchor_to="bottom_left", layer=6)},
     ])
+    s["layer"] = 5
+    return s
 
 
 def header():
@@ -246,14 +248,18 @@ def profile_content():
     doll = {
         "type": "panel",
         "size": ["100%", "fill"],
+        "clips_children": True,
+        "layer": 1,
         "controls": [
             {
+                # Renders the local player, so every hunter sees their own skin.
                 "player": {
                     "type": "custom",
                     "renderer": "live_player_renderer",
-                    "size": [46, 80],
+                    "size": [30, 52],
+                    "offset": [0, -2],
                     "property_bag": {"#look_at_cursor": True},
-                    "layer": 3,
+                    "layer": 1,
                 }
             }
         ],
