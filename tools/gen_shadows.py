@@ -38,6 +38,9 @@ SHADOWS = {
 # type -> (vanilla definition to copy, texture override). Empty: every shadow
 # uses its own vanilla model, material and texture.
 CLIENT_BASE = {}
+# Shadows with fully custom models (tools/gen_custom_models.py): their vanilla
+# definitions don't render on custom entities in recent versions.
+CUSTOM_MODELS = {"zombie", "creeper"}
 
 
 def load(path):
@@ -170,6 +173,8 @@ def main(vanilla_dir):
     for sid, (hp, dmg, speed, size, ranged) in SHADOWS.items():
         with open(os.path.join(BP, "entities", "shadows", f"{sid}.json"), "w") as f:
             json.dump(behavior(sid, hp, dmg, speed, size, ranged), f, indent=2)
+        if sid in CUSTOM_MODELS:
+            continue  # client definition comes from tools/gen_custom_models.py
         with open(os.path.join(RP, "entity", "shadows", f"{sid}.entity.json"), "w") as f:
             json.dump(client(sid, vanilla_dir), f, indent=2)
     os.makedirs(os.path.join(BP, "loot_tables", "sl"), exist_ok=True)

@@ -121,11 +121,11 @@
 
 `world_behavior_packs.json`
 ```json
-[ { "pack_id": "c63f3ea1-b815-4c86-8d08-fa4f1f13d4e2", "version": [0, 3, 5] } ]
+[ { "pack_id": "c63f3ea1-b815-4c86-8d08-fa4f1f13d4e2", "version": [0, 3, 6] } ]
 ```
 `world_resource_packs.json`
 ```json
-[ { "pack_id": "74a1ff86-af96-45c3-8ccf-94d3550211ba", "version": [0, 3, 5] } ]
+[ { "pack_id": "74a1ff86-af96-45c3-8ccf-94d3550211ba", "version": [0, 3, 6] } ]
 ```
 4. في `server.properties` خلّ:
 ```
@@ -143,5 +143,6 @@ python3 tools/build.py     # يولّد التكستشرات والواجهة و
 - `tools/gen_textures.py`: كل تكستشرات الواجهة والجوهرة
 - `tools/gen_ui.py`: ملفات JSON UI (الواجهة المخصصة)
 - `tools/gen_shadows.py` / `tools/gen_shadow_art.py`: كيانات الظلال وصورها
+- `tools/gen_custom_models.py`: موديلات وتكستشرات خاصة بالزومبي والكريبر
 - `tools/gen_icons.py`: خريطة أيقونات الأغراض (من Mojang/bedrock-samples و @minecraft/vanilla-data)
 - `packs/SoloLeveling_BP/scripts/`: منطق اللعبة (Script API `@minecraft/server` 2.10.0)
