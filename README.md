@@ -50,6 +50,13 @@
   - نسبة النجاح تعتمد على رتبة الوحش، و INT، والمستوى.
 - **14 نوع ظل**: Zombie, Husk, Drowned, Skeleton, Stray, Spider, Wolf, Creeper, Wither Skeleton, Enderman, Vindicator, Iron Golem, Ravager, Warden.
   - كل نوع له مهارة خاصة: سم، تجميد، Wither، إطلاق للهواء، وغيرها.
+- **طريقة الهجوم** (زر ATTACK في تبويب SHADOWS):
+  - **MONSTERS**: يهاجم الوحوش بس (الوضع الافتراضي)
+  - **ANIMALS**: يهاجم الحيوانات بس (ما يهاجم الحيوانات الأليفة المروّضة)
+  - **ALL**: يهاجم الوحوش والحيوانات
+  - **SPECIFIC**: تختار نوع واحد من الوحوش أو الحيوانات
+  - **PVP**: يهاجم اللاعبين الأعداء، **ظلالهم أول** وبعدها اللاعب نفسه. الظلال الذكية من رتبة Knight وفوق (Enderman, Vindicator, Wither Skeleton, Warden، والظلال اللي لها أسماء) تقدر تهاجم اللاعب مباشرة. ولو ما اخترت PVP، ظلالك ما تأذي أي لاعب ولا ظلاله.
+  - **DEFEND**: يحميك بس، ويهاجم اللي تضربه أنت
 - **ظلال بأسماء**: أول استخراج من Wither Skeleton يطلع لك **Igris**، ومن Iron Golem يطلع **Iron**، ومن Ravager يطلع **Tank**، ومن Warden يطلع **Beru**.
 - **الرتب**: Normal ← Elite ← Knight ← Elite Knight ← Commander ← Marshal ← Grand Marshal. الظل يترقّى كل 20 مستوى.
 - **شكل الظلال**: طبقة بنفسجية داكنة تنرسم بإضاءتها الخاصة (تبان بالليل وداخل الكهوف)، وحولها هالة أرواح خفيفة.
@@ -121,11 +128,11 @@
 
 `world_behavior_packs.json`
 ```json
-[ { "pack_id": "c63f3ea1-b815-4c86-8d08-fa4f1f13d4e2", "version": [0, 3, 6] } ]
+[ { "pack_id": "c63f3ea1-b815-4c86-8d08-fa4f1f13d4e2", "version": [0, 3, 7] } ]
 ```
 `world_resource_packs.json`
 ```json
-[ { "pack_id": "74a1ff86-af96-45c3-8ccf-94d3550211ba", "version": [0, 3, 6] } ]
+[ { "pack_id": "74a1ff86-af96-45c3-8ccf-94d3550211ba", "version": [0, 3, 7] } ]
 ```
 4. في `server.properties` خلّ:
 ```

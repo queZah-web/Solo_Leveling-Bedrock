@@ -8,6 +8,7 @@ import { getData, markDirty } from "../data.js";
 import { addDamageHook, addXp, flash, xpFor } from "../stats.js";
 import { ARCHERS, gearInfo, setGear, GEAR_SLOTS, shadowBow, updateCombatMode } from "./gear.js";
 import { deleteShadowSave, placeShadow, placing, saveShadow, shadowTag } from "./persist.js";
+import { applyMode, driveTargets, modeOf, provoking } from "./targeting.js";
 import {
   creeperCharges, creeperPower, healValue,
   activeLimit, ARISE_ATTEMPTS, ARISE_MP, armyCapacity, CORPSE_SECONDS, entityIdOf, FEED_MP, GRADES,
@@ -74,6 +75,7 @@ function register(player, s, e) {
   activeOf(player).set(s.id, e);
   meta.set(e.id, { playerId: player.id, sid: s.id });
   if (s.type === "creeper") charges.set(e.id, creeperCharges(s));
+  applyMode(e, modeOf(player));
   try {
     e.dimension.spawnParticle("minecraft:soul_particle", { ...e.location, y: e.location.y + 1 });
     e.dimension.spawnParticle("minecraft:large_explosion", e.location);
@@ -471,16 +473,28 @@ function totemSlot(e, s) {
 // Damage: shadows scale with level/grade, never hurt their owner or each
 // other, block with shields and are saved by totems.
 addDamageHook((ev) => {
+  if (provoking) return; // the targeting system's tiny "look at me" hit
   const attacker = ev.damageSource.damagingEntity;
   const victim = ev.hurtEntity;
   const a = attacker && meta.get(attacker.id);
   const v = meta.get(victim.id);
   if (a) {
-    if (victim.id === a.playerId || v) {
+    // Never the owner, never a shadow of the same owner.
+    if (victim.id === a.playerId || (v && v.playerId === a.playerId)) {
       ev.cancel = true;
       return;
     }
     const owner = playerById(a.playerId);
+    // Other players and their shadows: only when PvP was chosen, by this
+    // shadow's owner or by the other side (then fighting back is fair).
+    if (victim instanceof Player || v) {
+      const other = victim instanceof Player ? victim : playerById(v.playerId);
+      const pvp = (owner && modeOf(owner) === "PVP") || (other && modeOf(other) === "PVP");
+      if (!pvp) {
+        ev.cancel = true;
+        return;
+      }
+    }
     const s = owner && findRecord(owner, a.sid);
     if (s) {
       // Creeper blasts only hurt monsters (no griefing players, pets or villagers).
@@ -647,6 +661,24 @@ function autoEat(player, sid, e, h) {
     e.dimension.playSound("random.eat", e.location);
   } catch {}
 }
+
+/** [record, entity] pairs of a player's summoned shadows. */
+export function summonedList(player) {
+  const out = [];
+  for (const [sid, e] of active.get(player.id) ?? []) {
+    const s = findRecord(player, sid);
+    if (s && e.isValid) out.push([s, e]);
+  }
+  return out;
+}
+
+// Script-driven attack modes (animals, specific type, PvP).
+system.runInterval(() => {
+  for (const player of world.getAllPlayers()) {
+    const list = summonedList(player);
+    if (list.length) driveTargets(player, list, (x) => meta.get(x.id));
+  }
+}, 40);
 
 // Follow the owner across distance and dimensions; slow regeneration.
 system.runInterval(() => {

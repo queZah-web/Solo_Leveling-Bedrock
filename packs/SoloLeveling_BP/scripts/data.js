@@ -6,7 +6,8 @@ import { BASE_STAT, DATA_KEY, DATA_VERSION, maxMp } from "./config.js";
 /** @typedef {{v:number, level:number, xp:number, points:number,
  *  str:number, agi:number, vit:number, int:number, per:number,
  *  mp:number, fatigue:number, kills:number, job:string, title:string,
- *  customUi:boolean, hud:boolean, shadows:ShadowRecord[], namedTaken:string[]}} HunterData */
+ *  customUi:boolean, hud:boolean, shadows:ShadowRecord[], namedTaken:string[],
+ *  armyMode:string, armyTarget:string}} HunterData */
 /** @typedef {{id:string, type:string, name:string, grade:number, base:number,
  *  level:number, xp:number, kills:number, deadUntil:number, ptr?:string, gear?:Record<string,string>,
  *  food?:{id:string, count:number}, totem?:number}} ShadowRecord */
@@ -32,6 +33,8 @@ export function defaultData() {
     hud: true,
     shadows: [],
     namedTaken: [],
+    armyMode: "MONSTERS",
+    armyTarget: "minecraft:zombie",
   };
 }
 

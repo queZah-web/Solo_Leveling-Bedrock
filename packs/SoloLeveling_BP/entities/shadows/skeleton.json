@@ -61,16 +61,6 @@
       "minecraft:damage_sensor": {
         "triggers": [
           {
-            "on_damage": {
-              "filters": {
-                "test": "is_family",
-                "subject": "other",
-                "value": "sl_shadow"
-              }
-            },
-            "deals_damage": "no"
-          },
-          {
             "cause": "fall",
             "deals_damage": "no"
           },
@@ -121,32 +111,6 @@
             ]
           }
         }
-      },
-      "minecraft:behavior.nearest_attackable_target": {
-        "priority": 3,
-        "must_see": true,
-        "reselect_targets": true,
-        "within_radius": 16,
-        "entity_types": [
-          {
-            "filters": {
-              "all_of": [
-                {
-                  "test": "is_family",
-                  "subject": "other",
-                  "value": "monster"
-                },
-                {
-                  "test": "is_family",
-                  "subject": "other",
-                  "operator": "!=",
-                  "value": "sl_shadow"
-                }
-              ]
-            },
-            "max_dist": 16
-          }
-        ]
       },
       "minecraft:behavior.follow_owner": {
         "priority": 4,
@@ -202,6 +166,39 @@
       }
     },
     "component_groups": {
+      "sl:auto_target": {
+        "minecraft:behavior.nearest_attackable_target": {
+          "priority": 3,
+          "must_see": true,
+          "reselect_targets": true,
+          "within_radius": 16,
+          "entity_types": [
+            {
+              "filters": {
+                "all_of": [
+                  {
+                    "test": "is_family",
+                    "subject": "other",
+                    "value": "monster"
+                  },
+                  {
+                    "test": "is_family",
+                    "subject": "other",
+                    "operator": "!=",
+                    "value": "sl_shadow"
+                  }
+                ]
+              },
+              "max_dist": 16
+            }
+          ]
+        }
+      },
+      "sl:pvp": {
+        "minecraft:behavior.hurt_by_target": {
+          "priority": 1
+        }
+      },
       "sl:ranged": {
         "minecraft:shooter": {
           "def": "minecraft:arrow"
@@ -225,7 +222,36 @@
       "minecraft:entity_spawned": {
         "add": {
           "component_groups": [
+            "sl:auto_target",
             "sl:ranged"
+          ]
+        }
+      },
+      "sl:auto_on": {
+        "add": {
+          "component_groups": [
+            "sl:auto_target"
+          ]
+        }
+      },
+      "sl:auto_off": {
+        "remove": {
+          "component_groups": [
+            "sl:auto_target"
+          ]
+        }
+      },
+      "sl:pvp_on": {
+        "add": {
+          "component_groups": [
+            "sl:pvp"
+          ]
+        }
+      },
+      "sl:pvp_off": {
+        "remove": {
+          "component_groups": [
+            "sl:pvp"
           ]
         }
       },

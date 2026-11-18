@@ -464,7 +464,7 @@ def vault_content():
 #   7 army header   9 selected title   10 prev 11 page 12 next
 #   13 summon all 14 call 15 dismiss all   16 summon/dismiss 17 feed 18 train
 #   19 portrait   20..27 cards (4 x 2)   28 hp bar 29 xp bar
-#   30 rename 31 release 32 arise
+#   30 rename 31 release 32 arise   33 attack mode
 CARD = 48
 
 
@@ -520,6 +520,8 @@ def army_content():
         {"body": {"type": "panel", "size": ["100%", "fill"], "controls": [
             {"txt": {**body_text(), "anchor_from": "top_left", "anchor_to": "top_left", "font_scale_factor": 0.75}}]}},
         {"g2": gap("100%", 2)},
+        {"a33": small_btn(33, ["100%", 16])},
+        {"g3": gap("100%", 2)},
         {"a32": small_btn(32, ["100%", 16])},
     ])
     return {

@@ -32,14 +32,80 @@
         },
         "rightLeg": {
           "rotation": [
-            "math.cos(query.modified_distance_moved * 38.17) * 70.0 * query.modified_move_speed",
+            "(math.cos(query.modified_distance_moved * 38.17) * 70.0 * query.modified_move_speed)",
             0.0,
             0.0
           ]
         },
         "leftLeg": {
           "rotation": [
-            "-math.cos(query.modified_distance_moved * 38.17) * 70.0 * query.modified_move_speed",
+            "-(math.cos(query.modified_distance_moved * 38.17) * 70.0 * query.modified_move_speed)",
+            0.0,
+            0.0
+          ]
+        }
+      }
+    },
+    "animation.sl.humanoid.walk": {
+      "loop": true,
+      "bones": {
+        "rightArm": {
+          "rotation": [
+            "-(math.cos(query.modified_distance_moved * 38.17) * 70.0 * query.modified_move_speed) * 0.6",
+            0.0,
+            0.0
+          ]
+        },
+        "leftArm": {
+          "rotation": [
+            "(math.cos(query.modified_distance_moved * 38.17) * 70.0 * query.modified_move_speed) * 0.6",
+            0.0,
+            0.0
+          ]
+        },
+        "rightLeg": {
+          "rotation": [
+            "(math.cos(query.modified_distance_moved * 38.17) * 70.0 * query.modified_move_speed)",
+            0.0,
+            0.0
+          ]
+        },
+        "leftLeg": {
+          "rotation": [
+            "-(math.cos(query.modified_distance_moved * 38.17) * 70.0 * query.modified_move_speed)",
+            0.0,
+            0.0
+          ]
+        }
+      }
+    },
+    "animation.sl.golem.walk": {
+      "loop": true,
+      "bones": {
+        "arm0": {
+          "rotation": [
+            "-(math.cos(query.modified_distance_moved * 38.17) * 70.0 * query.modified_move_speed) * 0.4",
+            0.0,
+            0.0
+          ]
+        },
+        "arm1": {
+          "rotation": [
+            "(math.cos(query.modified_distance_moved * 38.17) * 70.0 * query.modified_move_speed) * 0.4",
+            0.0,
+            0.0
+          ]
+        },
+        "leg0": {
+          "rotation": [
+            "(math.cos(query.modified_distance_moved * 38.17) * 70.0 * query.modified_move_speed) * 0.7",
+            0.0,
+            0.0
+          ]
+        },
+        "leg1": {
+          "rotation": [
+            "-(math.cos(query.modified_distance_moved * 38.17) * 70.0 * query.modified_move_speed) * 0.7",
             0.0,
             0.0
           ]
@@ -51,28 +117,28 @@
       "bones": {
         "leg0": {
           "rotation": [
-            "math.cos(query.modified_distance_moved * 38.17) * 70.0 * query.modified_move_speed",
+            "(math.cos(query.modified_distance_moved * 38.17) * 70.0 * query.modified_move_speed)",
             0.0,
             0.0
           ]
         },
         "leg3": {
           "rotation": [
-            "math.cos(query.modified_distance_moved * 38.17) * 70.0 * query.modified_move_speed",
+            "(math.cos(query.modified_distance_moved * 38.17) * 70.0 * query.modified_move_speed)",
             0.0,
             0.0
           ]
         },
         "leg1": {
           "rotation": [
-            "-math.cos(query.modified_distance_moved * 38.17) * 70.0 * query.modified_move_speed",
+            "-(math.cos(query.modified_distance_moved * 38.17) * 70.0 * query.modified_move_speed)",
             0.0,
             0.0
           ]
         },
         "leg2": {
           "rotation": [
-            "-math.cos(query.modified_distance_moved * 38.17) * 70.0 * query.modified_move_speed",
+            "-(math.cos(query.modified_distance_moved * 38.17) * 70.0 * query.modified_move_speed)",
             0.0,
             0.0
           ]

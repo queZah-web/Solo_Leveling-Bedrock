@@ -40,7 +40,7 @@ SHADOWS = {
 CLIENT_BASE = {}
 # Shadows with fully custom models (tools/gen_custom_models.py): their vanilla
 # definitions don't render on custom entities in recent versions.
-CUSTOM_MODELS = {"zombie", "creeper"}
+CUSTOM_MODELS = {"zombie", "creeper", "husk", "drowned", "vindicator", "iron_golem"}
 
 
 def load(path):
@@ -77,7 +77,6 @@ def behavior(sid, hp, dmg, speed, size, ranged):
         "minecraft:follow_range": {"value": 24, "max": 32},
         "minecraft:damage_sensor": {
             "triggers": [
-                {"on_damage": {"filters": {"test": "is_family", "subject": "other", "value": "sl_shadow"}}, "deals_damage": "no"},
                 {"cause": "fall", "deals_damage": "no"},
                 {"cause": "suffocation", "deals_damage": "no"},
                 {"cause": "drowning", "deals_damage": "no"},
@@ -94,13 +93,6 @@ def behavior(sid, hp, dmg, speed, size, ranged):
                 {"test": "is_family", "subject": "other", "operator": "!=", "value": "player"},
                 {"test": "is_family", "subject": "other", "operator": "!=", "value": "sl_shadow"},
             ]}},
-        },
-        "minecraft:behavior.nearest_attackable_target": {
-            "priority": 3,
-            "must_see": True,
-            "reselect_targets": True,
-            "within_radius": 16,
-            "entity_types": [{"filters": {"all_of": not_shadow_or_owner()}, "max_dist": 16}],
         },
         "minecraft:behavior.follow_owner": {"priority": 4, "speed_multiplier": 1.25, "start_distance": 7, "stop_distance": 3},
         "minecraft:behavior.random_stroll": {"priority": 7, "speed_multiplier": 0.8},
@@ -121,7 +113,28 @@ def behavior(sid, hp, dmg, speed, size, ranged):
         ],
     }
     melee = {"minecraft:behavior.melee_attack": {"priority": 3, "speed_multiplier": 1.3, "track_target": True}}
-    groups, events = {}, {}
+    # Attack modes (switched by the script):
+    #   sl:auto_target - automatically hunt monsters
+    #   sl:pvp         - retaliate against anyone, including players and enemy shadows
+    groups = {
+        "sl:auto_target": {
+            "minecraft:behavior.nearest_attackable_target": {
+                "priority": 3,
+                "must_see": True,
+                "reselect_targets": True,
+                "within_radius": 16,
+                "entity_types": [{"filters": {"all_of": not_shadow_or_owner()}, "max_dist": 16}],
+            }
+        },
+        "sl:pvp": {"minecraft:behavior.hurt_by_target": {"priority": 1}},
+    }
+    events = {
+        "minecraft:entity_spawned": {"add": {"component_groups": ["sl:auto_target"]}},
+        "sl:auto_on": {"add": {"component_groups": ["sl:auto_target"]}},
+        "sl:auto_off": {"remove": {"component_groups": ["sl:auto_target"]}},
+        "sl:pvp_on": {"add": {"component_groups": ["sl:pvp"]}},
+        "sl:pvp_off": {"remove": {"component_groups": ["sl:pvp"]}},
+    }
     if ranged:
         # Archers: ranged with a bow/crossbow, melee with anything else.
         groups["sl:ranged"] = {
@@ -129,20 +142,17 @@ def behavior(sid, hp, dmg, speed, size, ranged):
             "minecraft:behavior.ranged_attack": {"priority": 3, "attack_interval_min": 1.0, "attack_interval_max": 2.0, "attack_radius": 15.0},
         }
         groups["sl:melee"] = melee
-        events = {
-            "minecraft:entity_spawned": {"add": {"component_groups": ["sl:ranged"]}},
-            "sl:mode_ranged": {"add": {"component_groups": ["sl:ranged"]}, "remove": {"component_groups": ["sl:melee"]}},
-            "sl:mode_melee": {"add": {"component_groups": ["sl:melee"]}, "remove": {"component_groups": ["sl:ranged"]}},
-        }
+        events["minecraft:entity_spawned"] = {"add": {"component_groups": ["sl:auto_target", "sl:ranged"]}}
+        events["sl:mode_ranged"] = {"add": {"component_groups": ["sl:ranged"]}, "remove": {"component_groups": ["sl:melee"]}}
+        events["sl:mode_melee"] = {"add": {"component_groups": ["sl:melee"]}, "remove": {"component_groups": ["sl:ranged"]}}
     else:
         c.update(melee)
     ent = {
         "description": {"identifier": f"sl:shadow_{sid}", "is_spawnable": False, "is_summonable": True},
         "components": c,
     }
-    if groups:
-        ent["component_groups"] = groups
-        ent["events"] = events
+    ent["component_groups"] = groups
+    ent["events"] = events
     return {"format_version": "1.21.100", "minecraft:entity": ent}
 
 

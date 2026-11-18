@@ -1,6 +1,9 @@
 // SHADOWS tab: Army Management. Layout "sl:army|" (index map in tools/gen_ui.py).
 // Tapping a shadow card opens its Shadow Profile (ui/shadow_screen.js).
-import { activeCount, arise, callAll, corpsesNear, dismissAll, entityOf, regenLeft, summonAll } from "../army/army.js";
+import { activeCount, arise, callAll, corpsesNear, dismissAll, entityOf, regenLeft, summonAll, summonedList } from "../army/army.js";
+import { MODE_INFO, modeLabel, modeOf, MODES, setMode, SPECIFIC_TYPES } from "../army/targeting.js";
+import { ModalFormData } from "@minecraft/server-ui";
+import { showForm } from "./form.js";
 import {
   activeLimit, ARISE_MP, armyCapacity, GRADES, nextRankLimits, portraitOf, RANK_LIMITS,
 } from "../army/types.js";
@@ -68,8 +71,10 @@ export async function armyScreen(player) {
   form.display(19, "", list[0] ? portraitOf(list[0].type) : BLANK);
   form.display(28, `§9MP §f${Math.floor(d.mp)}/${mmax}`, barTex("mp", d.mp, mmax));
   form.display(29, `§5ARMY §f${list.length}/${cap}`, barTex("xp", list.length, cap));
+  const mode = modeOf(player);
   form.body(
     [
+      `§cATTACK: §f${modeLabel(player)} §8- ${MODE_INFO[mode]}`,
       `§7Rank: §f${cur?.rank ?? "E-Rank"}  §7Active: §b${act}/${lim}`,
       next
         ? `§7Next: §e${next.rank} §7(Lv ${next.min}) §8→ §fArmy ${next.army}, Active ${next.active}`
@@ -78,10 +83,34 @@ export async function armyScreen(player) {
       "",
       "§5ARISE§7: kill a monster, then within 20s",
       `§7Sneak + use the Gem or §f/arise §8(${ARISE_MP} MP)`,
-      "§7Tap a shadow to open its profile.",
-      "§7Sneak + tap a summoned shadow: same.",
+      "§7Tap a shadow (or Sneak + tap it) for its profile.",
     ].join("\n"),
   );
+  form.slot(33, `§cATTACK: §f${modeLabel(player)}`, BLANK, async () => {
+    const shadows = () => summonedList(player).map(([, e]) => e);
+    const next = MODES[(MODES.indexOf(mode) + 1) % MODES.length];
+    if (next === "SPECIFIC") {
+      const names = SPECIFIC_TYPES.map((t) => t.replace("minecraft:", "").replace(/_/g, " "));
+      const d2 = getData(player);
+      const res = await showForm(
+        player,
+        new ModalFormData()
+          .title("Attack only...")
+          .dropdown("Your army will hunt only this mob type", names, { defaultValueIndex: Math.max(0, SPECIFIC_TYPES.indexOf(d2.armyTarget)) })
+          .submitButton("Hunt"),
+      );
+      if (!res || res.canceled || !res.formValues) {
+        setMode(player, "PVP", shadows); // skipped SPECIFIC
+      } else {
+        setMode(player, "SPECIFIC", shadows, SPECIFIC_TYPES[Number(res.formValues[0])]);
+      }
+    } else {
+      setMode(player, next, shadows);
+    }
+    toast(`§cAttack mode: §f${modeLabel(player)}`);
+    return again();
+  }, `§cAttack mode: §f${modeLabel(player)} §7(tap to change)`);
+
   const souls = corpsesNear(player).length;
   form.slot(32, souls ? `§5ARISE (${souls} soul${souls > 1 ? "s" : ""} nearby)` : "§8ARISE - no soul nearby", BLANK, () => {
     if (souls) arise(player);
