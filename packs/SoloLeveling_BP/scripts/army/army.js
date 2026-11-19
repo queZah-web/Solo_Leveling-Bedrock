@@ -6,6 +6,7 @@
 import { EntityDamageCause, ItemStack, Player, system, world } from "@minecraft/server";
 import { getData, markDirty } from "../data.js";
 import { bonusOf } from "../classes.js";
+import { allies } from "../social/association.js";
 import { addGold, goldForKill } from "../economy.js";
 import { addDamageHook, addXp, flash, xpFor } from "../stats.js";
 import { ARCHERS, gearInfo, setGear, GEAR_SLOTS, shadowBow, updateCombatMode } from "./gear.js";
@@ -638,6 +639,10 @@ addDamageHook((ev) => {
     // shadow (or its army) or by the other side (then fighting back is fair).
     if (victim instanceof Player || v) {
       const other = victim instanceof Player ? victim : playerById(v.playerId);
+      if (owner && other && allies(owner, other)) {
+        ev.cancel = true;
+        return;
+      }
       const otherShadow = v && other ? findRecord(other, v.sid) : undefined;
       const pvp = (owner && s && effectiveMode(owner, s) === "PVP") ||
         (other && (modeOf(other) === "PVP" || (otherShadow && effectiveMode(other, otherShadow) === "PVP")));
@@ -674,6 +679,10 @@ addDamageHook((ev) => {
       return;
     }
     const owner = playerById(v.playerId);
+    if (attacker instanceof Player && owner && allies(attacker, owner)) {
+      ev.cancel = true;
+      return;
+    }
     const s = owner && findRecord(owner, v.sid);
     if (!s) return;
     ev.damage *= shadowDefMult(s) * bonusOf(getData(owner)).shadowDef;

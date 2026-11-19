@@ -21,6 +21,7 @@ import { addXp, flash } from "../stats.js";
 import { addGold } from "../economy.js";
 import { bonusOf } from "../classes.js";
 import { onGateCleared } from "../progression.js";
+import { guildGateCleared } from "../social/guild.js";
 import { GATE_RANKS, MAX_DUNGEONS, RED_REWARD } from "./ranks.js";
 
 const DUNGEON_GOLD = [60, 150, 350, 800, 1800, 4000];
@@ -469,6 +470,7 @@ function clearDungeon(inst) {
     addXp(p, Math.floor(r.xp * pm));
     addGold(p, Math.floor(DUNGEON_GOLD[inst.rank] * pm), "dungeon cleared");
     onGateCleared(p, { bossId: r.boss.id, red: inst.red, rank: inst.rank, solo });
+    guildGateCleared(p, inst.rank);
     const inv = p.getComponent("minecraft:inventory").container;
     const got = [];
     for (const [id, min, max] of r.loot) {

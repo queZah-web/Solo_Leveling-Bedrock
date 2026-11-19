@@ -6,6 +6,7 @@ import { JOBS, jobOf, KILL_GROUPS, MONARCH_LEVEL, TITLE_BY_ID, TITLES, titleOf }
 import { getData, markDirty } from "./data.js";
 import { applyStatEffects } from "./stats.js";
 import { summonedList } from "./army/army.js";
+import { setGuildChangeHandler } from "./social/guild.js";
 
 // ---------------------------------------------------------------- jobs
 function grantStats(d, stats) {
@@ -104,10 +105,12 @@ export function refreshTag(player) {
   const parts = [];
   if (j) parts.push(`${j.color}${j.name}`);
   if (t) parts.push(`${t.color}${t.name}`);
+  const name = d.gtag ? `§6[${d.gtag}] §f${player.name}` : player.name;
   try {
-    player.nameTag = d.showTitle !== false && parts.length ? `${player.name}\n${parts.join(" §8| ")}` : player.name;
+    player.nameTag = d.showTitle !== false && parts.length ? `${name}\n${parts.join(" §8| ")}` : name;
   } catch {}
 }
+setGuildChangeHandler(refreshTag);
 
 // Old saves: the penalty title was stored as plain text.
 function migrate(player, d) {

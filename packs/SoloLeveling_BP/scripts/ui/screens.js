@@ -17,6 +17,7 @@ import { shopScreen } from "./shop_screen.js";
 import { shadowScreen } from "./shadow_screen.js";
 import { endVault, vaultScreen } from "./vault_screen.js";
 import { jobScreen, titlesScreen } from "./job_screen.js";
+import { associationScreen, guildRankScreen, guildScreen, partyScreen } from "./hunters_screen.js";
 import { jobOf, titleOf } from "../classes.js";
 
 // ---------------------------------------------------------------- STATUS
@@ -131,6 +132,10 @@ const SCREENS = {
   settings: settingsScreen,
   job: jobScreen,
   titles: titlesScreen,
+  association: associationScreen,
+  guildrank: guildRankScreen,
+  party: partyScreen,
+  guild: guildScreen,
 };
 
 const open = new Set();

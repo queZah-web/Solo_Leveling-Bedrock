@@ -97,6 +97,10 @@ export const TITLES = [
 ];
 export const TITLE_BY_ID = Object.fromEntries(TITLES.map((t) => [t.id, t]));
 
+/** Guild perks by guild level (1..5), cumulative. */
+/** @type {Bonus[]} */
+const GUILD_BONUS = [{}, { dungeonReward: 1.05 }, { activeAdd: 1 }, { dungeonReward: 1.1 / 1.05 }, { dmgMult: 1.05, shadowAtk: 1.05 }];
+
 export const jobOf = (d) => Object.values(JOBS).find((j) => j.name === d.job);
 export const titleOf = (d) => (d.titleId ? TITLE_BY_ID[d.titleId] : undefined);
 
@@ -110,10 +114,10 @@ const memo = new Map();
  * @returns {Required<Omit<Bonus, "skillCdById"|"skillMpById"|"vs">> & {skillCdById:Record<string, number>, skillMpById:Record<string, number>, vs:any[]}}
  */
 export function bonusOf(d) {
-  const key = `${d.job}|${d.titleId ?? ""}`;
+  const key = `${d.job}|${d.titleId ?? ""}|${d.gl ?? 0}`;
   const hit = memo.get(key);
   if (hit) return hit;
-  const parts = [jobOf(d)?.bonus, titleOf(d)?.bonus].filter(Boolean);
+  const parts = [jobOf(d)?.bonus, titleOf(d)?.bonus, ...GUILD_BONUS.slice(0, d.gl ?? 0)].filter(Boolean);
   /** @type {any} */
   const b = { skillCdById: {}, skillMpById: {}, vs: [] };
   for (const k of MULTS) b[k] = parts.reduce((m, p) => m * (p[k] ?? 1), 1);

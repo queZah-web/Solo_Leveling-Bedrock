@@ -2401,24 +2401,30 @@
                     }
                   },
                   {
-                    "body": {
-                      "type": "label",
-                      "text": "#form_text",
-                      "color": [
-                        1.0,
-                        1.0,
-                        1.0
-                      ],
-                      "shadow": true,
+                    "scroll@common.scrolling_panel": {
+                      "anchor_to": "top_left",
+                      "anchor_from": "top_left",
                       "size": [
                         "100%",
-                        "default"
+                        "fill"
                       ],
-                      "font_scale_factor": 0.9,
-                      "bindings": [
-                        {
-                          "binding_name": "#form_text"
-                        }
+                      "$show_background": false,
+                      "$scrolling_content": "sl_ui.list_body_scroll",
+                      "$scroll_size": [
+                        5,
+                        "100% - 4px"
+                      ],
+                      "$scrolling_pane_size": [
+                        "100% - 6px",
+                        "100% - 2px"
+                      ],
+                      "$scrolling_pane_offset": [
+                        0,
+                        0
+                      ],
+                      "$scroll_bar_right_padding_size": [
+                        0,
+                        0
                       ]
                     }
                   }
@@ -2498,23 +2504,30 @@
                     }
                   },
                   {
-                    "list": {
-                      "type": "stack_panel",
-                      "orientation": "vertical",
+                    "scroll@common.scrolling_panel": {
+                      "anchor_to": "top_left",
+                      "anchor_from": "top_left",
                       "size": [
                         "100%",
-                        "100%c"
+                        "fill"
                       ],
-                      "factory": {
-                        "name": "buttons",
-                        "control_name": "sl_ui.list_item"
-                      },
-                      "collection_name": "form_buttons",
-                      "bindings": [
-                        {
-                          "binding_name": "#form_button_length",
-                          "binding_name_override": "#collection_length"
-                        }
+                      "$show_background": false,
+                      "$scrolling_content": "sl_ui.list_buttons_scroll",
+                      "$scroll_size": [
+                        5,
+                        "100% - 4px"
+                      ],
+                      "$scrolling_pane_size": [
+                        "100% - 6px",
+                        "100% - 2px"
+                      ],
+                      "$scrolling_pane_offset": [
+                        0,
+                        0
+                      ],
+                      "$scroll_bar_right_padding_size": [
+                        0,
+                        0
                       ]
                     }
                   }
@@ -21487,6 +21500,58 @@
             }
           ]
         }
+      }
+    ]
+  },
+  "list_body_scroll": {
+    "type": "stack_panel",
+    "orientation": "vertical",
+    "size": [
+      "100%",
+      "100%c"
+    ],
+    "controls": [
+      {
+        "body": {
+          "type": "label",
+          "text": "#form_text",
+          "color": [
+            1.0,
+            1.0,
+            1.0
+          ],
+          "shadow": true,
+          "size": [
+            "100%",
+            "default"
+          ],
+          "font_scale_factor": 0.9,
+          "bindings": [
+            {
+              "binding_name": "#form_text"
+            }
+          ]
+        }
+      }
+    ],
+    "collection_name": "form_buttons"
+  },
+  "list_buttons_scroll": {
+    "type": "stack_panel",
+    "orientation": "vertical",
+    "size": [
+      "100%",
+      "100%c"
+    ],
+    "factory": {
+      "name": "buttons",
+      "control_name": "sl_ui.list_item"
+    },
+    "collection_name": "form_buttons",
+    "bindings": [
+      {
+        "binding_name": "#form_button_length",
+        "binding_name_override": "#collection_length"
       }
     ]
   }

@@ -10,6 +10,7 @@
 // shadow with a tiny hit from the chosen target, so the shadow's
 // hurt_by_target behavior locks onto it.
 import { EntityDamageCause, Player, system, world } from "@minecraft/server";
+import { allies } from "../social/association.js";
 import { getData, markDirty } from "../data.js";
 import { SHADOW_TYPES } from "./types.js";
 
@@ -171,14 +172,15 @@ export function driveTargets(owner, list, metaOf) {
     } else if (mode === "PVP") {
       const enemies = owner.dimension
         .getPlayers({ location: owner.location, maxDistance: 24 })
-        .filter((p) => p.id !== owner.id && p.getGameMode() !== "Creative" && p.getGameMode() !== "Spectator");
+        .filter((p) => p.id !== owner.id && !allies(owner, p) && p.getGameMode() !== "Creative" && p.getGameMode() !== "Spectator");
       const enemy = nearest(enemies, e.location);
       if (!enemy) continue;
       const enemyShadows = e.dimension
         .getEntities({ families: ["sl_shadow"], location: e.location, maxDistance: 20 })
         .filter((x) => {
           const m = metaOf(x);
-          return m && m.playerId !== owner.id;
+          const o = m && world.getAllPlayers().find((p) => p.id === m.playerId);
+          return m && m.playerId !== owner.id && !(o && allies(owner, o));
         });
       const def = SHADOW_TYPES[s.type];
       const named = !!def.named && s.name === def.named.name;

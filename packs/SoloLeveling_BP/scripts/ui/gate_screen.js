@@ -1,6 +1,7 @@
 // Gate window (tap a gate) and the "Nearby Gates" list.
 import { getData } from "../data.js";
 import { enterDungeon, instances } from "../gates/dungeon.js";
+import { followers } from "../social/party.js";
 import { colorOf, gateLabel, gates, gatesNear, minutesLeft, setGateUi } from "../gates/gates.js";
 import { COLOR_NAMES, GATE_RANKS, lifetimeMin } from "../gates/ranks.js";
 import { stopTracking, trackedGate, trackGate } from "../gates/tracking.js";
@@ -44,6 +45,24 @@ export async function gateScreen(player) {
     }
     return undefined; // close the window, the dungeon takes over
   });
+  const party = followers(player);
+  if (party.length && inst?.state !== "cleared") {
+    form.button(`§aENTER WITH PARTY §7(${party.length + 1})`, BLANK, () => {
+      const err = enterDungeon(player, g);
+      if (err) {
+        player.onScreenDisplay.setActionBar(`§c${err}`);
+        return "gate";
+      }
+      for (const m of party) {
+        const md = getData(m);
+        if (md.penalty || md.trial || md.dungeon) continue;
+        const e = enterDungeon(m, g);
+        if (e) m.sendMessage(`§c[System] ${e}`);
+        else m.sendMessage(`§a[Party] §f${player.name} §7led the party into the gate.`);
+      }
+      return undefined;
+    });
+  }
   form.button("§7All Gates", BLANK, () => "gates");
   return form.show(player);
 }

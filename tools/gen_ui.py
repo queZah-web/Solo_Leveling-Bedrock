@@ -330,9 +330,29 @@ def list_item():
     }
 
 
-def list_content():
-    """sl:list| -- body text left, every button whose text starts with sl:l| on the right."""
-    stack = {
+def scroll(content_name):
+    """Vanilla scrolling panel (as in the long server form) around a named element."""
+    return {
+        "scroll@common.scrolling_panel": {
+            "anchor_to": "top_left",
+            "anchor_from": "top_left",
+            "size": ["100%", "fill"],
+            "$show_background": False,
+            "$scrolling_content": f"sl_ui.{content_name}",
+            "$scroll_size": [5, "100% - 4px"],
+            "$scrolling_pane_size": ["100% - 6px", "100% - 2px"],
+            "$scrolling_pane_offset": [0, 0],
+            "$scroll_bar_right_padding_size": [0, 0],
+        }
+    }
+
+
+def list_body_scroll():
+    return {"type": "stack_panel", "orientation": "vertical", "size": ["100%", "100%c"], "controls": [{"body": body_text()}]}
+
+
+def list_buttons_scroll():
+    return {
         "type": "stack_panel",
         "orientation": "vertical",
         "size": ["100%", "100%c"],
@@ -340,8 +360,12 @@ def list_content():
         "collection_name": COL,
         "bindings": [{"binding_name": "#form_button_length", "binding_name_override": "#collection_length"}],
     }
-    left = inner_panel(["45%", "100%"], [{"t": section_title("INFO", PURPLE)}, {"body": body_text()}])
-    right = inner_panel(["fill", "100%"], [{"t": section_title("OPTIONS")}, {"list": stack}])
+
+
+def list_content():
+    """sl:list| -- body text left, every button whose text starts with sl:l| on the right (both scroll)."""
+    left = inner_panel(["45%", "100%"], [{"t": section_title("INFO", PURPLE)}, scroll("list_body_scroll")])
+    right = inner_panel(["fill", "100%"], [{"t": section_title("OPTIONS")}, scroll("list_buttons_scroll")])
     return {
         "type": "stack_panel",
         "orientation": "horizontal",
@@ -722,8 +746,10 @@ def main():
         "army_content": army_content(),
         "shadow_content": shadow_content(),
         "list_item": list_item(),
+        "list_body_scroll": list_body_scroll(),
+        "list_buttons_scroll": list_buttons_scroll(),
     }
-    for key in ("screen", "profile_content", "list_content", "vault_content", "army_content", "shadow_content"):
+    for key in ("screen", "profile_content", "list_content", "vault_content", "army_content", "shadow_content", "list_body_scroll"):
         add_collection_name(sl_ui[key])
     with open(os.path.join(UI_DIR, "sl_ui.json"), "w") as f:
         json.dump(sl_ui, f, indent=2, ensure_ascii=False)

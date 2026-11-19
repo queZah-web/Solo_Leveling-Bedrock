@@ -38,6 +38,9 @@ export async function questsScreen(player) {
   form.button("§9NEARBY GATES", BLANK, () => "gates");
   form.button(d.jobPending ? "§6§lJOB CHANGE §r§6(choose your Job!)" : "§6JOB CHANGE", BLANK, () => "job");
   form.button("§eTITLES", BLANK, () => "titles");
+  form.button("§bHUNTER ASSOCIATION §7(rankings)", BLANK, () => "association");
+  form.button("§aPARTY", BLANK, () => "party");
+  form.button("§6GUILD", BLANK, () => "guild");
   const inst = instanceOf(player);
   if (inst) {
     const canLeave = !inst.red || inst.state === "cleared";
