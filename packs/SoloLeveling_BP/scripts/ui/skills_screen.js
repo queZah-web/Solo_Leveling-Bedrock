@@ -3,6 +3,7 @@
 import { ActionFormData, ModalFormData } from "@minecraft/server-ui";
 import { maxMp } from "../config.js";
 import { getData, markDirty } from "../data.js";
+import { bonusOf, skillCooldown, skillCost } from "../classes.js";
 import { cast, cooldownLeft, equipSkill, quickSlots, SKILL_BY_ID, skillIcon, SKILLS } from "../skills/skills.js";
 import { barTex, BLANK, showForm, SystemForm } from "./form.js";
 import { frame } from "./frame.js";
@@ -47,13 +48,13 @@ export async function skillsScreen(player) {
     const mark = slot >= 0 ? `§e[${slot + 1}] ` : "";
     form.slot(
       20 + i,
-      `${locked ? "§8" : s.color}${s.name.length > 10 ? s.name.slice(0, 9) + "." : s.name}\n${locked ? `§8LOCK Lv${s.level}` : `${mark}§7${s.mp} MP`}`,
+      `${locked ? "§8" : s.color}${s.name.length > 10 ? s.name.slice(0, 9) + "." : s.name}\n${locked ? `§8LOCK Lv${s.level}` : `${mark}§7${skillCost(bonusOf(d), s)} MP`}`,
       skillIcon(s.id),
       () => {
         selected.set(player.id, s.id);
         return again();
       },
-      `${locked ? "§8" : s.color}${s.name} §7${locked ? `(Lv ${s.level})` : `${s.mp} MP`}${mark ? " " + mark : ""}`,
+      `${locked ? "§8" : s.color}${s.name} §7${locked ? `(Lv ${s.level})` : `${skillCost(bonusOf(d), s)} MP`}${mark ? " " + mark : ""}`,
     );
   });
 
@@ -68,7 +69,7 @@ export async function skillsScreen(player) {
     [
       `§f${sel.desc}`,
       "",
-      `§9MP: §f${sel.mp}   §6Cooldown: §f${sel.cd}s`,
+      `§9MP: §f${skillCost(bonusOf(d), sel)}   §6Cooldown: §f${skillCooldown(bonusOf(d), sel)}s`,
       locked ? `§cUnlocks at level ${sel.level}` : "§aUnlocked",
       `§7Quick slots: ${slots.map((id, i) => `§e${i + 1}§7:${id ? SKILL_BY_ID[id].name : "-"}`).join(" ")}`,
     ].join("\n"),
@@ -116,7 +117,7 @@ export async function quickMenu(player) {
       return;
     }
     const cd = cooldownLeft(player, id);
-    form.button(`${sk.color}${i + 1}. ${sk.name}\n§r§7${cd > 0 ? `cooldown ${cd}s` : `${sk.mp} MP`}`, skillIcon(id));
+    form.button(`${sk.color}${i + 1}. ${sk.name}\n§r§7${cd > 0 ? `cooldown ${cd}s` : `${skillCost(bonusOf(d), sk)} MP`}`, skillIcon(id));
     map.push(id);
   });
   const res = await showForm(player, form);

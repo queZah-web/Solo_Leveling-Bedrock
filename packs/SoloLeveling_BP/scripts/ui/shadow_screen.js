@@ -3,13 +3,13 @@
 import { ItemLockMode, ItemStack } from "@minecraft/server";
 import { ActionFormData, ModalFormData } from "@minecraft/server-ui";
 import {
-  allocate, dismiss, entityOf, feed, findRecord, rankUp, rankUpStatus, regenLeft, release, rename, saveActive, setOrder, summon, train,
+  allocate, dismiss, entityOf, summonCostOf, feed, findRecord, rankUp, rankUpStatus, regenLeft, release, rename, saveActive, setOrder, summon, train,
 } from "../army/army.js";
 import { canWearGear, gearInfo, GEAR_SLOTS, isPlain, setGear, updateCombatMode } from "../army/gear.js";
 import {
   canRankUp, creeperCharges, freePoints, SHADOW_STATS, STAT_KEYS, statOf, DIETS, FEED_MP, FOOD_MAX, GRADES, healValue, levelCap, portraitOf, SHADOW_MAX_LEVEL, SHADOW_TYPES, shadowAtkMult, shadowDefMult, shadowXpToNext, TRAIN_MP,
 } from "../army/types.js";
-import { markDirty } from "../data.js";
+import { getData, markDirty } from "../data.js";
 import { iconOf, prettyId } from "../vault/items.js";
 import { stateOf } from "./army_screen.js";
 import { pickMode } from "./mode_picker.js";
@@ -56,7 +56,7 @@ export async function shadowScreen(player) {
       `${g.color}${g.name} §8| §7Lv §f${s.level}§8/${levelCap(s)} §8| §7Kills §f${s.kills}`,
       `§7ATK §cx${shadowAtkMult(s).toFixed(2)} §7DEF §a${Math.round((1 - shadowDefMult(s)) * 100)}%% §8| ${freePoints(s) ? `§a${freePoints(s)} free points` : "§8no free points"}`,
       STAT_KEYS.map((k) => `${SHADOW_STATS[k].color}${SHADOW_STATS[k].label} §f${statOf(s, k)}`).join(" §8| "),
-      `§7${status} §8| §9${g.cost} MP`,
+      `§7${status} §8| §9${summonCostOf(getData(player), s)} MP`,
       `§5${def.skill}§7: ${def.skillDesc}`,
       `§7Eats: §f${DIETS[s.type].hint}`,
       s.type === "creeper" ? `§7Blasts: §c${creeperCharges(s)} §8(more with level & rank)` : "",

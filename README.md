@@ -14,6 +14,7 @@
 | 5 | البوابات والدانجن والزعماء | ✅ |
 | 6 | الوحوش والأسلحة والمتجر | ✅ |
 | 7 | تحسين الموديلات والتكستشرات | 🟡 جاري (الأسلحة والأغراض والوحوش) |
+| 8 | تغيير المهنة (Job Change) + الألقاب (Titles) | ✅ |
 
 ## المرحلة 1 — المحتوى
 
@@ -322,12 +323,51 @@ Healing Elixir, Mana Potion, Fatigue Recovery Potion, Elixir of Life, Random Box
 
 \* المواد النادرة تنحسب بكمية أقل (Ender Pearl و Emerald و Goblin Fang ربع العدد، و Echo Shard عُشره).
 
+## المرحلة 8 — تغيير المهنة والألقاب
+
+### 🗡️ Job Change Quest (من مستوى 40)
+- يوصلك إشعار من النظام. افتح **System ← QUESTS ← JOB CHANGE ← START**.
+- تنتقل **وحدك** لقاعة سوداء بالسما فيها سجادة حمرا وتماثيل فرسان راكعين. تواجه 3 موجات Knights و Mages.
+- بعدها يقوم **Igris, the Blood-Red Commander** من عرشه. اقتله خلال 15 دقيقة.
+- بعد ما تفوز تقدر تسوي **ARISE** على Igris، وبعدها النظام يعرض عليك **المهنة** (اختيار نهائي).
+- إذا مت تفشل، وأغراضك ترجعلك لما ترسبن. تقدر تعيد بعد 15 دقيقة.
+
+| المهنة | إحصائيات | المميزات |
+|---|---|---|
+| **Necromancer** | +10 INT +5 VIT | جيش أكبر 50%، +2 ظلال نشطة، +10% استخراج، الظلال +10% ضرر. **تصير Shadow Monarch بمستوى 100** |
+| **Assassin** | +10 AGI +5 PER | +10% كريتيكال، الكريتيكال ×2.0، Stealth و Dagger Rush أرخص وأسرع |
+| **Knight** | +15 VIT | -12% ضرر واصلك، يرجّع 20% من ضرر الضربات للمهاجم |
+| **Mage** | +15 INT | +50% تجديد MP، كل المهارات -20% كولداون و -15% MP |
+| **Ranger** | +12 PER +3 AGI | +30% ضرر بعيد، +5% كريتيكال |
+| **Healer** | +8 VIT +7 INT | يشفي اللاعبين القريبين وظلالك كل 4 ثواني، +20% MP، تعب أبطأ |
+| **Shadow Monarch** | +20 INT +10 VIT +10 STR | ضعف الجيش، +5 نشطين، +20% استخراج، الظلال +30% ضرر و -20% ضرر واصل، الاستدعاء أرخص 40%، +10% ضرر |
+
+### 🏷️ الألقاب (System ← QUESTS ← TITLES)
+تفتحها بالإنجازات وتلبس لقب واحد. اللقب والمهنة يطلعون فوق راسك (تقدر تطفيها).
+
+| اللقب | كيف | التأثير |
+|---|---|---|
+| The One Who Overcame Adversity | تنجو من Penalty Zone | -25% ضرر لما صحتك تحت 30% |
+| Wolf Slayer | 50 حيوان مفترس | +25% ضرر عليهم |
+| Exterminator | 100 حشرة | +25% ضرر عليهم |
+| Demon Hunter | 100 شيطان | +25% ضرر عليهم |
+| Knight Killer | تهزم Igris | +25% ضرر على الفرسان والجنود |
+| Giant Slayer | 5 زعماء | +20% ضرر على الزعماء |
+| Gate Breaker | 10 بوابات | +20% XP وذهب من الدانجن |
+| Survivor of the Red Gate | تخلص بوابة حمرا | +6% كريتيكال |
+| The One Who Hunts Alone | بوابة A أو S بروحك | +15% ضرر إذا ماكو لاعب قريب |
+| Diligent | 7 مهام يومية | +25% MP، تعب أبطأ |
+| Commander of the Dead | 50 ظل بجيشك | الظلال +10% ضرر و -10% ضرر واصل |
+| King of the Dead | تصير Shadow Monarch | +8% ضرر، الظلال +10% |
+
 ### أوامر الأدمن (للـ OP فقط)
 ```
 /sl:setlevel <level> [player]
 /sl:addxp <amount> [player]
 /sl:resetstats [player]
 /sl:resetplayer [player]
+/sl:resetjob [player]       - يشيل المهنة (يقدر يعيد Job Change Quest)
+/sl:passjobquest [player]   - يكمّل Job Change Quest بدون قتال (للتجربة)
 /sl:penalty <true|false>
 /sl:spawngate <E|D|C|B|A|S> [red]   - يفتح بوابة قدامك
 /sl:gates <true|false>               - البوابات الطبيعية
@@ -353,11 +393,11 @@ Healing Elixir, Mana Potion, Fatigue Recovery Potion, Elixir of Life, Random Box
 
 `world_behavior_packs.json`
 ```json
-[ { "pack_id": "c63f3ea1-b815-4c86-8d08-fa4f1f13d4e2", "version": [0, 8, 0] } ]
+[ { "pack_id": "c63f3ea1-b815-4c86-8d08-fa4f1f13d4e2", "version": [0, 9, 0] } ]
 ```
 `world_resource_packs.json`
 ```json
-[ { "pack_id": "74a1ff86-af96-45c3-8ccf-94d3550211ba", "version": [0, 8, 0] } ]
+[ { "pack_id": "74a1ff86-af96-45c3-8ccf-94d3550211ba", "version": [0, 9, 0] } ]
 ```
 4. في `server.properties` خلّ:
 ```

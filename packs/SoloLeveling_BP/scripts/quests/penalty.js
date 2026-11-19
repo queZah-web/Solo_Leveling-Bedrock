@@ -6,6 +6,7 @@
 import { BlockVolume, GameMode, Player, system, world } from "@minecraft/server";
 import { getData, markDirty } from "../data.js";
 import { addXp, flash } from "../stats.js";
+import { credit } from "../progression.js";
 
 export const PENALTY_SECONDS = 180;
 const C = { x: 60000, y: 180, z: 60000 }; // floor level center
@@ -228,7 +229,7 @@ export function endPenalty(player, survived) {
     player.setGameMode(pen?.mode ?? GameMode.Survival);
   } catch {}
   if (survived) {
-    if (d.title === "None") d.title = "The One Who Overcame Adversity";
+    credit(player, "penalty");
     player.onScreenDisplay.setTitle("§aPENALTY CLEARED", {
       subtitle: "§fYou survived the Penalty Zone.", fadeInDuration: 5, stayDuration: 50, fadeOutDuration: 10,
     });

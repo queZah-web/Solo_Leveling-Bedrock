@@ -12,12 +12,15 @@
 // monsters; clearing the last wave opens them. Dead ends hold treasure
 // (guarded by an elite), armories, libraries and healing shrines. The boss
 // gate opens once enough of the dungeon is cleared.
-import { BlockPermutation, BlockVolume, ItemStack, Player, system, world } from "@minecraft/server";
+import { ItemStack, Player, system, world } from "@minecraft/server";
+import { fillBox, permOf, applyOps } from "./blocks.js";
 import { bossSpot, CELL, cellBox, designRoom, exitSpot, isCombat, makePlan, sealOf, vaultBarsOf, Y_HI } from "./plan.js";
 import { fillChest } from "./loot.js";
 import { getData, markDirty } from "../data.js";
 import { addXp, flash } from "../stats.js";
 import { addGold } from "../economy.js";
+import { bonusOf } from "../classes.js";
+import { onGateCleared } from "../progression.js";
 import { GATE_RANKS, MAX_DUNGEONS, RED_REWARD } from "./ranks.js";
 
 const DUNGEON_GOLD = [60, 150, 350, 800, 1800, 4000];
@@ -49,55 +52,6 @@ export function instanceOf(player) {
   const g = getData(player).dungeon?.gateId;
   const inst = g && instances.get(g);
   return inst && inst.members.has(player.id) ? inst : undefined;
-}
-
-// ---------------------------------------------------------------- blocks
-const FALLBACK = {
-  cobweb: "web", short_grass: "tallgrass", fern: "tallgrass", azalea_leaves_flowered: "azalea_leaves", jungle_leaves: "azalea_leaves",
-  poppy: "red_flower", blue_orchid: "red_flower", allium: "red_flower", azure_bluet: "red_flower", oxeye_daisy: "red_flower",
-  cornflower: "red_flower", lily_of_the_valley: "red_flower", dandelion: "yellow_flower", skeleton_skull: "skull",
-  tuff_bricks: "stone_bricks", polished_tuff: "polished_andesite", chiseled_tuff_bricks: "chiseled_stone_bricks",
-  jungle_fence: "oak_fence", spruce_fence: "oak_fence", dark_oak_fence: "oak_fence", crimson_fence: "oak_fence",
-  cyan_stained_glass: "glass", red_wool: "wool", mossy_stone_bricks: "stonebrick", stone_bricks: "stonebrick",
-};
-/** @type {Map<string, BlockPermutation|null>} */
-const perms = new Map();
-function permOf(b) {
-  const id = typeof b === "string" ? (b.includes(":") ? b : `minecraft:${b}`) : b.id;
-  const states = typeof b === "string" ? undefined : b.states;
-  const key = states ? id + JSON.stringify(states) : id;
-  if (perms.has(key)) return perms.get(key);
-  let perm = null;
-  for (const [i, s] of [[id, states], [id, undefined], [`minecraft:${FALLBACK[id.slice(10)] ?? "-"}`, undefined]]) {
-    try {
-      perm = BlockPermutation.resolve(i, s);
-      break;
-    } catch {}
-  }
-  if (!perm) console.warn(`[SL] dungeon: unknown block ${key}`);
-  perms.set(key, perm);
-  return perm;
-}
-
-/** fillBlocks in pieces small enough for the engine. */
-function fillBox(dim, x1, y1, z1, x2, y2, z2, perm) {
-  const dy = y2 - y1 + 1;
-  const dz = z2 - z1 + 1;
-  const step = Math.max(1, Math.floor(30000 / (dy * dz)));
-  for (let x = x1; x <= x2; x += step) {
-    if (dy * dz > 30000) {
-      const zs = Math.max(1, Math.floor(30000 / dy));
-      for (let z = z1; z <= z2; z += zs) {
-        try {
-          dim.fillBlocks(new BlockVolume({ x, y: y1, z }, { x, y: y2, z: Math.min(z + zs - 1, z2) }), perm);
-        } catch {}
-      }
-      continue;
-    }
-    try {
-      dim.fillBlocks(new BlockVolume({ x, y: y1, z: z1 }, { x: Math.min(x + step - 1, x2), y: y2, z: z2 }), perm);
-    } catch {}
-  }
 }
 
 /** Area (3x3 cells) around a room: kept loaded while it is built or cleared. */
@@ -170,26 +124,8 @@ function* buildJob(inst) {
       yield* clearCell(plan, plan.rooms[n]);
     }
     const { ops, chests } = designRoom(plan, r);
-    let work = 0;
-    for (const op of ops) {
-      if (inst.dead) return;
-      try {
-        if (op[0] === "F") {
-          const [, x1, y1, z1, x2, y2, z2, b] = op;
-          const perm = permOf(b);
-          if (perm) fillBox(dim, x1, y1, z1, x2, y2, z2, perm);
-          work += 4;
-        } else {
-          const perm = permOf(op[3]);
-          if (perm) dim.getBlock({ x: op[0], y: op[1], z: op[2] })?.setPermutation(perm);
-          work++;
-        }
-      } catch {}
-      if (work >= 220) {
-        work = 0;
-        yield;
-      }
-    }
+    yield* applyOps(dim, ops, () => !!inst.dead);
+    if (inst.dead) return;
     for (const c of chests) {
       try {
         const block = dim.getBlock(c);
@@ -524,12 +460,15 @@ function clearDungeon(inst) {
   inst.clearedAt = Date.now();
   const r = GATE_RANKS[inst.rank];
   const mult = inst.red ? RED_REWARD : 1;
+  const solo = inst.members.size === 1;
   forMembers(inst, (p) => {
     const d = getData(p);
     d.gatesCleared = (d.gatesCleared ?? 0) + 1;
     markDirty(p);
-    addXp(p, Math.floor(r.xp * mult));
-    addGold(p, Math.floor(DUNGEON_GOLD[inst.rank] * mult), "dungeon cleared");
+    const pm = mult * bonusOf(d).dungeonReward;
+    addXp(p, Math.floor(r.xp * pm));
+    addGold(p, Math.floor(DUNGEON_GOLD[inst.rank] * pm), "dungeon cleared");
+    onGateCleared(p, { bossId: r.boss.id, red: inst.red, rank: inst.rank, solo });
     const inv = p.getComponent("minecraft:inventory").container;
     const got = [];
     for (const [id, min, max] of r.loot) {
@@ -541,7 +480,7 @@ function clearDungeon(inst) {
       } catch {}
     }
     p.onScreenDisplay.setTitle("§b§lDUNGEON CLEARED", {
-      subtitle: `§e+${Math.floor(r.xp * mult)} XP`, fadeInDuration: 5, stayDuration: 60, fadeOutDuration: 10,
+      subtitle: `§e+${Math.floor(r.xp * pm)} XP`, fadeInDuration: 5, stayDuration: 60, fadeOutDuration: 10,
     });
     p.sendMessage(`§b[System] §fRewards: §e${got.join(", ")}`);
     p.sendMessage("§b[System] §7The gate will close in 3 minutes. Loot the vaults, then use the §bEXIT §7gate or the QUESTS tab.");

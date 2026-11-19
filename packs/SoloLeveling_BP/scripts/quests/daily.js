@@ -7,6 +7,7 @@
 import { Player, system, world } from "@minecraft/server";
 import { maxMp } from "../config.js";
 import { getData, markDirty } from "../data.js";
+import { credit } from "../progression.js";
 import { addXp } from "../stats.js";
 import { addGold } from "../economy.js";
 import { startPenalty } from "./penalty.js";
@@ -78,6 +79,7 @@ export function claimDaily(player) {
   h?.setCurrentValue(h.effectiveMax);
   addXp(player, 50 + d.level * 20);
   addGold(player, 100, "daily quest");
+  credit(player, "daily");
   player.onScreenDisplay.setTitle("§bQUEST COMPLETE", {
     subtitle: `§a+${DAILY_REWARD_POINTS} stat points §7| §fFull recovery`,
     fadeInDuration: 5, stayDuration: 50, fadeOutDuration: 10,

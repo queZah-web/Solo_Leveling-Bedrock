@@ -36,6 +36,8 @@ export async function questsScreen(player) {
     return "quests";
   });
   form.button("§9NEARBY GATES", BLANK, () => "gates");
+  form.button(d.jobPending ? "§6§lJOB CHANGE §r§6(choose your Job!)" : "§6JOB CHANGE", BLANK, () => "job");
+  form.button("§eTITLES", BLANK, () => "titles");
   const inst = instanceOf(player);
   if (inst) {
     const canLeave = !inst.red || inst.state === "cleared";

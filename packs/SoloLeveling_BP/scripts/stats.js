@@ -6,6 +6,7 @@ import {
   RANKS, rangedMult, STATS, strDamageMult, vitHealthBoost, vitReduction, XP_OVERRIDES, xpToNext,
 } from "./config.js";
 import { getData, markDirty } from "./data.js";
+import { bonusOf, vsMult } from "./classes.js";
 
 export const rankOf = (level) => RANKS.find((r) => level >= r.min) ?? RANKS[RANKS.length - 1];
 
@@ -43,7 +44,7 @@ export function addXp(player, amount) {
 export function setLevel(player, level) {
   const d = getData(player);
   level = Math.max(1, Math.min(MAX_LEVEL, Math.floor(level)));
-  const spent = STATS.reduce((s, st) => s + (d[st.key] - BASE_STAT), 0);
+  const spent = STATS.reduce((s, st) => s + (d[st.key] - BASE_STAT), 0) - (d.jobStats ?? 0);
   d.level = level;
   d.xp = 0;
   d.points = Math.max(0, (level - 1) * POINTS_PER_LEVEL - spent);
@@ -140,10 +141,19 @@ world.beforeEvents.entityHurt.subscribe((ev) => {
   let dmg = ev.damage;
   if (attacker instanceof Player) {
     const d = getData(attacker);
+    const b = bonusOf(d);
+    dmg *= b.dmgMult * vsMult(b, ev.hurtEntity);
+    if (b.aloneDmg !== 1) {
+      let alone = true;
+      try {
+        alone = attacker.dimension.getPlayers({ location: attacker.location, maxDistance: 32 }).length <= 1;
+      } catch {}
+      if (alone) dmg *= b.aloneDmg;
+    }
     if (src.cause === EntityDamageCause.entityAttack) {
       dmg *= strDamageMult(d.str);
-      if (Math.random() < critChance(d.per)) {
-        dmg *= CRIT_MULT;
+      if (Math.random() < critChance(d.per) + b.critAdd) {
+        dmg *= CRIT_MULT + b.critMult;
         const target = ev.hurtEntity;
         system.run(() => {
           try {
@@ -153,12 +163,27 @@ world.beforeEvents.entityHurt.subscribe((ev) => {
         });
       }
     } else if (src.cause === EntityDamageCause.projectile) {
-      dmg *= rangedMult(d.per);
+      dmg *= rangedMult(d.per) * b.rangedMult;
     }
   }
   const victim = ev.hurtEntity;
   if (victim instanceof Player) {
-    dmg *= 1 - vitReduction(getData(victim).vit);
+    const vd = getData(victim);
+    const vb = bonusOf(vd);
+    dmg *= (1 - vitReduction(vd.vit)) * vb.takenMult;
+    if (vb.lowHpTaken !== 1) {
+      const h = victim.getComponent("minecraft:health");
+      if (h && h.currentValue < h.effectiveMax * 0.3) dmg *= vb.lowHpTaken;
+    }
+    // Knight: reflect part of melee damage
+    if (vb.thorns > 0 && attacker && attacker.id !== victim.id && src.cause === EntityDamageCause.entityAttack) {
+      const back = dmg * vb.thorns;
+      system.run(() => {
+        try {
+          if (attacker.isValid) attacker.applyDamage(back, { cause: EntityDamageCause.thorns });
+        } catch {}
+      });
+    }
   }
   ev.damage = dmg;
   for (const hook of damageHooks) {
@@ -173,7 +198,7 @@ world.afterEvents.entityHurt.subscribe(({ damageSource, hurtEntity }) => {
   for (const p of [damageSource.damagingEntity, hurtEntity]) {
     if (p instanceof Player) {
       const d = getData(p);
-      d.fatigue += FATIGUE_PER_HIT;
+      d.fatigue += FATIGUE_PER_HIT * bonusOf(d).fatigueMult;
       sanitize(d);
       lastCombat.set(p.id, now);
       markDirty(p);
@@ -220,7 +245,7 @@ system.runInterval(() => {
     // MP regen
     const mmax = maxMp(d.int);
     if (d.mp < mmax) {
-      d.mp = Math.min(mmax, d.mp + mpRegenPerSec(d.int));
+      d.mp = Math.min(mmax, d.mp + mpRegenPerSec(d.int) * bonusOf(d).mpRegenMult);
       markDirty(player);
     }
     // Fatigue recovery when out of combat for 5s

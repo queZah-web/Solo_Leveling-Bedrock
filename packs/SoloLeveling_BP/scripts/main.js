@@ -1,4 +1,4 @@
-// Solo Leveling - The System (Phase 7)
+// Solo Leveling - The System (Phase 8)
 import "./data.js";
 import "./stats.js";
 import "./army/army.js";
@@ -11,6 +11,8 @@ import "./economy.js";
 import "./items/weapons.js";
 import "./items/consumables.js";
 import "./items/drops.js";
+import "./progression.js";
+import "./quests/jobchange.js";
 import "./commands.js";
 import "./gem.js";
 import "./ui/shortcuts.js";

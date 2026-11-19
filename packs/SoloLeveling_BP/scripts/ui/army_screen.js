@@ -1,12 +1,12 @@
 // SHADOWS tab: Army Management. Layout "sl:army|" (index map in tools/gen_ui.py).
 // Tapping a shadow card opens its Shadow Profile (ui/shadow_screen.js).
 import {
-  activeCount, arise, callAll, corpsesNear, dismissAll, entityOf, orderAll, regenLeft, summonAll, summonedList,
+  activeCount, activeLimitOf, arise, armyCapOf, callAll, corpsesNear, dismissAll, entityOf, orderAll, regenLeft, summonAll, summonedList,
 } from "../army/army.js";
 import { armyTargets, MODE_INFO, modeLabel, modeOf, setArmyMode } from "../army/targeting.js";
 import { pickMode } from "./mode_picker.js";
 import {
-  activeLimit, ARISE_MP, armyCapacity, GRADES, nextRankLimits, portraitOf, RANK_LIMITS,
+  ARISE_MP, GRADES, nextRankLimits, portraitOf, RANK_LIMITS,
 } from "../army/types.js";
 import { maxMp } from "../config.js";
 import { getData } from "../data.js";
@@ -31,8 +31,8 @@ function shortName(s) {
 export async function armyScreen(player) {
   const st = stateOf(player);
   const d = getData(player);
-  const cap = armyCapacity(d.level);
-  const lim = activeLimit(d.level, d.int);
+  const cap = armyCapOf(d);
+  const lim = activeLimitOf(d);
   const list = [...d.shadows].sort((a, b) => b.grade - a.grade || b.level - a.level || a.name.localeCompare(b.name));
   const pages = Math.max(1, Math.ceil(list.length / PER_PAGE));
   st.page = Math.min(st.page, pages - 1);

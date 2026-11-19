@@ -16,6 +16,8 @@ import { skillsScreen } from "./skills_screen.js";
 import { shopScreen } from "./shop_screen.js";
 import { shadowScreen } from "./shadow_screen.js";
 import { endVault, vaultScreen } from "./vault_screen.js";
+import { jobScreen, titlesScreen } from "./job_screen.js";
+import { jobOf, titleOf } from "../classes.js";
 
 // ---------------------------------------------------------------- STATUS
 async function profileScreen(player) {
@@ -31,8 +33,8 @@ async function profileScreen(player) {
     [
       `§7Name: §f${player.name}`,
       `§7Rank: ${rank.color}${rank.name}`,
-      `§7Job: §f${d.job}`,
-      `§7Title: §f${d.title}`,
+      `§7Job: ${jobOf(d) ? jobOf(d).color + d.job : d.jobPending ? "§6choose one (QUESTS)" : "§fNone"}`,
+      `§7Title: ${titleOf(d) ? titleOf(d).color + titleOf(d).name : "§fNone"}`,
       `§7Kills: §f${d.kills}  §6Gold: §f${d.gold ?? 0}`,
       "",
       "§bBONUSES",
@@ -127,6 +129,8 @@ const SCREENS = {
   gates: gatesScreen,
   quests: questsScreen,
   settings: settingsScreen,
+  job: jobScreen,
+  titles: titlesScreen,
 };
 
 const open = new Set();

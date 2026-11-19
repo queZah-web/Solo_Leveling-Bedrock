@@ -3,6 +3,7 @@
 import { EntityDamageCause, Player, system } from "@minecraft/server";
 import { summonedList } from "../army/army.js";
 import { getData, markDirty } from "../data.js";
+import { bonusOf, skillCooldown, skillCost } from "../classes.js";
 import { domainUntil, stealthUntil } from "../state.js";
 import { addDamageHook, flash } from "../stats.js";
 
@@ -210,18 +211,20 @@ export function cast(player, id) {
   if (d.level < sk.level) return `${sk.name} unlocks at level ${sk.level}.`;
   const cd = cooldownLeft(player, id);
   if (cd > 0) return `${sk.name} is on cooldown (${cd}s).`;
-  if (d.mp < sk.mp) return `Not enough MP (${sk.mp} needed).`;
+  const b = bonusOf(d);
+  const mp = skillCost(b, sk);
+  if (d.mp < mp) return `Not enough MP (${mp} needed).`;
   let note;
   try {
     note = EFFECTS[id](player, d);
   } catch (e) {
     return `${sk.name} failed: ${e}`;
   }
-  d.mp -= sk.mp;
-  d.fatigue = Math.min(100, d.fatigue + Math.ceil(sk.mp / 25));
+  d.mp -= mp;
+  d.fatigue = Math.min(100, d.fatigue + Math.ceil(mp / 25));
   markDirty(player);
   const map = cooldowns.get(player.id) ?? {};
-  map[id] = system.currentTick + sk.cd * 20;
+  map[id] = system.currentTick + skillCooldown(b, sk) * 20;
   cooldowns.set(player.id, map);
   flash(player, `${sk.color}§l${sk.name.toUpperCase()}${note ? ` §r§7- ${note}` : ""}`, 40);
   return undefined;

@@ -13,6 +13,8 @@ import { RANK_INDEX } from "./gates/ranks.js";
 import { endPenalty, startPenalty } from "./quests/penalty.js";
 import { openSystem } from "./ui/screens.js";
 import { castSlot, quickMenu } from "./ui/skills_screen.js";
+import { jobOf } from "./classes.js";
+import { refreshTag } from "./progression.js";
 
 const ok = (message) => ({ status: CustomCommandStatus.Success, message });
 const fail = (message) => ({ status: CustomCommandStatus.Failure, message });
@@ -219,9 +221,11 @@ system.beforeEvents.startup.subscribe(({ customCommandRegistry: reg }) => {
       system.run(() =>
         list.forEach((p) => {
           const d = getData(p);
+          const keep = jobOf(d)?.stats ?? {};
           for (const st of STATS) {
-            d.points += d[st.key] - BASE_STAT;
-            d[st.key] = BASE_STAT;
+            const base = BASE_STAT + (keep[st.key] ?? 0);
+            d.points += Math.max(0, d[st.key] - base);
+            d[st.key] = Math.min(d[st.key], base);
           }
           d.mp = Math.min(d.mp, maxMp(d.int));
           markDirty(p);
@@ -229,6 +233,60 @@ system.beforeEvents.startup.subscribe(({ customCommandRegistry: reg }) => {
         }),
       );
       return ok(`Stats refunded for ${list.length} player(s).`);
+    },
+  );
+
+  reg.registerCommand(
+    {
+      name: "sl:resetjob",
+      description: "[Admin] Remove a hunter's Job (they can take the Job Change Quest again)",
+      permissionLevel: CommandPermissionLevel.GameDirectors,
+      cheatsRequired: false,
+      optionalParameters: [target],
+    },
+    (origin, targets) => {
+      const list = targetsOf(origin, targets);
+      system.run(() =>
+        list.forEach((p) => {
+          const d = getData(p);
+          const j = jobOf(d);
+          if (j) for (const [k, n] of Object.entries(j.stats)) d[k] = Math.max(BASE_STAT, d[k] - n);
+          d.jobStats = 0;
+          d.job = "None";
+          d.jobPending = false;
+          d.jobNotified = false;
+          d.trialRetry = 0;
+          d.mp = Math.min(d.mp, maxMp(d.int));
+          markDirty(p);
+          applyStatEffects(p, true);
+          refreshTag(p);
+          p.sendMessage("§6[System] §7Your Job was reset.");
+        }),
+      );
+      return ok(`Job reset for ${list.length} player(s).`);
+    },
+  );
+
+  reg.registerCommand(
+    {
+      name: "sl:passjobquest",
+      description: "[Admin] Complete the Job Change Quest for a hunter (they choose a Job)",
+      permissionLevel: CommandPermissionLevel.GameDirectors,
+      cheatsRequired: false,
+      optionalParameters: [target],
+    },
+    (origin, targets) => {
+      const list = targetsOf(origin, targets);
+      system.run(() =>
+        list.forEach((p) => {
+          const d = getData(p);
+          if (d.job && d.job !== "None") return p.sendMessage("§6[System] §7You already have a Job.");
+          d.jobPending = true;
+          markDirty(p);
+          p.sendMessage("§6[System] §fJob Change Quest completed. Choose your Job: §bSystem > QUESTS > JOB CHANGE§f.");
+        }),
+      );
+      return ok(`Job Change Quest passed for ${list.length} player(s).`);
     },
   );
 

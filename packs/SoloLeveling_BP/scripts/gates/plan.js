@@ -217,7 +217,7 @@ export function sealOf(r, door) {
 export const buildOrder = (plan) => plan.order;
 
 // ---------------------------------------------------------------- painter
-class Painter {
+export class Painter {
   constructor(rnd, T) {
     this.ops = [];
     this.chests = [];

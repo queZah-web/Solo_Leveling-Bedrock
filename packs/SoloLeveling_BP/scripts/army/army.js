@@ -5,6 +5,7 @@
 // shadow entities are removed and the shadows simply return to the army.
 import { EntityDamageCause, ItemStack, Player, system, world } from "@minecraft/server";
 import { getData, markDirty } from "../data.js";
+import { bonusOf } from "../classes.js";
 import { addGold, goldForKill } from "../economy.js";
 import { addDamageHook, addXp, flash, xpFor } from "../stats.js";
 import { ARCHERS, gearInfo, setGear, GEAR_SLOTS, shadowBow, updateCombatMode } from "./gear.js";
@@ -41,6 +42,11 @@ export const findRecord = (player, sid) => getData(player).shadows.find((s) => s
 /** Owner id + shadow id of a summoned shadow entity. */
 export const metaOf = (entity) => meta.get(entity.id);
 const playerById = (id) => world.getAllPlayers().find((p) => p.id === id);
+
+/** Army size, active limit and summon cost after job/title bonuses. */
+export const armyCapOf = (d) => Math.floor(armyCapacity(d.level) * bonusOf(d).armyCap);
+export const activeLimitOf = (d) => Math.min(40, activeLimit(d.level, d.int) + bonusOf(d).activeAdd);
+export const summonCostOf = (d, s) => Math.max(1, Math.ceil(GRADES[s.grade].cost * bonusOf(d).summonCost));
 
 export function shadowName(s) {
   const g = GRADES[s.grade];
@@ -155,8 +161,8 @@ export async function summon(player, s, { free = false, location = undefined } =
   const d = getData(player);
   if (isSummoned(player, s.id)) return "Already summoned.";
   if (regenLeft(s) > 0) return `${s.name} is regenerating (${regenLeft(s)}s).`;
-  if (activeCount(player) + summoning.size >= activeLimit(d.level, d.int)) return "Active shadow limit reached.";
-  const cost = GRADES[s.grade].cost;
+  if (activeCount(player) + summoning.size >= activeLimitOf(d)) return "Active shadow limit reached.";
+  const cost = summonCostOf(d, s);
   if (!free && d.mp < cost) return `Not enough MP (${cost} needed).`;
   summoning.add(s.id);
   try {
@@ -243,9 +249,9 @@ export async function summonAll(player) {
   let n = 0;
   for (const s of list) {
     if (isSummoned(player, s.id) || regenLeft(s) > 0) continue;
-    if (d.mp < GRADES[s.grade].cost) continue;
+    if (d.mp < summonCostOf(d, s)) continue;
     if ((await summon(player, s)) === undefined) n++;
-    if (activeCount(player) >= activeLimit(d.level, d.int)) break;
+    if (activeCount(player) >= activeLimitOf(d)) break;
   }
   return n;
 }
@@ -478,8 +484,8 @@ export function arise(player) {
   const l = player.location;
   const c = near.sort((a, b) => dist2(a.loc, l) - dist2(b.loc, l))[0];
   const def = SHADOW_TYPES[c.type];
-  if (d.shadows.length >= armyCapacity(d.level)) {
-    flash(player, `§cYour army is full (${d.shadows.length}/${armyCapacity(d.level)}).`, 60);
+  if (d.shadows.length >= armyCapOf(d)) {
+    flash(player, `§cYour army is full (${d.shadows.length}/${armyCapOf(d)}).`, 60);
     return true;
   }
   if (d.mp < ARISE_MP) {
@@ -490,7 +496,7 @@ export function arise(player) {
   c.attempts++;
   const namedFirst = def.named && !d.namedTaken.includes(c.type);
   const grade = namedFirst ? def.named.grade : def.grade;
-  const chance = Math.min(0.95, GRADES[grade].extract + Math.max(0, d.int - 10) * 0.005 + Math.min(0.15, d.level * 0.002));
+  const chance = Math.min(0.95, bonusOf(d).extractAdd + GRADES[grade].extract + Math.max(0, d.int - 10) * 0.005 + Math.min(0.15, d.level * 0.002));
   const dim = world.getDimension(c.dim);
 
   if (Math.random() < chance) {
@@ -520,7 +526,7 @@ export function arise(player) {
       for (let i = 0; i < 6; i++) dim.spawnParticle("minecraft:soul_particle", { x: c.loc.x, y: c.loc.y + i * 0.3, z: c.loc.z });
     } catch {}
     // The new shadow rises right away if there is room.
-    if (activeCount(player) < activeLimit(d.level, d.int)) spawnFresh(player, s, c.loc, dim);
+    if (activeCount(player) < activeLimitOf(d)) spawnFresh(player, s, c.loc, dim);
   } else {
     const left = ARISE_ATTEMPTS - c.attempts;
     markDirty(player);
@@ -652,7 +658,7 @@ addDamageHook((ev) => {
           return;
         }
       }
-      let mult = shadowAtkMult(s);
+      let mult = shadowAtkMult(s) * bonusOf(getData(owner)).shadowAtk;
       if ((domainUntil.get(a.playerId) ?? 0) > system.currentTick) mult *= 1.5; // Monarch's Domain
       if (s.type === "wolf") mult *= 1.25;
       if (s.type === "vindicator") {
@@ -670,7 +676,7 @@ addDamageHook((ev) => {
     const owner = playerById(v.playerId);
     const s = owner && findRecord(owner, v.sid);
     if (!s) return;
-    ev.damage *= shadowDefMult(s);
+    ev.damage *= shadowDefMult(s) * bonusOf(getData(owner)).shadowDef;
     // Shield
     const cause = ev.damageSource.cause;
     if ((cause === EntityDamageCause.entityAttack || cause === EntityDamageCause.projectile) &&
